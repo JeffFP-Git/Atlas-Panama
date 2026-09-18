@@ -1,0 +1,46 @@
+FROM node:20-bullseye
+
+# Detect target arch at build time (amd64/arm64, etc.)
+ARG TARGETARCH
+
+# Install Google Chrome for Puppeteer (system Chrome)
+RUN set -eux; \
+  apt-get update; \
+  apt-get install -y wget gnupg ca-certificates fonts-liberation curl; \
+  if [ "${TARGETARCH:-amd64}" = "amd64" ]; then \
+    wget -qO- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor >/usr/share/keyrings/google.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >/etc/apt/sources.list.d/google-chrome.list; \
+    apt-get update && apt-get install -y google-chrome-stable; \
+  else \
+    apt-get update && apt-get install -y chromium; \
+    if [ -x /usr/bin/chromium-browser ]; then ln -sf /usr/bin/chromium-browser /usr/bin/google-chrome-stable; else ln -sf /usr/bin/chromium /usr/bin/google-chrome-stable; fi; \
+  fi; \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install production deps first
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy source
+COPY . .
+
+# Puppeteer should use system Chrome inside the container
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
+    NODE_ENV=production \
+    PORT=3000
+
+# Persist outputs, session, and data across runs
+VOLUME ["/app/BuildingData", "/app/debug-output", "/app/session", "/app/data", "/app/logs"]
+
+# Expose API port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Default entrypoint runs the API server
+ENTRYPOINT ["node", "api.js"]
+

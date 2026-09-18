@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panama Scraper Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; color: #222; padding-top: 60px; }
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #667eea;
+    }
+    .nav-links a.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    h1 { margin-top: 0; }
+    fieldset { border: 1px solid #ddd; padding: 12px; margin-bottom: 16px; }
+    label { display:block; margin: 8px 0 4px; font-weight: 600; }
+    input, button { padding: 8px; font-size: 14px; }
+    input[type="number"] { width: 120px; }
+    .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .log { background: #0b1e39; color: #cfe3ff; padding: 12px; border-radius: 6px; height: 300px; overflow: auto; white-space: pre-wrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .status { padding: 6px 10px; border-radius: 4px; display: inline-block; }
+    .status.running { background: #fff6cc; }
+    .status.done { background: #e9ffe9; }
+    .status.error { background: #ffe9e9; }
+    .grid { display: grid; grid-template-columns: 220px 1fr; gap: 8px 16px; }
+    .muted { color: #666; }
+    @media (max-width: 600px) {
+      .nav-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+      .nav-links {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      body {
+        padding-top: 90px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe.html" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe.html">Subscribe</a>
+      <a href="/about.html">About</a>
+    </div>
+  </nav>
+  <h1>Panama Scraper Dashboard</h1>
+  <fieldset>
+    <legend>API</legend>
+    <div class="row">
+      <label for="apiBase">API Base URL</label>
+      <input id="apiBase" class="mono" style="min-width: 360px" value="" placeholder="http://<EC2_IP>:3000" />
+      <button onclick="ping()">Health Check</button>
+      <span id="health" class="muted"></span>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>New Run</legend>
+    <div class="grid">
+      <label for="buildingName">Building Name</label>
+      <input id="buildingName" placeholder="Ocean Waves" />
+
+      <label for="searchParam">Search Param (defaults to Building)</label>
+      <input id="searchParam" placeholder="Ocean Waves" />
+
+      <label for="maxProps">Max Properties</label>
+      <input id="maxProps" type="number" value="300" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label><input id="headless" type="checkbox" /> Run headless (EC2)</label>
+    </div>
+    <div style="margin-top:12px">
+      <button onclick="queueRun()">Queue Run</button>
+      <span class="muted">Responses are 202 Accepted; use Job Stream for progress.</span>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Job Status</legend>
+    <div class="row">
+      <label for="jobId">Job ID</label>
+      <input id="jobId" class="mono" style="min-width: 340px" placeholder="paste job id here" />
+      <button onclick="loadStatus()">Get Status</button>
+      <button onclick="startStream()">Start Stream</button>
+      <button onclick="stopStream()">Stop Stream</button>
+      <span id="jobStatus" class="status"></span>
+    </div>
+    <div id="log" class="log mono" style="margin-top:12px"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Queue</legend>
+    <div class="row">
+      <button onclick="loadQueue()">List Jobs</button>
+      <button onclick="cancelQueued()">Cancel All Queued</button>
+    </div>
+    <pre id="queue" class="mono"></pre>
+  </fieldset>
+
+  <fieldset>
+    <legend>Files</legend>
+    <div class="row">
+      <button onclick="loadFiles()">Refresh Files</button>
+      <span class="muted">Click a filename to download.</span>
+    </div>
+    <div id="files"></div>
+  </fieldset>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const api = () => {
+      const base = $('apiBase').value.trim();
+      if (base) return base.replace(/\/+$/, '');
+      // default to same origin if blank
+      return location.origin;
+    };
+
+    function setStatus(text, cls) {
+      const el = $('jobStatus');
+      el.textContent = text || '';
+      el.className = `status ${cls || ''}`;
+    }
+    function appendLog(line) {
+      const el = $('log');
+      el.textContent += (line.endsWith('\n') ? line : line + '\n');
+      el.scrollTop = el.scrollHeight;
+    }
+    function clearLog() { $('log').textContent = ''; }
+
+    async function ping() {
+      $('health').textContent = 'checking...';
+      try {
+        const r = await fetch(api() + '/health');
+        const j = await r.json();
+        $('health').textContent = `ok=${j.ok} running=${j.running} queued=${j.queued}`;
+      } catch (e) {
+        $('health').textContent = 'failed';
+      }
+    }
+
+    async function queueRun() {
+      const payload = {
+        buildingName: $('buildingName').value.trim(),
+        searchParam: $('searchParam').value.trim() || undefined,
+        maxProperties: Number($('maxProps').value) || undefined,
+        headless: $('headless').checked ? 1 : 0
+      };
+      try {
+        const r = await fetch(api() + '/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const j = await r.json();
+        if (!j.ok) { alert('Failed: ' + (j.error || 'unknown')); return; }
+        $('jobId').value = j.jobId;
+        setStatus('queued', '');
+        clearLog();
+        appendLog(`Queued job ${j.jobId} (position ${j.position})`);
+        startStream();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function loadStatus() {
+      const id = $('jobId').value.trim();
+      if (!id) return;
+      const r = await fetch(api() + '/jobs/' + encodeURIComponent(id));
+      const j = await r.json();
+      if (!j.ok) { alert('Not found'); return; }
+      setStatus(j.job.status, j.job.status);
+      clearLog();
+      (j.job.logs || []).forEach(appendLog);
+    }
+
+    async function loadQueue() {
+      const r = await fetch(api() + '/jobs');
+      const j = await r.json();
+      $('queue').textContent = JSON.stringify(j, null, 2);
+    }
+
+    async function cancelQueued() {
+      const r = await fetch(api() + '/cancel-all', { method: 'POST' });
+      const j = await r.json();
+      alert('Cancelled queued: ' + (j.cancelled || 0));
+      loadQueue();
+    }
+
+    async function loadFiles() {
+      try {
+        const r = await fetch(api() + '/files');
+        const j = await r.json();
+        if (!j.ok) { $('files').textContent = 'Unable to load.'; return; }
+        if (!Array.isArray(j.files) || j.files.length === 0) {
+          $('files').textContent = 'No files found.';
+          return;
+        }
+        const html = `
+          <table border="1" cellpadding="6" cellspacing="0">
+            <thead><tr><th>Name</th><th>Size</th><th>Modified</th></tr></thead>
+            <tbody>
+              ${j.files.map(f => `
+                <tr>
+                  <td><a href="${api()}/files/${encodeURIComponent(f.name)}" download>${f.name}</a></td>
+                  <td class="mono">${(f.bytes/1024).toFixed(1)} KB</td>
+                  <td>${new Date(f.modified).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        $('files').innerHTML = html;
+      } catch (e) {
+        $('files').textContent = 'Error loading files.';
+      }
+    }
+
+    let es = null;
+    function startStream() {
+      const id = $('jobId').value.trim();
+      if (!id) return;
+      stopStream();
+      const url = api() + '/jobs/' + encodeURIComponent(id) + '/stream';
+      es = new EventSource(url);
+      es.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.type === 'log') appendLog(data.line);
+          if (data.type === 'status') setStatus(data.status, data.status);
+        } catch {}
+      };
+      es.onerror = () => {
+        appendLog('[stream] connection error; retrying…');
+      };
+      appendLog('[stream] connected');
+    }
+    function stopStream() {
+      if (es) { es.close(); es = null; appendLog('[stream] disconnected'); }
+    }
+
+    // Default API base: if opened as file://, prefer a real API base instead of file://
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('apiBase') || '';
+      const defaultBase = (location.protocol === 'file:')
+        ? 'http://18.188.50.45:3000'   // change to your public/elastic IP as needed
+        : location.origin;
+      $('apiBase').value = saved || defaultBase;
+      $('apiBase').addEventListener('change', () => {
+        localStorage.setItem('apiBase', $('apiBase').value.trim());
+      });
+      loadFiles();
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,44 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'public/**'
+      - 'scripts/deploy-frontend-s3.sh'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Deploy to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          API_URL: ${{ secrets.API_URL }}
+          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DIST_ID }}
+        run: |
+          chmod +x scripts/deploy-frontend-s3.sh
+          ./scripts/deploy-frontend-s3.sh "$API_URL"
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Frontend deployed successfully!"
+          echo "S3 Bucket: ${{ secrets.S3_BUCKET }}"
+          if [ -n "${{ secrets.CLOUDFRONT_DIST_ID }}" ]; then
+            echo "CloudFront Distribution: ${{ secrets.CLOUDFRONT_DIST_ID }}"
+          fi
+

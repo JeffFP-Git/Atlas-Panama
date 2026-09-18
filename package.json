@@ -1,0 +1,41 @@
+{
+  "name": "panama-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "main": "scraper.js",
+  "scripts": {
+    "test": "vitest",
+    "api": "node api.js",
+    "desktop": "electron ./application/main.js",
+    "scrape": "node scraper.js",
+    "mercantil": "node lib/mercantil.js",
+    "experiment:concurrency": "node scripts/concurrency-experiment.mjs",
+    "deploy:frontend": "./scripts/deploy-frontend-s3.sh",
+    "deploy:frontend:help": "echo 'Usage: npm run deploy:frontend [API_URL]' && echo 'Set env vars: S3_BUCKET, CLOUDFRONT_DIST_ID'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "neon": "^2.0.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^7.0.11",
+    "puppeteer": "^24.28.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-recaptcha": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "stripe": "^22.6.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "electron": "^31.2.0",
+    "vitest": "^1.6.0"
+  }
+}

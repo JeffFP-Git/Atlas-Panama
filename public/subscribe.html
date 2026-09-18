@@ -1,0 +1,1624 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Busqueda Diaria - Suscripción</title>
+  <style>
+    * { box-sizing: border-box; }
+    html {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      color: #333;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+    input[type="email"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .radio-option:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+    .radio-option input[type="radio"] {
+      margin-right: 12px;
+      width: auto;
+    }
+    .radio-option label {
+      margin: 0;
+      cursor: pointer;
+      flex: 1;
+    }
+    .search-type-fields {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .search-type-fields.hidden {
+      display: none;
+    }
+    .hidden {
+      display: none;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .success {
+      color: #27ae60;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-bar-container {
+      display: none;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .loading-bar-container.active {
+      display: block;
+    }
+    .loading-bar-wrapper {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.3s ease-out;
+      position: relative;
+    }
+    .loading-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .loading-text {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .page-warning {
+      display: none;
+      background: #fff6cc;
+      border: 2px solid #f0c020;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      color: #856404;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .page-warning.active {
+      display: block;
+    }
+    .page-warning strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      color: #856404;
+    }
+    .confirmation-page {
+      text-align: center;
+    }
+    .confirmation-page h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .confirmation-info {
+      background: #f8f9ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    .confirmation-info p {
+      margin: 8px 0;
+      color: #666;
+    }
+    .confirmation-info strong {
+      color: #333;
+    }
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn-secondary {
+      background: #6c757d;
+    }
+    .btn-secondary:hover {
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #667eea;
+    }
+    .nav-links a.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: 8px;
+    }
+    .lang-btn {
+      width: auto;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transform: none;
+      box-shadow: none;
+    }
+    .lang-btn:hover {
+      transform: none;
+      box-shadow: none;
+      background: #f8f9ff;
+    }
+    .lang-btn.active {
+      background: #667eea;
+      color: white;
+    }
+    body {
+      padding-top: 60px;
+    }
+    @media (max-width: 600px) {
+      .nav-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+      .nav-links {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      body {
+        padding-top: 90px;
+      }
+    }
+    .btn-outline {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+    .btn-outline:hover {
+      background: #f8f9ff;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe.html" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe.html" class="active" data-i18n="nav.subscribe">Subscribe</a>
+      <a href="/about.html" data-i18n="nav.about">About</a>
+      <span class="lang-toggle">
+        <button type="button" id="langEs" class="lang-btn active">ES</button>
+        <button type="button" id="langEn" class="lang-btn">EN</button>
+      </span>
+    </div>
+  </nav>
+  <div class="container">
+    <!-- Form Page -->
+    <div id="formPage">
+      <h1 data-i18n="form.title">Búsqueda Diaria</h1>
+      <p class="subtitle" data-i18n="form.subtitle">Complete el formulario para recibir información diaria sobre su propiedad o entidad</p>
+
+      <form id="subscribeForm">
+        <div class="form-group">
+          <label for="email" data-i18n="form.emailLabel">1. Email Address *</label>
+          <input type="email" id="email" name="email" required placeholder="su@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="form.tipoLabel">2. Tipo de Subscripción / Búsqueda Diaria *</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="tipo-mercantil" name="tipo" value="mercantil" required />
+              <label for="tipo-mercantil" data-i18n="form.tipoMercantil">A. Mercantil – SA, Corp, Inc, or SRL</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="tipo-fundacion" name="tipo" value="fundacion" required />
+              <label for="tipo-fundacion" data-i18n="form.tipoFundacion">B. Fundación</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="tipo-inmueble" name="tipo" value="inmueble" required />
+              <label for="tipo-inmueble" data-i18n="form.tipoInmueble">C. Inmueble</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mercantil/Fundacion Fields -->
+        <div id="mercantilFields" class="search-type-fields hidden">
+          <div class="form-group">
+            <label for="entityName" data-i18n="form.entityNameLabel">Nombre de la Empresa o Fundación</label>
+            <input type="text" id="entityName" name="entityName" data-i18n-placeholder="form.entityNamePlaceholder" placeholder="Ej: Mi Empresa, S.A." />
+          </div>
+          <div class="form-group">
+            <label for="ruc" data-i18n="form.rucLabel">RUC (opcional)</label>
+            <input type="text" id="ruc" name="ruc" data-i18n-placeholder="form.rucPlaceholder" placeholder="Ej: 1157961-1-573219 — déjelo en blanco si no lo sabe" />
+          </div>
+          <p class="field-hint" data-i18n="form.mercantilHint" style="color:#666; font-size:13px; margin-top:-12px;">Ingrese el nombre, el RUC, o ambos.</p>
+        </div>
+
+        <!-- Inmueble Fields -->
+        <div id="inmuebleFields" class="search-type-fields hidden">
+          <div class="form-group">
+            <label for="ownerName" data-i18n="form.ownerNameLabel">Nombre del Propietario</label>
+            <input type="text" id="ownerName" name="ownerName" data-i18n-placeholder="form.ownerNamePlaceholder" placeholder="Nombre del propietario registrado" />
+          </div>
+          <div class="form-group">
+            <div class="field-row">
+              <div>
+                <label for="folio" data-i18n="form.folioLabel">Folio</label>
+                <input type="text" id="folio" name="folio" data-i18n-placeholder="form.folioPlaceholder" placeholder="Número de folio" />
+              </div>
+              <div>
+                <label for="codigo" data-i18n="form.codigoLabel">Código de Ubicación (opcional)</label>
+                <input type="text" id="codigo" name="codigo" data-i18n-placeholder="form.codigoPlaceholder" placeholder="Déjelo en blanco si no lo sabe" />
+              </div>
+            </div>
+            <p class="field-hint" data-i18n="form.inmuebleHint" style="color:#666; font-size:13px; margin-top:8px;">Ingrese el Folio, el Nombre del Propietario, o ambos. Si su Folio tiene varios resultados, le enviaremos una lista para que elija el correcto.</p>
+          </div>
+        </div>
+
+        <!-- WhatsApp opt-in (shown once a tipo is selected, wording adapts to it) -->
+        <div id="whatsappFields" class="form-group hidden">
+          <div class="radio-option" style="align-items: flex-start; cursor: default;">
+            <input type="checkbox" id="whatsappOptIn" name="whatsappOptIn" style="margin-right: 12px; width: auto; margin-top: 3px;" />
+            <label for="whatsappOptIn" id="whatsappOptInLabel" style="cursor: pointer; font-weight: 500;"></label>
+          </div>
+          <div id="whatsappPhoneField" class="hidden" style="margin-top: 14px;">
+            <label for="whatsappPhone" data-i18n="form.whatsappPhoneLabel">Número de WhatsApp</label>
+            <input type="tel" id="whatsappPhone" name="whatsappPhone" data-i18n-placeholder="form.whatsappPhonePlaceholder" placeholder="Ej: +507 6000-0000" />
+          </div>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="successMessage" class="success" style="display: none;"></div>
+
+        <div id="pageWarning" class="page-warning">
+          <strong data-i18n="form.warningTitle">⚠️ No cierre ni abandone esta página</strong>
+          <span data-i18n="form.warningBody">Por favor mantenga esta página abierta mientras se procesa su solicitud. El proceso puede tardar unos minutos.</span>
+        </div>
+
+        <div id="loadingBarContainer" class="loading-bar-container">
+          <div class="loading-bar-wrapper">
+            <div id="loadingBarFill" class="loading-bar-fill"></div>
+          </div>
+          <div id="loadingText" class="loading-text" data-i18n="loading.processing">Procesando su solicitud...</div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          <span id="submitText" data-i18n="form.submitButton">3. Enviar Email para Confirmar</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Confirmation Page -->
+    <div id="confirmationPage" class="confirmation-page" style="display: none;">
+      <h2 data-i18n="confirm.title">Verificar Datos</h2>
+      <div id="confirmationInfo" class="confirmation-info"></div>
+      <div style="margin: 30px 0;">
+        <label for="verificationCodeInput" data-i18n="confirm.codeLabel" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
+          Código de Verificación (del email):
+        </label>
+        <input
+          type="text"
+          id="verificationCodeInput"
+          data-i18n-placeholder="confirm.codePlaceholder"
+          placeholder="Ingrese el código de 8 caracteres"
+          maxlength="8"
+          style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; text-align: center;"
+        />
+      </div>
+      <div class="action-buttons">
+        <button id="btnYes" class="btn-primary" data-i18n="confirm.yesButton">Sí - Verificar y Activar</button>
+        <button id="btnNo" class="btn-secondary" data-i18n="confirm.noButton">No - Volver al Formulario</button>
+      </div>
+      <div id="confirmationError" class="error" style="display: none; margin-top: 20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // API Base URL Configuration
+    // Set API_BASE_URL environment variable or use same origin
+    const API_BASE = (function() {
+      // If API_BASE_URL is defined (via script tag or build-time replacement), use it
+      if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) {
+        console.log('[Frontend] Using configured API_BASE_URL:', window.API_BASE_URL);
+        return window.API_BASE_URL;
+      }
+      // Otherwise, use same origin (works when frontend and API are on same domain)
+      const origin = window.location.origin;
+      console.log('[Frontend] No API_BASE_URL configured, using origin:', origin);
+      console.warn('[Frontend] WARNING: If frontend and API are on different domains, set window.API_BASE_URL');
+      return origin;
+    })();
+    
+    console.log('[Frontend] Final API_BASE:', API_BASE);
+
+    // ---------- Language / translations ----------
+    // Hand-written (not machine-translated) — this is legal/financial content
+    // people act on, so accuracy matters more than coverage speed. Covers the
+    // signup form itself; the emails sent by the backend are a separate piece of
+    // work (lib/email.js), not translated here.
+    const TRANSLATIONS = {
+      es: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'form.title': 'Búsqueda Diaria',
+        'form.subtitle': 'Complete el formulario para recibir información diaria sobre su propiedad o entidad',
+        'form.emailLabel': '1. Email Address *',
+        'form.tipoLabel': '2. Tipo de Subscripción / Búsqueda Diaria *',
+        'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
+        'form.tipoFundacion': 'B. Fundación',
+        'form.tipoInmueble': 'C. Inmueble',
+        'form.entityNameLabel': 'Nombre de la Empresa o Fundación',
+        'form.entityNamePlaceholder': 'Ej: Mi Empresa, S.A.',
+        'form.rucLabel': 'RUC (opcional)',
+        'form.rucPlaceholder': 'Ej: 1157961-1-573219 — déjelo en blanco si no lo sabe',
+        'form.mercantilHint': 'Ingrese el nombre, el RUC, o ambos.',
+        'form.ownerNameLabel': 'Nombre del Propietario',
+        'form.ownerNamePlaceholder': 'Nombre del propietario registrado',
+        'form.folioLabel': 'Folio',
+        'form.folioPlaceholder': 'Número de folio',
+        'form.codigoLabel': 'Código de Ubicación (opcional)',
+        'form.codigoPlaceholder': 'Déjelo en blanco si no lo sabe',
+        'form.inmuebleHint': 'Ingrese el Folio, el Nombre del Propietario, o ambos. Si su Folio tiene varios resultados, le enviaremos una lista para que elija el correcto.',
+        'form.whatsappOptInProperty': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su propiedad, además de la notificación por email?',
+        'form.whatsappOptInMercantil': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su empresa, además de la notificación por email?',
+        'form.whatsappOptInFundacion': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su fundación, además de la notificación por email?',
+        'form.whatsappPhoneLabel': 'Número de WhatsApp',
+        'form.whatsappPhonePlaceholder': 'Ej: +507 6000-0000',
+        'form.warningTitle': '⚠️ No cierre ni abandone esta página',
+        'form.warningBody': 'Por favor mantenga esta página abierta mientras se procesa su solicitud. El proceso puede tardar unos minutos.',
+        'form.submitButton': '3. Enviar Email para Confirmar',
+        'loading.processing': 'Procesando su solicitud...',
+        'loading.searching': 'Buscando información...',
+        'loading.preparing': 'Preparando resultados...',
+        'loading.sending': 'Enviando email...',
+        'loading.done': 'Completado - Email enviado',
+        'loading.errorText': 'Error al procesar',
+        'confirm.title': 'Verificar Datos',
+        'confirm.codeLabel': 'Código de Verificación (del email):',
+        'confirm.codePlaceholder': 'Ingrese el código de 8 caracteres',
+        'confirm.yesButton': 'Sí - Verificar y Activar',
+        'confirm.noButton': 'No - Volver al Formulario',
+        'errors.nameOrRucRequired': 'Por favor ingrese el nombre de la empresa/fundación, el RUC, o ambos',
+        'errors.folioOrOwnerRequired': 'Por favor ingrese el Folio, el Nombre del Propietario, o ambos',
+        'errors.whatsappPhoneRequired': 'Por favor ingrese su número de WhatsApp, o desmarque la casilla',
+        'outcome.disambiguationTitle': 'Encontramos {count} resultados',
+        'outcome.disambiguationBody': 'Por favor seleccione el correcto:',
+        'outcome.selectButton': 'Esta es la correcta',
+        'outcome.refinementTitle': 'Demasiados resultados',
+        'outcome.refinementBody': 'Su búsqueda encontró demasiados resultados para mostrarlos individualmente. Por favor vuelva a intentar con más detalles (por ejemplo, el Código de Ubicación, el RUC, o un nombre más específico).',
+        'outcome.noMatchTitle': 'No se encontró ningún resultado',
+        'outcome.noMatchBody': 'No pudimos encontrar ningún resultado que coincida con lo que ingresó. Por favor verifique los datos e intente de nuevo.',
+        'outcome.timeoutTitle': 'Seguimos procesando su solicitud',
+        'outcome.timeoutBody': 'Esto está tardando más de lo usual. Le enviaremos un email en cuanto tengamos el resultado — no es necesario que mantenga esta página abierta.'
+      },
+      en: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'form.title': 'Daily Search',
+        'form.subtitle': 'Complete the form to receive daily updates about your property or entity',
+        'form.emailLabel': '1. Email Address *',
+        'form.tipoLabel': '2. Subscription Type / Daily Search *',
+        'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
+        'form.tipoFundacion': 'B. Foundation',
+        'form.tipoInmueble': 'C. Property',
+        'form.entityNameLabel': 'Company or Foundation Name',
+        'form.entityNamePlaceholder': 'E.g: My Company, S.A.',
+        'form.rucLabel': 'RUC (optional)',
+        'form.rucPlaceholder': 'E.g: 1157961-1-573219 — leave blank if you don\'t know it',
+        'form.mercantilHint': 'Enter the name, the RUC, or both.',
+        'form.ownerNameLabel': 'Owner Name',
+        'form.ownerNamePlaceholder': 'Registered owner\'s name',
+        'form.folioLabel': 'Folio',
+        'form.folioPlaceholder': 'Folio number',
+        'form.codigoLabel': 'Location Code (optional)',
+        'form.codigoPlaceholder': 'Leave blank if you don\'t know it',
+        'form.inmuebleHint': 'Enter the Folio, the Owner Name, or both. If your Folio has multiple matches, we\'ll email you a list to pick the right one.',
+        'form.whatsappOptInProperty': 'Would you like to receive a WhatsApp message when we detect a change to your property, in addition to the email notification?',
+        'form.whatsappOptInMercantil': 'Would you like to receive a WhatsApp message when we detect a change to your company, in addition to the email notification?',
+        'form.whatsappOptInFundacion': 'Would you like to receive a WhatsApp message when we detect a change to your foundation, in addition to the email notification?',
+        'form.whatsappPhoneLabel': 'WhatsApp Number',
+        'form.whatsappPhonePlaceholder': 'E.g: +507 6000-0000',
+        'form.warningTitle': '⚠️ Do not close or leave this page',
+        'form.warningBody': 'Please keep this page open while your request is being processed. This can take a few minutes.',
+        'form.submitButton': '3. Send Confirmation Email',
+        'loading.processing': 'Processing your request...',
+        'loading.searching': 'Searching for information...',
+        'loading.preparing': 'Preparing results...',
+        'loading.sending': 'Sending email...',
+        'loading.done': 'Done - Email sent',
+        'loading.errorText': 'Error processing request',
+        'confirm.title': 'Verify Your Data',
+        'confirm.codeLabel': 'Verification Code (from the email):',
+        'confirm.codePlaceholder': 'Enter the 8-character code',
+        'confirm.yesButton': 'Yes - Verify and Activate',
+        'confirm.noButton': 'No - Back to Form',
+        'errors.nameOrRucRequired': 'Please enter the company/foundation name, the RUC, or both',
+        'errors.folioOrOwnerRequired': 'Please enter the Folio, the Owner Name, or both',
+        'errors.whatsappPhoneRequired': 'Please enter your WhatsApp number, or uncheck the box',
+        'outcome.disambiguationTitle': 'We found {count} results',
+        'outcome.disambiguationBody': 'Please select the correct one:',
+        'outcome.selectButton': 'This is the one',
+        'outcome.refinementTitle': 'Too many results',
+        'outcome.refinementBody': 'Your search returned too many results to show individually. Please try again with more details (e.g. the Location Code, the RUC, or a more specific name).',
+        'outcome.noMatchTitle': 'No results found',
+        'outcome.noMatchBody': 'We couldn\'t find anything matching what you entered. Please double-check your details and try again.',
+        'outcome.timeoutTitle': 'Still working on your request',
+        'outcome.timeoutBody': 'This is taking longer than usual. We\'ll email you as soon as we have a result — no need to keep this page open.'
+      }
+    };
+
+    let currentLang = localStorage.getItem('atlaspanama_lang') || 'es';
+    if (currentLang !== 'es' && currentLang !== 'en') currentLang = 'es';
+
+    // Looks up a key for the current language, with {placeholders} substituted from vars.
+    function t(key, vars) {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
+      let str = dict[key] || TRANSLATIONS.es[key] || key;
+      if (vars) {
+        Object.keys(vars).forEach(k => { str = str.replace('{' + k + '}', vars[k]); });
+      }
+      return str;
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.getAttribute('data-i18n'));
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+      });
+      updateWhatsappLabel();
+    }
+
+    function setLanguage(lang) {
+      if (lang !== 'es' && lang !== 'en') return;
+      currentLang = lang;
+      localStorage.setItem('atlaspanama_lang', lang);
+      document.getElementById('langEs').classList.toggle('active', lang === 'es');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      applyTranslations();
+    }
+
+    document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
+    document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+
+    // The WhatsApp question's wording depends on which tipo is selected.
+    function updateWhatsappLabel() {
+      const selectedTipo = document.querySelector('input[name="tipo"]:checked');
+      const label = document.getElementById('whatsappOptInLabel');
+      if (!label) return;
+      if (!selectedTipo) { label.textContent = ''; return; }
+      const key = selectedTipo.value === 'inmueble' ? 'form.whatsappOptInProperty'
+        : selectedTipo.value === 'fundacion' ? 'form.whatsappOptInFundacion'
+        : 'form.whatsappOptInMercantil';
+      label.textContent = t(key);
+    }
+
+    // Form elements
+    const formPage = document.getElementById('formPage');
+    const confirmationPage = document.getElementById('confirmationPage');
+    const subscribeForm = document.getElementById('subscribeForm');
+    const tipoInputs = document.querySelectorAll('input[name="tipo"]');
+    const mercantilFields = document.getElementById('mercantilFields');
+    const inmuebleFields = document.getElementById('inmuebleFields');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loadingBarContainer = document.getElementById('loadingBarContainer');
+    const loadingBarFill = document.getElementById('loadingBarFill');
+    const loadingText = document.getElementById('loadingText');
+
+    // Confirmation elements
+    const confirmationInfo = document.getElementById('confirmationInfo');
+    const btnYes = document.getElementById('btnYes');
+    const btnNo = document.getElementById('btnNo');
+    const verificationCodeInput = document.getElementById('verificationCodeInput');
+    const confirmationError = document.getElementById('confirmationError');
+
+    let currentRequestId = null;
+    let loadingBarAnimationFrame = null;
+    let loadingBarStartTime = null;
+    let isSubmitting = false;
+
+    // Show/hide fields based on tipo selection.
+    // None of the individual fields use native `required` — each tipo accepts more
+    // than one valid combination (e.g. Folio OR Owner name for inmueble; Name and/or
+    // RUC for entities), so "at least one of X/Y" is validated in JS at submit time
+    // instead (see the submit handler below).
+    const whatsappFields = document.getElementById('whatsappFields');
+    const whatsappOptIn = document.getElementById('whatsappOptIn');
+    const whatsappPhoneField = document.getElementById('whatsappPhoneField');
+
+    tipoInputs.forEach(input => {
+      input.addEventListener('change', () => {
+        const tipo = input.value;
+        mercantilFields.classList.add('hidden');
+        inmuebleFields.classList.add('hidden');
+
+        if (tipo === 'mercantil' || tipo === 'fundacion') {
+          mercantilFields.classList.remove('hidden');
+        } else if (tipo === 'inmueble') {
+          inmuebleFields.classList.remove('hidden');
+        }
+
+        whatsappFields.classList.remove('hidden');
+        updateWhatsappLabel();
+      });
+    });
+
+    whatsappOptIn.addEventListener('change', () => {
+      whatsappPhoneField.classList.toggle('hidden', !whatsappOptIn.checked);
+    });
+    
+    let statusPollInterval = null;
+    let currentRequestIdForPolling = null;
+    let statusCompletionResolver = null;
+    
+    // Start loading bar that tracks real progress
+    // Returns a promise that resolves when status is 'completed' or rejects on 'error'
+    function startLoadingBar(requestId) {
+      // Stop any existing animation
+      stopLoadingBar();
+      
+      loadingBarContainer.classList.add('active');
+      loadingBarFill.style.width = '0%';
+      loadingBarStartTime = Date.now();
+      currentRequestIdForPolling = requestId;
+      
+      const minDuration = 120000; // Paces the progress bar to roughly match real search time (see FINISH_TIMEOUT below)
+      const startTime = Date.now();
+      let lastStatus = 'pending';
+      let completedRequestData = null; // Store the request data when completed
+      
+      // Create promise that will resolve when completed
+      const completionPromise = new Promise((resolve, reject) => {
+        statusCompletionResolver = { resolve, reject };
+      });
+      
+      // Easing function that slows down in the middle to avoid frustration
+      // This creates a smooth curve: fast start, slow middle, moderate end
+      function easeInOutCubic(t) {
+        // t is 0 to 1 (time elapsed)
+        // Returns 0 to 1 (progress)
+        return t < 0.5
+          ? 4 * t * t * t
+          : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+      
+      // Custom easing that slows more in the middle (40-80% of time)
+      function easeSlowMiddle(t) {
+        if (t < 0.2) {
+          // Fast start: 0-20% of time maps to 0-15% of progress
+          return (t / 0.2) * 0.15;
+        } else if (t < 0.8) {
+          // Slow middle: 20-80% of time maps to 15-75% of progress
+          // This is 60% of time for 60% of progress, but with easing
+          const localT = (t - 0.2) / 0.6;
+          // Use ease-in-out for smooth transition
+          const eased = localT < 0.5
+            ? 2 * localT * localT
+            : 1 - Math.pow(-2 * localT + 2, 2) / 2;
+          return 0.15 + eased * 0.60;
+        } else {
+          // Moderate end: 80-100% of time maps to 75-100% of progress
+          const localT = (t - 0.8) / 0.2;
+          return 0.75 + (localT * localT) * 0.25; // Ease-in for final push
+        }
+      }
+      
+      // Update progress bar based on status and time (non-linear progression)
+      function updateProgressBar() {
+        const elapsed = Date.now() - startTime;
+        const timeElapsed = Math.min(elapsed / minDuration, 1.0); // Allow up to 100%
+        
+        let currentProgress;
+        
+        if (lastStatus === 'completed') {
+          // Completed - show 100%
+          currentProgress = 1.0;
+        } else if (lastStatus === 'error') {
+          // Error - show current progress capped at 50%
+          currentProgress = Math.min(0.5, easeSlowMiddle(timeElapsed) * 0.5);
+        } else {
+          // Use easing function that slows in the middle
+          // 0-40%: Initial setup and searching (pending status)
+          // 40-100%: Sending email (processing status) - 60% of the bar
+          currentProgress = easeSlowMiddle(timeElapsed);
+        }
+        
+        // Ensure we don't go backwards or exceed 100%
+        currentProgress = Math.max(0, Math.min(1.0, currentProgress));
+        
+        loadingBarFill.style.width = (currentProgress * 100) + '%';
+        
+        // Update loading text based on status and progress
+        if (lastStatus === 'completed') {
+          loadingText.textContent = t('loading.done');
+        } else if (lastStatus === 'error') {
+          loadingText.textContent = t('loading.errorText');
+        } else if (lastStatus === 'processing') {
+          // When processing, we're in "sending email" phase (40-100%)
+          // This is 60% of the total bar
+          if (currentProgress < 0.45) {
+            loadingText.textContent = t('loading.preparing');
+          } else {
+            loadingText.textContent = t('loading.sending');
+          }
+        } else {
+          // Pending phase (0-40%)
+          if (currentProgress < 0.15) {
+            loadingText.textContent = t('loading.processing');
+          } else if (currentProgress < 0.35) {
+            loadingText.textContent = t('loading.searching');
+          } else {
+            loadingText.textContent = t('loading.preparing');
+          }
+        }
+      }
+      
+      // Get token from URL or stored value
+      function getAccessToken() {
+        // Check URL parameters first (when user clicks email link)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+          // Store token in sessionStorage for this session
+          sessionStorage.setItem('subscription_token_' + currentRequestIdForPolling, tokenFromUrl);
+          return tokenFromUrl;
+        }
+        // Check sessionStorage (for polling after initial load)
+        if (currentRequestIdForPolling) {
+          return sessionStorage.getItem('subscription_token_' + currentRequestIdForPolling);
+        }
+        return null;
+      }
+      
+      // Poll status endpoint
+      async function pollStatus() {
+        // Stop polling if no request ID or if loading bar is not active
+        if (!currentRequestIdForPolling || !loadingBarContainer.classList.contains('active')) {
+          if (statusPollInterval) {
+            clearInterval(statusPollInterval);
+            statusPollInterval = null;
+          }
+          return;
+        }
+        
+        // Get token from URL or storage
+        const token = getAccessToken();
+        if (!token) {
+          // If no token, try without it (for backward compatibility during transition)
+          // But this will fail with new security, so we'll stop polling
+          console.warn('[Frontend] No access token found. Please use the link from your email.');
+          if (statusPollInterval) {
+            clearInterval(statusPollInterval);
+            statusPollInterval = null;
+          }
+          return;
+        }
+        
+        try {
+          const url = API_BASE + '/subscribe/request/' + currentRequestIdForPolling + '?token=' + encodeURIComponent(token);
+          console.log('[Frontend] Polling status:', url);
+          
+          const response = await fetch(url).catch(fetchError => {
+            // Handle network errors (including certificate errors)
+            console.error('[Frontend] Fetch error (may be certificate/network issue):', fetchError);
+            // Don't throw - let it continue and timeout will handle it
+            return null;
+          });
+          
+          if (!response) {
+            // Network error - will be handled by timeout
+            console.warn('[Frontend] No response from API (check certificate/network)');
+            return;
+          }
+          
+          if (!response.ok) {
+            console.warn('[Frontend] Response not OK:', response.status, response.statusText);
+            // If request fails, stop polling after a few attempts
+            return;
+          }
+          
+          const result = await response.json();
+          console.log('[Frontend] Poll result:', result);
+          
+          if (result.ok && result.request) {
+            const newStatus = result.request.status;
+            console.log('[Frontend] Status:', newStatus, '(previous:', lastStatus, ')');
+            
+            if (newStatus !== lastStatus) {
+              lastStatus = newStatus;
+              
+              // If completed, smoothly animate to 100% then resolve
+              if (newStatus === 'completed') {
+                // Check if we have the extracted data
+                const hasData = (result.request.tipo === 'inmueble' && result.request.datosDelInmueble) || 
+                                (result.request.tipo !== 'inmueble' && result.request.datosDelFolio);
+                
+                if (hasData) {
+                  // Store the completed request data
+                  completedRequestData = result.request;
+                  
+                  // Stop polling immediately
+                  if (statusPollInterval) {
+                    clearInterval(statusPollInterval);
+                    statusPollInterval = null;
+                  }
+                  
+                  // Animate to 100% over 500ms
+                  const startProgress = parseFloat(loadingBarFill.style.width) / 100 || 0;
+                  const duration = 500;
+                  const startTime = Date.now();
+                  
+                  const animateToComplete = () => {
+                    const elapsed = Date.now() - startTime;
+                    const frac = Math.min(elapsed / duration, 1);
+                    // Ease-out for smooth finish
+                    const eased = 1 - Math.pow(1 - frac, 3);
+                    const currentProgress = startProgress + (1.0 - startProgress) * eased;
+                    loadingBarFill.style.width = (currentProgress * 100) + '%';
+
+                    if (frac < 1) {
+                      requestAnimationFrame(animateToComplete);
+                    } else {
+                      loadingBarFill.style.width = '100%';
+                      loadingText.textContent = t('loading.done');
+                      // Wait a moment to show completion, then resolve
+                      setTimeout(() => {
+                        if (statusCompletionResolver) {
+                          statusCompletionResolver.resolve({ status: 'completed', request: completedRequestData });
+                          statusCompletionResolver = null;
+                        }
+                        // Ensure polling is stopped
+                        if (statusPollInterval) {
+                          clearInterval(statusPollInterval);
+                          statusPollInterval = null;
+                        }
+                        // Clear request ID to prevent any further polling
+                        currentRequestIdForPolling = null;
+                      }, 500);
+                    }
+                  };
+                  
+                  requestAnimationFrame(animateToComplete);
+                  return;
+                } else {
+                  // Status is completed but data not ready yet - keep polling
+                  console.log('[Frontend] Status completed but data not ready yet, continuing to poll...');
+                }
+              }
+              
+              // If error, reject promise and stop polling
+              if (newStatus === 'error') {
+                // Stop polling immediately
+                if (statusPollInterval) {
+                  clearInterval(statusPollInterval);
+                  statusPollInterval = null;
+                }
+                // Clear request ID
+                currentRequestIdForPolling = null;
+                // Reject promise
+                if (statusCompletionResolver) {
+                  statusCompletionResolver.reject(new Error(result.request.error || 'Error al procesar'));
+                  statusCompletionResolver = null;
+                }
+                return;
+              }
+
+              // These three outcomes are also terminal (the search itself finished,
+              // it just didn't land on a single confirmed match) — resolve with the
+              // status + request so the caller can render the right screen instead of
+              // treating them as still-pending and eventually forcing a code-entry
+              // redirect with no code to enter.
+              if (newStatus === 'needs_disambiguation' || newStatus === 'needs_refinement' || newStatus === 'no_match') {
+                if (statusPollInterval) {
+                  clearInterval(statusPollInterval);
+                  statusPollInterval = null;
+                }
+                currentRequestIdForPolling = null;
+                loadingBarFill.style.width = '100%';
+                if (statusCompletionResolver) {
+                  statusCompletionResolver.resolve({ status: newStatus, request: result.request });
+                  statusCompletionResolver = null;
+                }
+                return;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('[Frontend] Error polling status:', error);
+        }
+        
+        updateProgressBar();
+      }
+      
+      // Initial update
+      updateProgressBar();
+      
+      // Simple timeout - finish regardless of polling status. Real searches (with
+      // CAPTCHA-solving) have been observed taking 60-120+ seconds, so this needs to
+      // be comfortably longer than that — a short timeout here used to force a
+      // redirect to the code-entry page before the backend had even sent a code.
+      const FINISH_TIMEOUT = 150000; // 2.5 minutes
+
+      setTimeout(() => {
+        console.log('[Frontend] Loading bar timeout reached (150 seconds). Finishing...');
+        
+        // Stop polling
+        if (statusPollInterval) {
+          clearInterval(statusPollInterval);
+          statusPollInterval = null;
+        }
+        // Stop animation
+        if (loadingBarAnimationFrame) {
+          cancelAnimationFrame(loadingBarAnimationFrame);
+          loadingBarAnimationFrame = null;
+        }
+        
+        // Animate to 100%
+        loadingBarFill.style.width = '100%';
+        loadingText.textContent = t('outcome.timeoutTitle');
+
+        // Wait a moment, then resolve
+        setTimeout(() => {
+          // Hide loading bar
+          loadingBarContainer.classList.remove('active');
+          // We genuinely don't know the outcome yet — resolve as 'timeout' so the
+          // caller shows a "still working on it, check your email" message rather
+          // than assuming success and redirecting to a code-entry page.
+          if (statusCompletionResolver) {
+            statusCompletionResolver.resolve({ status: 'timeout', request: null });
+            statusCompletionResolver = null;
+          }
+          // Clear request ID
+          currentRequestIdForPolling = null;
+        }, 500);
+      }, FINISH_TIMEOUT);
+      
+      // Start polling every 1 second (optional - for early completion if status updates work)
+      statusPollInterval = setInterval(() => {
+        pollStatus();
+      }, 1000);
+      
+      // Also update progress bar animation frame for smooth transitions
+      function animateProgress() {
+        updateProgressBar();
+        if (lastStatus !== 'completed' && lastStatus !== 'error') {
+          loadingBarAnimationFrame = requestAnimationFrame(animateProgress);
+        } else {
+          loadingBarAnimationFrame = null;
+        }
+      }
+      
+      loadingBarAnimationFrame = requestAnimationFrame(animateProgress);
+      
+      // Return promise that resolves when completed
+      return completionPromise;
+    }
+    
+    // Stop loading bar
+    function stopLoadingBar() {
+      // Stop animation frame
+      if (loadingBarAnimationFrame !== null) {
+        cancelAnimationFrame(loadingBarAnimationFrame);
+        loadingBarAnimationFrame = null;
+      }
+      // Stop polling interval
+      if (statusPollInterval) {
+        clearInterval(statusPollInterval);
+        statusPollInterval = null;
+      }
+      // Clear resolver
+      if (statusCompletionResolver) {
+        // Don't reject, just clear the resolver
+        statusCompletionResolver = null;
+      }
+      // Clear request ID to prevent further polling
+      currentRequestIdForPolling = null;
+        // Hide loading bar
+        loadingBarContainer.classList.remove('active');
+        loadingBarFill.style.width = '0%';
+        // Hide warning
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+      }
+
+    // Handle form submission
+    subscribeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Prevent multiple simultaneous submissions (button stays enabled)
+      if (isSubmitting) {
+        return;
+      }
+      
+      isSubmitting = true;
+      
+      // Show warning to not leave the page
+      const pageWarning = document.getElementById('pageWarning');
+      if (pageWarning) {
+        pageWarning.classList.add('active');
+      }
+      
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+      
+      const formData = new FormData(subscribeForm);
+      const tipo = formData.get('tipo');
+      const email = formData.get('email');
+      
+      let payload = {
+        email,
+        tipo,
+        language: currentLang
+      };
+
+      if (tipo === 'mercantil' || tipo === 'fundacion') {
+        const entityName = (formData.get('entityName') || '').trim();
+        const ruc = (formData.get('ruc') || '').trim();
+        if (!entityName && !ruc) {
+          showError(t('errors.nameOrRucRequired'));
+          isSubmitting = false;
+          return;
+        }
+        if (entityName) payload.name = entityName;
+        if (ruc) payload.ruc = ruc;
+      } else if (tipo === 'inmueble') {
+        const folio = (formData.get('folio') || '').trim();
+        const codigo = (formData.get('codigo') || '').trim();
+        const ownerName = (formData.get('ownerName') || '').trim();
+        if (!folio && !ownerName) {
+          showError(t('errors.folioOrOwnerRequired'));
+          isSubmitting = false;
+          return;
+        }
+        if (folio) payload.folio = folio;
+        if (codigo) payload.codigo = codigo;
+        if (ownerName) payload.ownerName = ownerName;
+      }
+
+      const wantsWhatsapp = formData.get('whatsappOptIn') === 'on';
+      const whatsappPhone = (formData.get('whatsappPhone') || '').trim();
+      if (wantsWhatsapp && !whatsappPhone) {
+        showError(t('errors.whatsappPhoneRequired'));
+        isSubmitting = false;
+        return;
+      }
+      payload.whatsappOptIn = wantsWhatsapp;
+      if (wantsWhatsapp) payload.whatsappPhone = whatsappPhone;
+
+      // Track when API call completes
+      let apiResult = null;
+      let apiError = null;
+
+      // Start API call
+      try {
+        console.log('[Frontend] Submitting request to:', API_BASE + '/subscribe/submit');
+        console.log('[Frontend] Payload:', payload);
+        
+        const response = await fetch(API_BASE + '/subscribe/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(fetchError => {
+          // Handle network errors (certificate, CORS, network issues)
+          console.error('[Frontend] Fetch error:', fetchError);
+          throw new Error('No se pudo conectar al servidor. Verifique su conexión a internet o intente más tarde.');
+        });
+
+        console.log('[Frontend] Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.error('[Frontend] Response not OK:', response.status, errorText);
+          throw new Error(`Error del servidor (${response.status}). Por favor intente más tarde.`);
+        }
+        
+        const result = await response.json();
+        console.log('[Frontend] Response:', result);
+
+        if (!result.ok) {
+          throw new Error(result.error || 'Error al enviar la solicitud');
+        }
+
+        apiResult = result;
+      } catch (error) {
+        console.error('[Frontend] API call error:', error);
+        apiError = error;
+      }
+      
+      // Handle API errors
+      if (apiError) {
+        stopLoadingBar();
+        // Hide warning on error
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+        // Show user-friendly error message
+        const errorMsg = apiError.message || 'Error al enviar la solicitud';
+        showError('Error: ' + errorMsg);
+        isSubmitting = false;
+        return;
+      }
+      
+      if (!apiResult || !apiResult.requestId) {
+        stopLoadingBar();
+        // Hide warning on error
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+        showError('Error: No se recibió un ID de solicitud');
+        isSubmitting = false;
+        return;
+      }
+      
+      // Store accessToken if provided (for polling)
+      if (apiResult.accessToken) {
+        sessionStorage.setItem('subscription_token_' + apiResult.requestId, apiResult.accessToken);
+        console.log('[Frontend] Access token stored for polling');
+      }
+      
+      // Start loading bar with real progress tracking
+      const startTime = Date.now();
+      const minWaitTime = 30000; // Minimum 30 seconds
+      
+      try {
+        // Wait for the search to actually finish, then show whatever it actually
+        // found — a confirmed single match (→ code entry), a short list to pick
+        // from, a "too many, please refine" message, a "no match" message, or (if
+        // it's genuinely still running after the timeout) a "check your email"
+        // message. We no longer redirect blindly on a fixed timer regardless of
+        // outcome — that used to send subscribers to a code-entry page before the
+        // backend had even generated a code.
+        currentRequestId = apiResult.requestId;
+
+        subscribeForm.style.display = 'none';
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+
+        const outcome = await startLoadingBar(apiResult.requestId);
+        stopLoadingBar();
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+
+        renderSearchOutcome(outcome, payload.email);
+        isSubmitting = false;
+      } catch (error) {
+        // Handle error from status polling
+        stopLoadingBar();
+        // Hide warning on error
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+        showError('Error: ' + error.message);
+        isSubmitting = false;
+      }
+    });
+
+    // Shows the right screen for whatever the search actually found.
+    function renderSearchOutcome(outcome, email) {
+      const status = outcome && outcome.status;
+      const request = outcome && outcome.request;
+
+      if (status === 'completed') {
+        const verifyUrl = 'verify.html?id=' + encodeURIComponent(currentRequestId) + '&email=' + encodeURIComponent(email);
+        console.log('[Frontend] Redirecting to verification page:', verifyUrl);
+        window.location.href = verifyUrl;
+        return;
+      }
+
+      if (status === 'needs_disambiguation' && request && Array.isArray(request.matches)) {
+        const token = sessionStorage.getItem('subscription_token_' + currentRequestId) || '';
+        const selectLabel = t('outcome.selectButton');
+        const itemsHtml = request.matches.map((m, i) => {
+          const label = describeMatchForDisplay(request.tipo, m);
+          const link = API_BASE + '/subscribe/request/' + encodeURIComponent(currentRequestId) + '/select?index=' + i + '&token=' + encodeURIComponent(token);
+          return '<div class="radio-option" style="justify-content: space-between;"><span>' + label + '</span><a href="' + link + '" class="btn-outline" style="width:auto; padding:8px 16px; text-decoration:none; border-radius:6px; font-weight:600;">' + selectLabel + '</a></div>';
+        }).join('');
+        showOutcomeScreen(
+          t('outcome.disambiguationTitle', { count: request.matches.length }),
+          '<p>' + t('outcome.disambiguationBody') + '</p><div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">' + itemsHtml + '</div>'
+        );
+        return;
+      }
+
+      if (status === 'needs_refinement') {
+        showOutcomeScreen(t('outcome.refinementTitle'), '<p>' + t('outcome.refinementBody') + '</p>');
+        return;
+      }
+
+      if (status === 'no_match') {
+        showOutcomeScreen(t('outcome.noMatchTitle'), '<p>' + t('outcome.noMatchBody') + '</p>');
+        return;
+      }
+
+      // 'timeout' or anything unrecognized: the search may still be running.
+      showOutcomeScreen(t('outcome.timeoutTitle'), '<p>' + t('outcome.timeoutBody') + '</p>');
+    }
+
+    // Renders match data (property or entity shape) as a short, readable line for the disambiguation list.
+    function describeMatchForDisplay(tipo, match) {
+      if (tipo === 'inmueble') {
+        const folio = match['FOLIO'] || '';
+        const codigo = match['CODIGO UBICACIÓN'] || '';
+        const municipio = match['MUNICIPIO'] || '';
+        const propietario = match['PROPIETARIOS'] || '';
+        return 'Folio ' + folio + (codigo ? ', Código ' + codigo : '') + (municipio ? ' (' + municipio + ')' : '') + (propietario ? ' — ' + propietario : '');
+      }
+      const nombre = match['NOMBRE'] || Object.values(match)[0] || '';
+      const ruc = match['RUC'] || '';
+      return nombre + (ruc ? ' — RUC ' + ruc : '');
+    }
+
+    function showOutcomeScreen(title, bodyHtml) {
+      formPage.style.display = 'none';
+      confirmationPage.style.display = 'block';
+      document.querySelector('.confirmation-page h2').textContent = title;
+      confirmationInfo.innerHTML = bodyHtml;
+      document.querySelector('.action-buttons').style.display = 'none';
+      verificationCodeInput.style.display = 'none';
+      const codeLabel = document.querySelector('label[for="verificationCodeInput"]');
+      if (codeLabel) codeLabel.style.display = 'none';
+    }
+
+    // Show confirmation page with subscription data
+    function showConfirmationPageWithData(request) {
+      // Stop all polling and loading bar when showing confirmation page
+      stopLoadingBar();
+      currentRequestIdForPolling = null;
+      currentRequestId = request.id;
+      
+      let dataHtml = '';
+
+      if (request.tipo === 'inmueble') {
+        dataHtml = `
+          <h3 style="color: #333; margin-bottom: 20px;">Datos de la Propiedad</h3>
+          <p><strong>Tipo:</strong> Inmueble</p>
+          <p><strong>Folio:</strong> ${request.folio || 'N/A'}</p>
+          <p><strong>Código de Ubicación:</strong> ${request.codigo || 'N/A'}</p>
+          <p><strong>Propietario:</strong> ${request.ownerName || 'N/A'}</p>
+          <p><strong>Email:</strong> ${request.email}</p>
+        `;
+
+        // Show extracted property data if available
+        if (request.datosDelInmueble && request.datosDelInmueble.html) {
+          dataHtml += '<hr style="margin: 20px 0;">';
+          dataHtml += request.datosDelInmueble.html;
+        }
+      } else {
+        const tipoLabel = request.tipo === 'mercantil' ? 'Mercantil' : 'Fundación';
+        dataHtml = `
+          <h3 style="color: #333; margin-bottom: 20px;">Datos de la Entidad</h3>
+          <p><strong>Tipo:</strong> ${tipoLabel}</p>
+          <p><strong>Nombre:</strong> ${request.name || request.nameOrFolio || 'N/A'}</p>
+          <p><strong>RUC:</strong> ${request.ruc || 'N/A'}</p>
+          <p><strong>Email:</strong> ${request.email}</p>
+        `;
+
+        // Show extracted business data if available
+        if (request.datosDelFolio && request.datosDelFolio.html) {
+          dataHtml += '<hr style="margin: 20px 0;">';
+          dataHtml += request.datosDelFolio.html;
+        }
+      }
+
+      confirmationInfo.innerHTML = dataHtml;
+      verificationCodeInput.value = ''; // Clear any previous code
+      confirmationError.style.display = 'none';
+      formPage.style.display = 'none';
+      confirmationPage.style.display = 'block';
+    }
+
+    // Auto-uppercase verification code input
+    verificationCodeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Handle Yes button - Verify with code and activate
+    btnYes.addEventListener('click', async () => {
+      if (!currentRequestId) return;
+      
+      const code = verificationCodeInput.value.trim().toUpperCase();
+      
+      if (!code || code.length !== 8) {
+        confirmationError.textContent = 'Por favor ingrese el código de verificación de 8 caracteres del email';
+        confirmationError.style.display = 'block';
+        return;
+      }
+      
+      btnYes.disabled = true;
+      btnYes.textContent = 'Verificando...';
+      confirmationError.style.display = 'none';
+
+      try {
+        // Get email from the subscription data
+        const token = sessionStorage.getItem('subscription_token_' + currentRequestId);
+        let email;
+        
+        if (!token) {
+          // Try to get email from the request data
+          const dataResponse = await fetch(API_BASE + '/subscribe/request/' + currentRequestId);
+          if (!dataResponse.ok) {
+            throw new Error('No se pudo obtener la información de la suscripción');
+          }
+          const dataResult = await dataResponse.json();
+          if (!dataResult.ok || !dataResult.request) {
+            throw new Error('Suscripción no encontrada');
+          }
+          
+          email = dataResult.request.email;
+        } else {
+          // Get email from stored request data
+          const dataResponse = await fetch(API_BASE + '/subscribe/request/' + currentRequestId + '?token=' + encodeURIComponent(token));
+          if (!dataResponse.ok) {
+            throw new Error('No se pudo obtener la información de la suscripción');
+          }
+          const dataResult = await dataResponse.json();
+          if (!dataResult.ok || !dataResult.request) {
+            throw new Error('Suscripción no encontrada');
+          }
+          
+          email = dataResult.request.email;
+        }
+        
+        // Verify with code
+        const response = await fetch(API_BASE + '/subscribe/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requestId: currentRequestId,
+            email: email,
+            code: code
+          })
+        });
+
+        const result = await response.json();
+        
+        if (!result.ok) {
+          throw new Error(result.error === 'invalid_code' ? 'Código de verificación incorrecto' : (result.message || 'Error al verificar'));
+        }
+
+        // Show success message
+        confirmationInfo.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 48px; color: #27ae60; margin-bottom: 20px;">✓</div>
+            <h3 style="color: #333; margin-bottom: 10px;">¡Suscripción Activada!</h3>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Su suscripción diaria ha sido activada. Recibirá actualizaciones diarias por email.
+            </p>
+          </div>
+        `;
+        
+        // Hide action buttons and code input
+        document.querySelector('.action-buttons').style.display = 'none';
+        verificationCodeInput.style.display = 'none';
+        document.querySelector('label[for="verificationCodeInput"]').style.display = 'none';
+        
+      } catch (error) {
+        confirmationError.textContent = 'Error: ' + error.message;
+        confirmationError.style.display = 'block';
+        btnYes.disabled = false;
+        btnYes.textContent = 'Sí - Verificar y Activar';
+      }
+    });
+
+    // Handle No button - Go back to form
+    btnNo.addEventListener('click', () => {
+      // Stop any ongoing polling or loading
+      stopLoadingBar();
+      currentRequestIdForPolling = null;
+      
+      formPage.style.display = 'block';
+      confirmationPage.style.display = 'none';
+      subscribeForm.reset();
+      mercantilFields.classList.add('hidden');
+      inmuebleFields.classList.add('hidden');
+      currentRequestId = null;
+      isSubmitting = false;
+      verificationCodeInput.value = '';
+      confirmationError.style.display = 'none';
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+    }
+
+    // Initialize: Check if user arrived via email link (has token and id in URL)
+    async function initializeFromEmailLink() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const id = urlParams.get('id');
+      
+      if (!token || !id) {
+        // No token/id in URL - show form normally
+        return;
+      }
+      
+      // User arrived via email link - load subscription data and show confirmation page
+      console.log('[Frontend] Initializing from email link - ID:', id);
+      currentRequestId = id;
+      sessionStorage.setItem('subscription_token_' + id, token);
+      
+      try {
+        // Fetch subscription data
+        const response = await fetch(API_BASE + '/subscribe/request/' + id + '?token=' + encodeURIComponent(token));
+        
+        if (!response.ok) {
+          throw new Error('No se pudo cargar la información de la suscripción');
+        }
+        
+        const result = await response.json();
+        
+        if (!result.ok || !result.request) {
+          throw new Error('Suscripción no encontrada');
+        }
+        
+        const request = result.request;
+        
+        // Build confirmation page with extracted data
+        let dataHtml = '';
+        
+        if (request.tipo === 'inmueble') {
+          dataHtml = `
+            <h3 style="color: #333; margin-bottom: 20px;">Datos de la Propiedad</h3>
+            <p><strong>Tipo:</strong> Inmueble</p>
+            <p><strong>Folio:</strong> ${request.folio || 'N/A'}</p>
+            <p><strong>Código de Ubicación:</strong> ${request.codigo || 'N/A'}</p>
+            <p><strong>Propietario:</strong> ${request.ownerName || 'N/A'}</p>
+            <p><strong>Email:</strong> ${request.email}</p>
+          `;
+
+          // Show extracted property data if available
+          if (request.datosDelInmueble && request.datosDelInmueble.html) {
+            dataHtml += '<hr style="margin: 20px 0;">';
+            dataHtml += request.datosDelInmueble.html;
+          }
+        } else {
+          const tipoLabel = request.tipo === 'mercantil' ? 'Mercantil' : 'Fundación';
+          dataHtml = `
+            <h3 style="color: #333; margin-bottom: 20px;">Datos de la Entidad</h3>
+            <p><strong>Tipo:</strong> ${tipoLabel}</p>
+            <p><strong>Nombre:</strong> ${request.name || request.nameOrFolio || 'N/A'}</p>
+            <p><strong>RUC:</strong> ${request.ruc || 'N/A'}</p>
+            <p><strong>Email:</strong> ${request.email}</p>
+          `;
+
+          // Show extracted business data if available
+          if (request.datosDelFolio && request.datosDelFolio.html) {
+            dataHtml += '<hr style="margin: 20px 0;">';
+            dataHtml += request.datosDelFolio.html;
+          }
+        }
+
+        // Update confirmation page
+        confirmationInfo.innerHTML = dataHtml;
+        formPage.style.display = 'none';
+        confirmationPage.style.display = 'block';
+
+        // Update button text (this legacy entry path only ever handles a single
+        // confirmed match, not the disambiguation/refinement/no-match outcomes)
+        btnYes.textContent = 'Verificar y Activar Suscripción';
+        btnNo.textContent = 'Volver al Formulario';
+        
+      } catch (error) {
+        console.error('[Frontend] Error loading subscription:', error);
+        showError('Error al cargar la información: ' + error.message);
+      }
+    }
+
+    // Run initialization when page loads
+    setLanguage(currentLang);
+    initializeFromEmailLink();
+  </script>
+</body>
+</html>
+

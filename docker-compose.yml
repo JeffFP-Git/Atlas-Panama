@@ -1,0 +1,193 @@
+services:
+  # API Server - Main service for web interface and job scheduling
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: panama-scraper-api
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=1
+      - PORT=3000
+      - MAX_CONCURRENCY=${MAX_CONCURRENCY:-2}
+      - MAX_QUEUE=${MAX_QUEUE:-1000}
+      # Login credentials
+      - RP_USERNAME=${RP_USERNAME}
+      - RP_PASSWORD=${RP_PASSWORD}
+      # CAPTCHA configuration
+      - CAPTCHA_API_KEY=${CAPTCHA_API_KEY:-}
+      - CAPTCHA_PROVIDER=${CAPTCHA_PROVIDER:-}
+      - CAPTCHA_PLUGIN=${CAPTCHA_PLUGIN:-0}
+      - CAPTCHA_MODE=${CAPTCHA_MODE:-backup}
+      # Puppeteer
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Email configuration
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-0}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - SMTP_REJECT_UNAUTHORIZED=${SMTP_REJECT_UNAUTHORIZED:-1}
+      - FINCA_EMAIL_RECIPIENTS=${FINCA_EMAIL_RECIPIENTS:-}
+      - ALERT_EMAILS=${ALERT_EMAILS:-}
+      # Scheduler configuration
+      - DAILY_RUN_TIME=${DAILY_RUN_TIME:-09:00}
+    volumes:
+      - ./BuildingData:/app/BuildingData
+      - ./debug-output:/app/debug-output
+      - ./session:/app/session
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # Mount .env as read-only for additional config
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - panama-scraper-network
+
+  # Individual scraper services (use profiles to run on-demand)
+  finca:
+    build:
+      context: .
+      dockerfile: Dockerfile.finca
+    container_name: panama-scraper-finca
+    networks:
+      - panama-scraper-network
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=1
+      # Load from .env file (docker-compose will read .env automatically)
+      - RP_USERNAME=${RP_USERNAME}
+      - RP_PASSWORD=${RP_PASSWORD}
+      - BUILDING_NAME=${BUILDING_NAME:-}
+      - SEARCH_PARAMETER=${SEARCH_PARAMETER:-}
+      - CAPTCHA_API_KEY=${CAPTCHA_API_KEY:-}
+      - CAPTCHA_PROVIDER=${CAPTCHA_PROVIDER:-}
+      - CAPTCHA_PLUGIN=${CAPTCHA_PLUGIN:-0}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Email configuration
+      - FINCA_EMAIL_RECIPIENTS=${FINCA_EMAIL_RECIPIENTS:-}
+      - ALERT_EMAILS=${ALERT_EMAILS:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-0}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+    volumes:
+      - ./BuildingData:/app/BuildingData
+      - ./debug-output:/app/debug-output
+      - ./session:/app/session
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    # Run on a schedule using a cron-like approach or manual trigger
+    # Use: docker-compose run --rm finca --name "Company Name"
+    profiles:
+      - finca
+
+  mercantil:
+    build:
+      context: .
+      dockerfile: Dockerfile.mercantil
+    container_name: panama-scraper-mercantil
+    networks:
+      - panama-scraper-network
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=1
+      - RP_USERNAME=${RP_USERNAME}
+      - RP_PASSWORD=${RP_PASSWORD}
+      - CAPTCHA_API_KEY=${CAPTCHA_API_KEY:-}
+      - CAPTCHA_PROVIDER=${CAPTCHA_PROVIDER:-}
+      - CAPTCHA_PLUGIN=${CAPTCHA_PLUGIN:-0}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    volumes:
+      - ./BuildingData:/app/BuildingData
+      - ./debug-output:/app/debug-output
+      - ./session:/app/session
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    profiles:
+      - mercantil
+
+  main:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    container_name: panama-scraper-main
+    networks:
+      - panama-scraper-network
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=1
+      - RP_USERNAME=${RP_USERNAME}
+      - RP_PASSWORD=${RP_PASSWORD}
+      - BUILDING_NAME=${BUILDING_NAME:-}
+      - MERCANTIL=${MERCANTIL:-}
+      - CAPTCHA_API_KEY=${CAPTCHA_API_KEY:-}
+      - CAPTCHA_PROVIDER=${CAPTCHA_PROVIDER:-}
+      - CAPTCHA_PLUGIN=${CAPTCHA_PLUGIN:-0}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Email configuration
+      - ALERT_EMAILS=${ALERT_EMAILS:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-0}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+    volumes:
+      - ./BuildingData:/app/BuildingData
+      - ./debug-output:/app/debug-output
+      - ./session:/app/session
+      - ./logs:/app/logs
+      - ./downloads:/app/downloads
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    profiles:
+      - main
+
+  # Optional: A service that runs all three in sequence
+  all:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    container_name: panama-scraper-all
+    networks:
+      - panama-scraper-network
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=1
+      - RP_USERNAME=${RP_USERNAME}
+      - RP_PASSWORD=${RP_PASSWORD}
+      - BUILDING_NAME=${BUILDING_NAME:-}
+      - CAPTCHA_API_KEY=${CAPTCHA_API_KEY:-}
+      - CAPTCHA_PROVIDER=${CAPTCHA_PROVIDER:-}
+      - CAPTCHA_PLUGIN=${CAPTCHA_PLUGIN:-0}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    volumes:
+      - ./BuildingData:/app/BuildingData
+      - ./debug-output:/app/debug-output
+      - ./session:/app/session
+      - ./logs:/app/logs
+      - ./downloads:/app/downloads
+      - ./.env:/app/.env:ro
+    entrypoint: ["/bin/bash", "/app/docker/entrypoint-all.sh"]
+    restart: "no"
+    profiles:
+      - all
+
+networks:
+  panama-scraper-network:
+    driver: bridge
+

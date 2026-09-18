@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panama Scraper - Intro Pipeline</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 24px;
+      padding-top: 84px;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #667eea;
+    }
+    .nav-links a.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      .nav-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+      .nav-links {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      body {
+        padding-top: 110px;
+      }
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-top: 0;
+      color: #1a1a1a;
+      border-bottom: 2px solid #4a90e2;
+      padding-bottom: 12px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+    .radio-group {
+      display: flex;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .radio-option input[type="radio"] {
+      width: auto;
+      margin: 0;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #357abd;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 16px;
+      display: none;
+    }
+    .status.show {
+      display: block;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .request-details {
+      margin-top: 24px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      display: none;
+    }
+    .request-details.show {
+      display: block;
+    }
+    .request-details h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .request-details p {
+      margin: 8px 0;
+    }
+    .request-details strong {
+      color: #555;
+    }
+    .confirm-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 4px;
+      display: none;
+    }
+    .confirm-section.show {
+      display: block;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .confirm-buttons button {
+      flex: 1;
+    }
+    .confirm-buttons button.correct {
+      background: #28a745;
+    }
+    .confirm-buttons button.correct:hover:not(:disabled) {
+      background: #218838;
+    }
+    .confirm-buttons button.incorrect {
+      background: #dc3545;
+    }
+    .confirm-buttons button.incorrect:hover:not(:disabled) {
+      background: #c82333;
+    }
+    .page-warning {
+      display: none;
+      background: #fff6cc;
+      border: 2px solid #f0c020;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      color: #856404;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .page-warning.active {
+      display: block;
+    }
+    .page-warning strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      color: #856404;
+    }
+    .schedule-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #d4edda;
+      border: 1px solid #28a745;
+      border-radius: 4px;
+      display: none;
+    }
+    .schedule-section.show {
+      display: block;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #4a90e2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe.html" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe.html">Subscribe</a>
+      <a href="/about.html">About</a>
+    </div>
+  </nav>
+  <div class="container">
+    <h1>Panama Scraper - Intro Pipeline</h1>
+    
+    <form id="introForm">
+      <div class="form-group">
+        <label>What would you like to track?</label>
+        <div class="radio-group">
+          <div class="radio-option">
+            <input type="radio" id="typeBusiness" name="type" value="business" checked>
+            <label for="typeBusiness" style="font-weight: normal; margin: 0;">Business</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" id="typeProperty" name="type" value="property">
+            <label for="typeProperty" style="font-weight: normal; margin: 0;">Property</label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group" id="businessNameGroup">
+        <label for="businessName">Business Name</label>
+        <input type="text" id="businessName" name="businessName" placeholder="Enter business name" required>
+      </div>
+      
+      <div class="form-group hidden" id="propertyNameGroup">
+        <label for="propertyName">Property Name</label>
+        <input type="text" id="propertyName" name="propertyName" placeholder="Enter property name">
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+      </div>
+      
+      <div id="pageWarning" class="page-warning">
+        <strong>⚠️ Do not leave or close this page</strong>
+        Please keep this page open while your request is being processed. The process may take a few minutes.
+      </div>
+      
+      <button type="submit" id="submitBtn">Submit Request</button>
+    </form>
+    
+    <div id="status" class="status"></div>
+    
+    <div id="requestDetails" class="request-details">
+      <h3>Request Details</h3>
+      <p><strong>Request ID:</strong> <span id="requestId"></span></p>
+      <p><strong>Status:</strong> <span id="requestStatus"></span></p>
+      <p><strong>Type:</strong> <span id="requestType"></span></p>
+      <p><strong>Name:</strong> <span id="requestName"></span></p>
+      <p><strong>Email:</strong> <span id="requestEmail"></span></p>
+      <p id="folioInfo" class="hidden"><strong>Folio:</strong> <span id="requestFolio"></span></p>
+      <p id="pdfInfo" class="hidden">
+        <strong>PDF:</strong> 
+        <a id="pdfLink" href="#" target="_blank">Download PDF</a>
+      </p>
+    </div>
+    
+    <div id="confirmSection" class="confirm-section">
+      <h3>Confirm Property</h3>
+      <p>Please review the PDF file that was sent to your email. Is this the correct property?</p>
+      <div class="confirm-buttons">
+        <button class="correct" onclick="confirmProperty(true)">Yes, this is correct</button>
+        <button class="incorrect" onclick="confirmProperty(false)">No, this is incorrect</button>
+      </div>
+    </div>
+    
+    <div id="scheduleSection" class="schedule-section">
+      <h3>Schedule Daily Runs</h3>
+      <p>Great! Your property has been confirmed. You can now schedule daily pipeline runs.</p>
+      <button onclick="scheduleDailyRuns()">Schedule Daily Runs</button>
+    </div>
+  </div>
+  
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let currentRequestId = null;
+    let statusCheckInterval = null;
+    
+    // Get API base URL
+    function getApiBase() {
+      // Use configured API_BASE_URL if available (from deployment script)
+      if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) {
+        return window.API_BASE_URL;
+      }
+      // Fallback to localStorage or same origin
+      const saved = localStorage.getItem('apiBase') || '';
+      if (saved) return saved;
+      return location.origin;
+    }
+    
+    // Show status message
+    function showStatus(message, type = 'info') {
+      const statusEl = $('status');
+      statusEl.textContent = message;
+      statusEl.className = `status show ${type}`;
+    }
+    
+    // Hide status message
+    function hideStatus() {
+      $('status').classList.remove('show');
+    }
+    
+    // Handle form type change
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'business') {
+          $('businessNameGroup').classList.remove('hidden');
+          $('propertyNameGroup').classList.add('hidden');
+          $('businessName').required = true;
+          $('propertyName').required = false;
+        } else {
+          $('businessNameGroup').classList.add('hidden');
+          $('propertyNameGroup').classList.remove('hidden');
+          $('businessName').required = false;
+          $('propertyName').required = true;
+        }
+      });
+    });
+    
+    // Handle form submission
+    $('introForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const type = document.querySelector('input[name="type"]:checked').value;
+      const businessName = $('businessName').value.trim();
+      const propertyName = $('propertyName').value.trim();
+      const email = $('email').value.trim();
+      
+      if (!email || !email.includes('@')) {
+        showStatus('Please enter a valid email address', 'error');
+        return;
+      }
+      
+      if (type === 'business' && !businessName) {
+        showStatus('Please enter a business name', 'error');
+        return;
+      }
+      
+      if (type === 'property' && !propertyName) {
+        showStatus('Please enter a property name', 'error');
+        return;
+      }
+      
+      $('submitBtn').disabled = true;
+      $('submitBtn').innerHTML = 'Submitting...<span class="loading"></span>';
+      hideStatus();
+      
+      // Show warning to not leave the page
+      const pageWarning = document.getElementById('pageWarning');
+      if (pageWarning) {
+        pageWarning.classList.add('active');
+      }
+      
+      try {
+        const response = await fetch(`${getApiBase()}/intro/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type,
+            businessName: type === 'business' ? businessName : null,
+            propertyName: type === 'property' ? propertyName : null,
+            email
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+          throw new Error(data.error || 'Submission failed');
+        }
+        
+        currentRequestId = data.requestId;
+        showStatus('Request submitted successfully! Processing...', 'success');
+        startStatusCheck();
+        
+      } catch (err) {
+        showStatus(`Error: ${err.message}`, 'error');
+        // Hide warning on error
+        const pageWarning = document.getElementById('pageWarning');
+        if (pageWarning) {
+          pageWarning.classList.remove('active');
+        }
+        $('submitBtn').disabled = false;
+        $('submitBtn').textContent = 'Submit Request';
+      }
+    });
+    
+    // Check request status periodically
+    function startStatusCheck() {
+      if (statusCheckInterval) clearInterval(statusCheckInterval);
+      
+      statusCheckInterval = setInterval(async () => {
+        if (!currentRequestId) return;
+        
+        try {
+          const response = await fetch(`${getApiBase()}/intro/request/${currentRequestId}`);
+          const data = await response.json();
+          
+          if (!data.ok) {
+            clearInterval(statusCheckInterval);
+            showStatus('Request not found', 'error');
+            // Hide warning on error
+            const pageWarning = document.getElementById('pageWarning');
+            if (pageWarning) {
+              pageWarning.classList.remove('active');
+            }
+            return;
+          }
+          
+          updateRequestDisplay(data.request);
+          
+          if (data.request.status === 'completed' || data.request.status === 'error') {
+            clearInterval(statusCheckInterval);
+            // Hide warning when completed or errored
+            const pageWarning = document.getElementById('pageWarning');
+            if (pageWarning) {
+              pageWarning.classList.remove('active');
+            }
+            $('submitBtn').disabled = false;
+            $('submitBtn').textContent = 'Submit Request';
+          }
+          
+        } catch (err) {
+          console.error('Status check error:', err);
+        }
+      }, 2000); // Check every 2 seconds
+    }
+    
+    // Update request display
+    function updateRequestDisplay(request) {
+      $('requestId').textContent = request.id;
+      $('requestStatus').textContent = request.status;
+      $('requestType').textContent = request.type;
+      $('requestName').textContent = request.businessName || request.propertyName || 'N/A';
+      $('requestEmail').textContent = request.email;
+      
+      if (request.folio) {
+        $('requestFolio').textContent = request.folio;
+        $('folioInfo').classList.remove('hidden');
+      }
+      
+      if (request.pdfPath) {
+        $('pdfLink').href = `${getApiBase()}/intro/pdf/${request.id}`;
+        $('pdfInfo').classList.remove('hidden');
+      }
+      
+      $('requestDetails').classList.add('show');
+      
+      // Show confirm section if completed and not yet confirmed
+      if (request.status === 'completed' && request.confirmed === null) {
+        $('confirmSection').classList.add('show');
+      } else {
+        $('confirmSection').classList.remove('show');
+      }
+      
+      // Show schedule section if confirmed
+      if (request.confirmed === true && !request.scheduled) {
+        $('scheduleSection').classList.add('show');
+      } else if (request.scheduled) {
+        $('scheduleSection').classList.add('show');
+        $('scheduleSection').querySelector('p').textContent = 'Daily runs have been scheduled!';
+        $('scheduleSection').querySelector('button').disabled = true;
+        $('scheduleSection').querySelector('button').textContent = 'Scheduled';
+      } else {
+        $('scheduleSection').classList.remove('show');
+      }
+      
+      if (request.error) {
+        showStatus(`Error: ${request.error}`, 'error');
+      }
+    }
+    
+    // Confirm property
+    async function confirmProperty(isCorrect) {
+      if (!currentRequestId) return;
+      
+      const buttons = document.querySelectorAll('.confirm-buttons button');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      try {
+        const response = await fetch(`${getApiBase()}/intro/request/${currentRequestId}/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isCorrect })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+          throw new Error(data.error || 'Confirmation failed');
+        }
+        
+        if (isCorrect) {
+          showStatus('Property confirmed! You can now schedule daily runs.', 'success');
+        } else {
+          showStatus('Property rejected. Please submit a new request.', 'error');
+        }
+        
+        updateRequestDisplay(data.request);
+        
+      } catch (err) {
+        showStatus(`Error: ${err.message}`, 'error');
+        buttons.forEach(btn => btn.disabled = false);
+      }
+    }
+    
+    // Schedule daily runs
+    async function scheduleDailyRuns() {
+      if (!currentRequestId) return;
+      
+      const btn = $('scheduleSection').querySelector('button');
+      btn.disabled = true;
+      btn.innerHTML = 'Scheduling...<span class="loading"></span>';
+      
+      try {
+        const response = await fetch(`${getApiBase()}/intro/request/${currentRequestId}/schedule`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+          throw new Error(data.error || 'Scheduling failed');
+        }
+        
+        showStatus('Daily runs have been scheduled!', 'success');
+        updateRequestDisplay(data.request);
+        
+      } catch (err) {
+        showStatus(`Error: ${err.message}`, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Schedule Daily Runs';
+      }
+    }
+    
+    // Check if there's a request ID in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestId = urlParams.get('requestId');
+      if (requestId) {
+        currentRequestId = requestId;
+        startStatusCheck();
+      }
+    });
+  </script>
+</body>
+</html>
+

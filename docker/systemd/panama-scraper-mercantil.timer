@@ -1,0 +1,13 @@
+[Unit]
+Description=Run Panama Scraper Mercantil Daily at 9:15 PM
+Requires=panama-scraper-mercantil.service
+
+[Timer]
+# Run daily at 9:15 PM (21:15) - 15 minutes after finca
+OnCalendar=*-*-* 21:15:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+

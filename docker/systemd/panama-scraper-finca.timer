@@ -1,0 +1,15 @@
+[Unit]
+Description=Run Panama Scraper Finca Daily at 9 PM
+Requires=panama-scraper-finca.service
+
+[Timer]
+# Run daily at 9:00 PM (21:00)
+OnCalendar=*-*-* 21:00:00
+# If the system was off, run immediately when it comes back online
+Persistent=true
+# Add some randomization to avoid hitting the server at exactly the same time
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+

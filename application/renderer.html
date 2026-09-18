@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panama Scraper — Desktop</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; margin: 16px; line-height: 1.35; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    fieldset { border: 1px solid #ddd; border-radius: 6px; margin: 12px 0; padding: 12px; }
+    legend { font-weight: 600; }
+    label { display: block; font-size: 13px; color: #333; margin: 6px 0 4px; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .row { display:flex; gap:8px; align-items:center; }
+    button { padding: 8px 12px; border: 1px solid #444; background: #111; color: #fff; border-radius: 4px; cursor: pointer; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    pre { background:#0b0b0b; color:#d7e6ff; padding:10px; border-radius:6px; height:45vh; overflow:auto; font-size:12px; }
+    .muted { color:#666; font-size:12px; }
+    .ok { color:#0a0; }
+    .err { color:#b00; }
+  </style>
+</head>
+<body>
+  <h1>Panama Scraper — Desktop</h1>
+  <fieldset>
+    <legend>Run</legend>
+    <label>Building name</label>
+    <input id="building" type="text" placeholder="e.g., Biltmore">
+    <label>Search param (defaults to building)</label>
+    <input id="search" type="text" placeholder="e.g., Biltmore">
+    <label>Max properties</label>
+    <input id="max" type="number" placeholder="e.g., 300">
+    <div class="row" style="margin-top:8px">
+      <label><input id="headless" type="checkbox"> Run headless</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label><input id="contact" type="checkbox"> Contact Search Mode</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="run">Run</button>
+      <button id="cancel">Cancel</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Live log</legend>
+    <pre id="log"></pre>
+  </fieldset>
+  <script>
+    const $ = id => document.getElementById(id);
+    let unsub = null;
+    function append(line, cls='') {
+      const pre = $('log');
+      pre.innerHTML += (cls ? '['+cls+'] ' : '') + line.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '\\n';
+      pre.scrollTop = pre.scrollHeight;
+    }
+    $('run').onclick = async () => {
+      if (!window.runner || !window.runner.run) {
+        append('Preload bridge not available. Please restart the app.', 'ERR');
+        $('status').textContent = 'Bridge missing';
+        return;
+      }
+      $('run').disabled = true;
+      $('status').textContent = 'Starting...';
+      $('log').textContent = '';
+      unsub?.(); unsub = window.runner.onLog(msg => {
+        if (msg.type === 'out') append(msg.line);
+        else if (msg.type === 'err') append(msg.line, 'ERR');
+        else if (msg.type === 'status') { $('status').textContent = msg.line; if (/^done|exit/.test(msg.line)) $('run').disabled = false; }
+      });
+      const payload = {
+        buildingName: $('building').value.trim(),
+        searchParam: $('search').value.trim() || $('building').value.trim(),
+        maxProperties: Number($('max').value) || undefined,
+        headless: $('headless').checked,
+        contactMode: $('contact').checked
+      };
+      const res = await window.runner.run(payload);
+      if (!res.ok) {
+        $('status').innerHTML = '<span class="err">Error: '+(res.error||'unknown')+'</span>';
+        $('run').disabled = false;
+      } else {
+        $('status').textContent = 'PID ' + res.pid;
+      }
+    };
+    $('cancel').onclick = async () => {
+      const res = await window.runner.cancel();
+      append(res.ok ? 'cancel requested' : ('cancel error: ' + (res.error||'unknown')));
+    };
+  </script>
+</body>
+</html>
+
+

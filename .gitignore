@@ -1,0 +1,33 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Dependencies (regenerated via npm install)
+/node_modules
+
+# Real subscriber data and generated artifacts — not code, and contains real
+# subscriber PII (emails, RUCs, folios) and real property/company records
+/data
+/MonitoringData
+/BuildingData
+
+# Registro Público session cookies — sensitive, and regenerated automatically on login
+/session
+
+# Debug/log output
+/debug-output
+/logs
+/.cache
+/chrome-profile
+/chrome-profile-docker
+
+# Vendored pdfjs-dist source — not imported directly (scraper.js uses the two
+# .mjs files already copied into lib/), just unpacked npm package source. 36MB,
+# no reason to bloat the repo/deploy with it.
+/package
+
+# OS/editor cruft
+.DS_Store
+Untitled
+~$*.xlsx

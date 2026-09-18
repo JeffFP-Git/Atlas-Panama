@@ -1,0 +1,29 @@
+[Unit]
+Description=Panama Scraper - Finca Daily Run
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/panama-scraper
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"
+
+# Load environment variables from .env file
+EnvironmentFile=/home/ubuntu/panama-scraper/.env
+
+# Use absolute path to docker-compose and add better error handling
+ExecStartPre=/bin/bash -c 'cd /home/ubuntu/panama-scraper && /usr/bin/docker-compose ps'
+ExecStart=/bin/bash -c 'cd /home/ubuntu/panama-scraper && /usr/bin/docker-compose run --rm finca --name "${BUILDING_NAME:-${SEARCH_PARAMETER}}" || exit 1'
+
+StandardOutput=append:/home/ubuntu/panama-scraper/logs/systemd-finca.log
+StandardError=append:/home/ubuntu/panama-scraper/logs/systemd-finca-error.log
+
+# Restart policy (only on failure, not for oneshot)
+Restart=on-failure
+RestartSec=60
+
+# Timeout settings
+TimeoutStartSec=3600
+TimeoutStopSec=60

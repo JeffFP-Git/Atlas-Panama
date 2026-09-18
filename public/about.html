@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>About - Atlas Panama</title>
+  <style>
+    * { box-sizing: border-box; }
+    html {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 700px;
+      width: 100%;
+      padding: 40px;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      color: #333;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .section {
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .contact-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .contact-details {
+      flex: 1;
+    }
+    .contact-label {
+      font-weight: 600;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .contact-value {
+      color: #333;
+      font-size: 16px;
+    }
+    .contact-value a {
+      color: #667eea;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .contact-value a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+    .description {
+      color: #555;
+      line-height: 1.8;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #667eea;
+    }
+    .nav-links a.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: 8px;
+    }
+    .lang-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: white;
+      color: #667eea;
+      border: none;
+      cursor: pointer;
+    }
+    .lang-btn:hover {
+      background: #f8f9ff;
+    }
+    .lang-btn.active {
+      background: #667eea;
+      color: white;
+    }
+    body {
+      padding-top: 60px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 24px;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+      .nav-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+      .nav-links {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      body {
+        padding-top: 90px;
+      }
+      .container {
+        padding: 24px;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      .section-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe.html" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a>
+      <a href="/about.html" class="active" data-i18n="nav.about">About</a>
+      <span class="lang-toggle">
+        <button type="button" id="langEs" class="lang-btn active">ES</button>
+        <button type="button" id="langEn" class="lang-btn">EN</button>
+      </span>
+    </div>
+  </nav>
+  <div class="container">
+    <h1 data-i18n="about.title">About Atlas Panama</h1>
+    <p class="subtitle" data-i18n="about.subtitle">Your trusted partner for Panama property data and insights</p>
+
+    <div class="section">
+      <div class="description" data-i18n="about.description">
+        Atlas Panama provides comprehensive property data and monitoring services for Panama's real estate market.
+        We offer automated data collection, change tracking, and timely notifications to help you stay informed
+        about property records and transactions.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title" data-i18n="about.contactTitle">Contact Information</h2>
+      <div class="contact-info">
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <div class="contact-details">
+            <div class="contact-label" data-i18n="about.emailLabel">Email</div>
+            <div class="contact-value">
+              <a href="mailto:info@atlaspanama.com">info@atlaspanama.com</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-4.257 2.13a11.042 11.042 0 005.516 5.516l2.13-4.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+          <div class="contact-details">
+            <div class="contact-label" data-i18n="about.phoneLabel">Phone</div>
+            <div class="contact-value">
+              <a href="tel:+17868684257">+1 786 868 4257</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <div class="contact-details">
+            <div class="contact-label" data-i18n="about.addressLabel">Address</div>
+            <div class="contact-value">
+              800 Silks Run #1353<br>
+              Hallandale Beach, FL 33009<br>
+              <span data-i18n="about.country">United States</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TRANSLATIONS = {
+      es: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'about.title': 'Acerca de Atlas Panama',
+        'about.subtitle': 'Su socio de confianza para datos e información de propiedades en Panamá',
+        'about.description': 'Atlas Panama ofrece datos completos y servicios de monitoreo para el mercado inmobiliario de Panamá. Ofrecemos recopilación automatizada de datos, seguimiento de cambios y notificaciones oportunas para ayudarle a mantenerse informado sobre registros de propiedades y transacciones.',
+        'about.contactTitle': 'Información de Contacto',
+        'about.emailLabel': 'Correo Electrónico',
+        'about.phoneLabel': 'Teléfono',
+        'about.addressLabel': 'Dirección',
+        'about.country': 'Estados Unidos'
+      },
+      en: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'about.title': 'About Atlas Panama',
+        'about.subtitle': 'Your trusted partner for Panama property data and insights',
+        'about.description': 'Atlas Panama provides comprehensive property data and monitoring services for Panama\'s real estate market. We offer automated data collection, change tracking, and timely notifications to help you stay informed about property records and transactions.',
+        'about.contactTitle': 'Contact Information',
+        'about.emailLabel': 'Email',
+        'about.phoneLabel': 'Phone',
+        'about.addressLabel': 'Address',
+        'about.country': 'United States'
+      }
+    };
+
+    let currentLang = localStorage.getItem('atlaspanama_lang') || 'es';
+    if (currentLang !== 'es' && currentLang !== 'en') currentLang = 'es';
+
+    function t(key) {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
+      return dict[key] || TRANSLATIONS.es[key] || key;
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+    }
+
+    function setLanguage(lang) {
+      if (lang !== 'es' && lang !== 'en') return;
+      currentLang = lang;
+      localStorage.setItem('atlaspanama_lang', lang);
+      document.getElementById('langEs').classList.toggle('active', lang === 'es');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      applyTranslations();
+    }
+
+    document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
+    document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+    setLanguage(currentLang);
+  </script>
+</body>
+</html>
+

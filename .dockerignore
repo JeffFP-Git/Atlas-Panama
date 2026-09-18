@@ -1,0 +1,60 @@
+# Dependencies
+node_modules
+npm-debug.log
+# Note: package-lock.json is needed for npm ci
+
+# Build outputs
+BuildingData
+debug-output
+downloads
+logs
+data
+session
+chrome-profile
+chrome-profile-docker
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs
+*.md
+README.md
+
+# Tests
+test
+tests
+*.test.js
+*.spec.js
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts (not needed in container)
+scripts
+
+# AWS
+awscli-bundle
+
+# Application (Electron, not needed in Docker)
+application

@@ -1,0 +1,13 @@
+[Unit]
+Description=Run Panama Scraper Main Pipeline Daily at 9:30 PM
+Requires=panama-scraper-main.service
+
+[Timer]
+# Run daily at 9:30 PM (21:30) - 30 minutes after finca
+OnCalendar=*-*-* 21:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+

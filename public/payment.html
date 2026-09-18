@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago y Suscripción</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: 80px;
+    }
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #667eea; }
+    .lang-toggle {
+      display: inline-flex;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: 8px;
+    }
+    .lang-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: white;
+      color: #667eea;
+      border: none;
+      cursor: pointer;
+    }
+    .lang-btn:hover { background: #f8f9ff; }
+    .lang-btn.active { background: #667eea; color: white; }
+    @media (max-width: 600px) {
+      .nav-bar { flex-direction: column; gap: 12px; padding: 12px 20px; }
+      .nav-links { gap: 16px; flex-wrap: wrap; justify-content: center; }
+      body { padding-top: 110px; }
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 { color: #333; font-size: 26px; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 28px; font-size: 14px; line-height: 1.5; }
+
+    .icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+      color: white;
+    }
+    .icon.success { background: #27ae60; }
+    .icon.warn { background: #e67e22; }
+    .icon.error { background: #e74c3c; }
+    .icon.info { background: #667eea; }
+
+    .plan-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #f8f9ff;
+      border: 2px solid #667eea;
+      color: #333;
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 12px 0;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .plan-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.25); }
+    .plan-btn .plan-price { font-size: 20px; font-weight: 800; color: #667eea; }
+    .plan-btn .plan-note { display: block; font-size: 13px; color: #666; margin-top: 2px; }
+    .plan-btn.recommended { background: #667eea; border-color: #667eea; }
+    .plan-btn.recommended .plan-price, .plan-btn.recommended .plan-note { color: white; }
+
+    .info-box {
+      background: #f8f9ff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      text-align: left;
+      color: #666;
+      font-size: 14px;
+    }
+    .info-box strong { color: #333; }
+
+    .btn-secondary {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 24px;
+      border-radius: 6px;
+      background: #ecf0f1;
+      color: #333;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe.html" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a>
+      <a href="/about.html" data-i18n="nav.about">About</a>
+      <span class="lang-toggle">
+        <button type="button" id="langEs" class="lang-btn active">ES</button>
+        <button type="button" id="langEn" class="lang-btn">EN</button>
+      </span>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div id="stateLoading">
+      <div class="icon info">⏳</div>
+      <h1 data-i18n="payment.loadingTitle">Cargando...</h1>
+      <p class="subtitle" data-i18n="payment.loadingBody">Un momento por favor.</p>
+    </div>
+
+    <div id="stateChoosePlan" hidden>
+      <div class="icon info">💳</div>
+      <h1 data-i18n="payment.chooseTitle">Confirme su correo y elija su plan</h1>
+      <p class="subtitle" id="chooseSubtitle" data-i18n="payment.chooseBody">Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.</p>
+      <a id="monthlyLink" class="plan-btn" href="#">
+        <span class="plan-price">$1 / <span data-i18n="payment.month">mes</span></span>
+        <span class="plan-note" data-i18n="payment.monthlyNote">Facturado mensualmente</span>
+      </a>
+      <a id="annualLink" class="plan-btn recommended" href="#">
+        <span class="plan-price">$10 / <span data-i18n="payment.year">año</span></span>
+        <span class="plan-note" data-i18n="payment.annualNote">Facturado anualmente · Ahorre ~17%</span>
+      </a>
+    </div>
+
+    <div id="stateAlreadyActive" hidden>
+      <div class="icon success">✓</div>
+      <h1 data-i18n="payment.activeTitle">Ya está activo</h1>
+      <p class="subtitle" data-i18n="payment.activeBody">Esta suscripción ya está activa. Recibirá actualizaciones por correo.</p>
+    </div>
+
+    <div id="stateSuccess" hidden>
+      <div class="icon success">✓</div>
+      <h1 data-i18n="payment.successTitle">¡Suscripción activada!</h1>
+      <p class="subtitle" id="successSubtitle" data-i18n="payment.successBody">Gracias. Comenzaremos a monitorear el Registro Público y le avisaremos por correo si algo cambia.</p>
+      <div class="info-box" id="successInfo"></div>
+    </div>
+
+    <div id="stateCancelled" hidden>
+      <div class="icon warn">⚠️</div>
+      <h1 data-i18n="payment.cancelledTitle">Pago cancelado</h1>
+      <p class="subtitle" data-i18n="payment.cancelledBody">No se realizó ningún cargo. Puede intentar de nuevo cuando quiera.</p>
+      <a id="tryAgainBtn" href="#" class="btn-secondary" data-i18n="payment.tryAgainBtn">Elegir plan de nuevo</a>
+    </div>
+
+    <div id="stateError" hidden>
+      <div class="icon error">⚠️</div>
+      <h1 data-i18n="payment.errorTitle">No pudimos continuar</h1>
+      <p class="subtitle" id="errorSubtitle" data-i18n="payment.errorBody">No pudimos encontrar esta solicitud de suscripción, o hubo un problema al confirmar el pago. Use el enlace de su correo más reciente.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = (function() {
+      if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) return window.API_BASE_URL;
+      return window.location.origin;
+    })();
+
+    // ---------- Language / translations (shared choice with subscribe.html/verify.html via localStorage) ----------
+    const TRANSLATIONS = {
+      es: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'payment.loadingTitle': 'Cargando...',
+        'payment.loadingBody': 'Un momento por favor.',
+        'payment.chooseTitle': 'Confirme su correo y elija su plan',
+        'payment.chooseBody': 'Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.',
+        'payment.month': 'mes',
+        'payment.year': 'año',
+        'payment.monthlyNote': 'Facturado mensualmente',
+        'payment.annualNote': 'Facturado anualmente · Ahorre ~17%',
+        'payment.activeTitle': 'Ya está activo',
+        'payment.activeBody': 'Esta suscripción ya está activa. Recibirá actualizaciones por correo.',
+        'payment.successTitle': '¡Suscripción activada!',
+        'payment.successBody': 'Gracias. Comenzaremos a monitorear el Registro Público y le avisaremos por correo si algo cambia.',
+        'payment.cancelledTitle': 'Pago cancelado',
+        'payment.cancelledBody': 'No se realizó ningún cargo. Puede intentar de nuevo cuando quiera.',
+        'payment.tryAgainBtn': 'Elegir plan de nuevo',
+        'payment.errorTitle': 'No pudimos continuar',
+        'payment.errorBody': 'No pudimos encontrar esta solicitud de suscripción, o hubo un problema al confirmar el pago. Use el enlace de su correo más reciente.',
+        'payment.forLabel': 'Para: {name}'
+      },
+      en: {
+        'nav.subscribe': 'Subscribe',
+        'nav.about': 'About',
+        'payment.loadingTitle': 'Loading...',
+        'payment.loadingBody': 'One moment please.',
+        'payment.chooseTitle': 'Confirm your email & choose your plan',
+        'payment.chooseBody': 'Choosing a plan confirms your email is working and takes you to secure Stripe payment.',
+        'payment.month': 'month',
+        'payment.year': 'year',
+        'payment.monthlyNote': 'Billed monthly',
+        'payment.annualNote': 'Billed annually · Save ~17%',
+        'payment.activeTitle': 'Already active',
+        'payment.activeBody': 'This subscription is already active. You\'ll receive updates by email.',
+        'payment.successTitle': 'Subscription activated!',
+        'payment.successBody': 'Thank you. We\'ll start monitoring the Registro Público and email you if anything changes.',
+        'payment.cancelledTitle': 'Payment cancelled',
+        'payment.cancelledBody': 'No charge was made. You can try again anytime.',
+        'payment.tryAgainBtn': 'Choose a plan again',
+        'payment.errorTitle': 'We couldn\'t continue',
+        'payment.errorBody': 'We couldn\'t find this subscription request, or there was a problem confirming payment. Please use the link from your most recent email.',
+        'payment.forLabel': 'For: {name}'
+      }
+    };
+
+    let currentLang = localStorage.getItem('atlaspanama_lang') || 'es';
+    if (currentLang !== 'es' && currentLang !== 'en') currentLang = 'es';
+
+    function t(key, vars) {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
+      let str = dict[key] || TRANSLATIONS.es[key] || key;
+      if (vars) Object.keys(vars).forEach(k => { str = str.replace('{' + k + '}', vars[k]); });
+      return str;
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+      document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+    }
+
+    function setLanguage(lang) {
+      if (lang !== 'es' && lang !== 'en') return;
+      currentLang = lang;
+      localStorage.setItem('atlaspanama_lang', lang);
+      document.getElementById('langEs').classList.toggle('active', lang === 'es');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      applyTranslations();
+      updateDynamicText();
+    }
+
+    document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
+    document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+
+    // ---------- Page logic ----------
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestId = urlParams.get('requestId');
+    const token = urlParams.get('token');
+    const result = urlParams.get('result'); // success | cancelled | (none)
+
+    const states = ['stateLoading', 'stateChoosePlan', 'stateAlreadyActive', 'stateSuccess', 'stateCancelled', 'stateError'];
+    function showState(id) {
+      states.forEach(s => { document.getElementById(s).hidden = (s !== id); });
+    }
+
+    let lastRequest = null;
+
+    function displayLabel(request) {
+      if (!request) return '';
+      if (request.tipo === 'inmueble') {
+        return 'Folio ' + (request.folio || '?') + (request.codigo ? ' / ' + request.codigo : '');
+      }
+      return request.name || request.nameOrFolio || '';
+    }
+
+    function updateDynamicText() {
+      if (!lastRequest) return;
+      const label = displayLabel(lastRequest);
+      const subEl = document.getElementById('chooseSubtitle');
+      if (subEl && label) subEl.textContent = t('payment.chooseBody') + '  ' + t('payment.forLabel', { name: label });
+      const successInfo = document.getElementById('successInfo');
+      if (successInfo && label) successInfo.innerHTML = '<strong>' + t('payment.forLabel', { name: '' }).replace(':', ':') + '</strong> ' + label;
+    }
+
+    function buildPlanLinks() {
+      document.getElementById('monthlyLink').href = `${API_BASE}/subscribe/request/${requestId}/checkout?token=${encodeURIComponent(token)}&plan=monthly`;
+      document.getElementById('annualLink').href = `${API_BASE}/subscribe/request/${requestId}/checkout?token=${encodeURIComponent(token)}&plan=annual`;
+      document.getElementById('tryAgainBtn').href = `${window.location.pathname}?requestId=${encodeURIComponent(requestId)}&token=${encodeURIComponent(token)}`;
+    }
+
+    async function init() {
+      setLanguage(currentLang);
+
+      if (!requestId || !token) {
+        showState('stateError');
+        return;
+      }
+
+      buildPlanLinks();
+
+      try {
+        const res = await fetch(`${API_BASE}/subscribe/request/${requestId}?token=${encodeURIComponent(token)}`);
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || !data.ok) {
+          showState('stateError');
+          return;
+        }
+        lastRequest = data.request;
+        updateDynamicText();
+
+        if (result === 'success') {
+          showState('stateSuccess');
+        } else if (result === 'cancelled') {
+          showState('stateCancelled');
+        } else if (lastRequest.confirmed === true) {
+          showState('stateAlreadyActive');
+        } else {
+          showState('stateChoosePlan');
+        }
+      } catch (err) {
+        showState('stateError');
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
