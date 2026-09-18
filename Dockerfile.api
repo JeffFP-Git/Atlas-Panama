@@ -1,14 +1,19 @@
-FROM node:20-bullseye
+FROM node:20-bookworm
 
 # Detect target arch at build time (amd64/arm64, etc.)
 ARG TARGETARCH
 
 # Install Google Chrome for Puppeteer (system Chrome).
+# Base image is bookworm (Debian 12), not bullseye (Debian 11): bullseye's
+# package mirror has aged out and started 404ing on specific point-release
+# .deb files (confirmed via Railway's build logs, Sept 2026), which broke
+# this build outright since Chrome hard-depends on packages like libnss3/
+# libasound2/systemd that --no-install-recommends can't skip. bookworm is
+# the current stable release with a live mirror, so keep this on bookworm
+# (or later) rather than pinning back to bullseye.
 # --no-install-recommends everywhere: without it, apt pulls in optional desktop-
-# integration extras alongside google-chrome-stable, and on Railway's build,
-# several of those extra bullseye-security packages 404'd (confirmed via
-# Railway's own deploy diagnosis) — they're irrelevant to running headless
-# Chrome anyway, so just don't request them at all.
+# integration extras alongside google-chrome-stable that are irrelevant to
+# running headless Chrome anyway, so just don't request them at all.
 RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends wget gnupg ca-certificates fonts-liberation curl; \

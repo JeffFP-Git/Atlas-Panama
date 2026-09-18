@@ -1,4 +1,4 @@
-FROM node:20-bullseye
+FROM node:20-bookworm
 
 # Detect target arch at build time (amd64/arm64, etc.)
 ARG TARGETARCH
