@@ -31,8 +31,11 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
     NODE_ENV=production \
     PORT=3000
 
-# Persist outputs, session, and data across runs
-VOLUME ["/app/BuildingData", "/app/debug-output", "/app/session", "/app/data", "/app/logs"]
+# Persist outputs, session, and data across runs.
+# /app/MonitoringData added Sept 2026 — it didn't exist when this Dockerfile was
+# first written; it's where the current app saves daily snapshots and PDFs, and
+# without it here, that data would be silently wiped on every redeploy.
+VOLUME ["/app/BuildingData", "/app/debug-output", "/app/session", "/app/data", "/app/logs", "/app/MonitoringData"]
 
 # Expose API port
 EXPOSE 3000
