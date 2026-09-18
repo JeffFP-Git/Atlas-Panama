@@ -3,16 +3,21 @@ FROM node:20-bullseye
 # Detect target arch at build time (amd64/arm64, etc.)
 ARG TARGETARCH
 
-# Install Google Chrome for Puppeteer (system Chrome)
+# Install Google Chrome for Puppeteer (system Chrome).
+# --no-install-recommends everywhere: without it, apt pulls in optional desktop-
+# integration extras alongside google-chrome-stable, and on Railway's build,
+# several of those extra bullseye-security packages 404'd (confirmed via
+# Railway's own deploy diagnosis) — they're irrelevant to running headless
+# Chrome anyway, so just don't request them at all.
 RUN set -eux; \
   apt-get update; \
-  apt-get install -y wget gnupg ca-certificates fonts-liberation curl; \
+  apt-get install -y --no-install-recommends wget gnupg ca-certificates fonts-liberation curl; \
   if [ "${TARGETARCH:-amd64}" = "amd64" ]; then \
     wget -qO- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor >/usr/share/keyrings/google.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >/etc/apt/sources.list.d/google-chrome.list; \
-    apt-get update && apt-get install -y google-chrome-stable; \
+    apt-get update && apt-get install -y --no-install-recommends google-chrome-stable; \
   else \
-    apt-get update && apt-get install -y chromium; \
+    apt-get update && apt-get install -y --no-install-recommends chromium; \
     if [ -x /usr/bin/chromium-browser ]; then ln -sf /usr/bin/chromium-browser /usr/bin/google-chrome-stable; else ln -sf /usr/bin/chromium /usr/bin/google-chrome-stable; fi; \
   fi; \
   rm -rf /var/lib/apt/lists/*
