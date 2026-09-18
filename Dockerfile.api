@@ -31,11 +31,14 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
     NODE_ENV=production \
     PORT=3000
 
-# Persist outputs, session, and data across runs.
-# /app/MonitoringData added Sept 2026 — it didn't exist when this Dockerfile was
-# first written; it's where the current app saves daily snapshots and PDFs, and
-# without it here, that data would be silently wiped on every redeploy.
-VOLUME ["/app/BuildingData", "/app/debug-output", "/app/session", "/app/data", "/app/logs", "/app/MonitoringData"]
+# NOTE (Sept 2026): deliberately NOT using a Docker VOLUME instruction here.
+# Railway's build validator rejects it outright (confirmed via Railway's own
+# "Diagnose" feature on a real failed deploy) — Railway has its own separate
+# persistent-volume system instead, configured in its dashboard (already
+# attached to this service as "api-volume"). Persistence for /app/data,
+# /app/session, and /app/MonitoringData depends on that Railway volume being
+# mounted at (or covering) those paths — verify the mount path in Railway's
+# dashboard matches, don't just rely on this file.
 
 # Expose API port
 EXPOSE 3000
