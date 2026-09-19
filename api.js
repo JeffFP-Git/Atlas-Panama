@@ -106,6 +106,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// www.atlaspanama.com is a separate Railway custom domain pointed at this
+// same service; redirect it to the root domain rather than serving it twice.
+app.use((req, res, next) => {
+  if (req.hostname === 'www.atlaspanama.com') {
+    return res.redirect(301, `https://atlaspanama.com${req.originalUrl}`);
+  }
+  next();
+});
+
 // Serve static dashboard
 const ROOT_DIR = process.cwd();
 app.use(express.static(path.join(ROOT_DIR, 'public')));
