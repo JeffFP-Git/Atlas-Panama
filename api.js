@@ -125,6 +125,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'public', 'about.html'));
 });
 
+// Clean URL for the signup link used in ads/social posts (atlaspanama.com/subscribe)
+// instead of the raw .html filename.
+app.get('/subscribe', (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, 'public', 'subscribe.html'));
+});
+
 // Job state
 // status: queued | running | done | error | cancelled
 const jobs = new Map(); // id -> { id, status, payload, timestamps, logs[] }
