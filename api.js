@@ -110,6 +110,12 @@ app.use((req, res, next) => {
 const ROOT_DIR = process.cwd();
 app.use(express.static(path.join(ROOT_DIR, 'public')));
 
+// public/ has no index.html, so the bare domain (e.g. atlaspanama.com) would
+// 404 without this — about.html is the decided landing/marketing page.
+app.get('/', (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, 'public', 'about.html'));
+});
+
 // Job state
 // status: queued | running | done | error | cancelled
 const jobs = new Map(); // id -> { id, status, payload, timestamps, logs[] }
