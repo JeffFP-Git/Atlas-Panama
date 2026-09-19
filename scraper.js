@@ -2268,7 +2268,46 @@ export async function extractDatosGenerales(page, expectedFolioNumber = null) {
   return result.data;
 }
 
-async function extractTabData(page, tabName, expectedFolioNumber = null) {
+/**
+ * Discovers every tab available on the currently-open record modal (property or
+ * entity — both use the same .ventana-con-tab-control UI), by reading the tab
+ * button group's text at runtime rather than assuming a fixed list. Used by
+ * lib/fullRecordExtraction.js for the "pull every tab, every run" daily monitoring
+ * path (see CLAUDE.md, Sept 2026 decision) — this is what makes that generic
+ * across whatever tabs a given record type actually has, present or future.
+ * @param {import('puppeteer').Page} page
+ * @param {string} [expectedFolio] - used to pick the right modal if more than one is open
+ * @returns {Promise<string[]>} tab names, in on-page order, excluding "Datos Generales"
+ *   (handled separately by extractDatosGenerales/the entity search summary)
+ */
+export async function discoverAvailableTabs(page, expectedFolio = null) {
+  try {
+    await page.waitForSelector('.ventana-con-tab-control .btn-group button, .btn-group[role="group"] button', { timeout: 15000 });
+  } catch {
+    // fall through — evaluate below will just find nothing if the control never appeared
+  }
+  return await page.evaluate((expected) => {
+    const modals = Array.from(document.querySelectorAll('.blazored-modal-container, .blazored-modal, .modal'))
+      .filter(m => { const s = getComputedStyle(m); return s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0'; });
+    let activeModal = null;
+    if (expected && modals.length > 0) {
+      activeModal = modals.find(m => (m.querySelector('.blazored-modal-title')?.textContent || '').includes(expected));
+    }
+    if (!activeModal) activeModal = modals.length > 0 ? modals[modals.length - 1] : document.body;
+
+    const tabControl = activeModal.querySelector('.ventana-con-tab-control');
+    let btnGroup = tabControl ? tabControl.querySelector('.btn-group[role="group"]') : null;
+    if (!btnGroup) btnGroup = activeModal.querySelector('.btn-group[role="group"]');
+    if (!btnGroup) btnGroup = activeModal.querySelector('.btn-group');
+    if (!btnGroup) return [];
+
+    return Array.from(btnGroup.querySelectorAll('button'))
+      .map(btn => btn.textContent?.trim())
+      .filter(text => text && text !== 'Datos Generales');
+  }, expectedFolio);
+}
+
+export async function extractTabData(page, tabName, expectedFolioNumber = null) {
     try {
       const searchNames = Array.isArray(tabName) ? tabName : [tabName];
       const displayName = Array.isArray(tabName) ? tabName[0] : tabName;
