@@ -11,7 +11,7 @@ import { searchPropertyMatches } from './lib/propertySearch.js';
 import * as auth from './lib/auth.js';
 import * as storage from './lib/introPipelineStorage.js';
 import * as scheduler from './lib/dailyScheduler.js';
-import { sendEmail } from './lib/email.js';
+import { sendEmail, sendWelcomeEmail } from './lib/email.js';
 import { getStripeClient, createCheckoutSession, PRICING } from './lib/stripe.js';
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
@@ -1094,6 +1094,13 @@ function confirmAndScheduleSubscription(requestId) {
     console.error(`[API] Error scheduling job for ${requestId}:`, err);
     // Don't fail the request - subscription is confirmed even if scheduling fails
   }
+  // Fire-and-forget: one-time welcome email, separate from daily monitoring emails
+  // (which start the next scheduled check). Failure here shouldn't fail activation.
+  sendWelcomeEmail({
+    recipientEmail: confirmedRequest.email,
+    displayName: confirmedRequest.name || confirmedRequest.nameOrFolio,
+    language: confirmedRequest.language
+  }).catch(err => console.error(`[API] Error sending welcome email for ${requestId}:`, err));
   return confirmedRequest;
 }
 
