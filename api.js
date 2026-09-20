@@ -125,6 +125,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'public', 'about.html'));
 });
 
+// Clean URL for the Terms of Service link used in emails/signup — content is a
+// draft pending attorney review (see legal/TERMINOS_DE_SERVICIO_BORRADOR.md);
+// same URL stays stable, only public/terminos.html's content changes once reviewed.
+app.get('/terminos', (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, 'public', 'terminos.html'));
+});
+
 // Clean URL for the signup link used in ads/social posts (atlaspanama.com/subscribe)
 // instead of the raw .html filename.
 app.get('/subscribe', (req, res) => {
