@@ -21,6 +21,7 @@
       min-height: -webkit-fill-available;
       min-height: 100dvh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 20px;
@@ -28,6 +29,43 @@
       padding-bottom: max(20px, env(safe-area-inset-bottom));
       padding-left: max(20px, env(safe-area-inset-left));
       padding-right: max(20px, env(safe-area-inset-right));
+    }
+    .hero {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      margin-bottom: 24px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .hero-title {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0 0 10px 0;
+    }
+    .hero-subline {
+      font-size: 15px;
+      opacity: 0.92;
+      line-height: 1.5;
+      margin: 0 0 16px 0;
+    }
+    .hero-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .hero-bullets li::before {
+      content: "✓ ";
+      font-weight: 700;
+    }
+    @media (max-width: 600px) {
+      .hero-title { font-size: 22px; }
     }
     .container {
       background: white;
@@ -383,6 +421,15 @@
       </span>
     </div>
   </nav>
+  <div class="hero">
+    <h1 class="hero-title" data-i18n="hero.title">Complete the form to receive weekly updates about your property or entity.</h1>
+    <p class="hero-subline" data-i18n="hero.subline">Once you submit the form, we'll send you a confirmation email to make sure we found the correct property or entity.</p>
+    <ul class="hero-bullets">
+      <li data-i18n="hero.bullet1">Protect what's yours.</li>
+      <li data-i18n="hero.bullet2">Find out about changes to your property or entity before it's too late.</li>
+      <li data-i18n="hero.bullet3">We check Panama's Public Registry every single day, so you don't have to.</li>
+    </ul>
+  </div>
   <div class="container">
     <!-- Form Page -->
     <div id="formPage">
@@ -550,6 +597,12 @@
       es: {
         'nav.subscribe': 'Subscribe',
         'nav.about': 'About',
+        // TEMPORARY: English placeholder pending Spanish approval — see hero.* keys in `en` below.
+        'hero.title': 'Complete the form to receive weekly updates about your property or entity.',
+        'hero.subline': 'Once you submit the form, we\'ll send you a confirmation email to make sure we found the correct property or entity.',
+        'hero.bullet1': 'Protect what\'s yours.',
+        'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
+        'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
         'form.title': 'Búsqueda Diaria',
         'form.subtitle': 'Complete el formulario para recibir información diaria sobre su propiedad o entidad',
         'form.emailLabel': '1. Email Address *',
@@ -609,6 +662,11 @@
       en: {
         'nav.subscribe': 'Subscribe',
         'nav.about': 'About',
+        'hero.title': 'Complete the form to receive weekly updates about your property or entity.',
+        'hero.subline': 'Once you submit the form, we\'ll send you a confirmation email to make sure we found the correct property or entity.',
+        'hero.bullet1': 'Protect what\'s yours.',
+        'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
+        'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
         'form.title': 'Daily Search',
         'form.subtitle': 'Complete the form to receive daily updates about your property or entity',
         'form.emailLabel': '1. Email Address *',
