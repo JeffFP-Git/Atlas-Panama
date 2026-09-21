@@ -272,6 +272,7 @@ Throughout earlier work in this file, `app.atlaspanama.com` is referenced as "th
 - **Consequence for Stripe:** the account was approved with `app.atlaspanama.com` on file. No formal reapproval is needed to change it, but once `atlaspanama.com` is actually live, update the "Business website" field in Stripe's Dashboard to match — see the pre-launch Stripe checklist item below.
 - **Practical impact:** any future DNS, deployment, or documentation work should target `atlaspanama.com` (root), not the `app.` subdomain, unless this decision is revisited.
 - **Confirmed (Sept 2026): site scope is deliberately just 2 pages for now** — `about.html` (doubles as the homepage) and `subscribe.html`. Intentionally minimal for this first launch (Registro Público monitoring subscription); more site content and more products get added post-launch. Don't add pages/sections speculatively before that.
+- **✅ POST-LAUNCH TO DO (Sept 2026, explicitly not now): split the About page and the homepage into separate pages.** Surfaced while deciding where the Q&A page goes (see below) — right now `about.html` literally serves both `/` and `/about`, which works for a single-product launch but won't once the homepage starts showcasing multiple products (the user's stated plan) while About stays a company/mission page. Confirmed explicitly: don't do this now, revisit post-launch.
 
 ## Pending decisions to revisit before/near launch (Sept 2026)
 
