@@ -39,13 +39,13 @@
       text-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     .hero-title {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 700;
       line-height: 1.3;
       margin: 0 0 10px 0;
     }
     .hero-subline {
-      font-size: 15px;
+      font-size: 17px;
       opacity: 0.92;
       line-height: 1.5;
       margin: 0 0 16px 0;
@@ -57,7 +57,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 500;
     }
     .hero-bullets li::before {
@@ -65,7 +65,7 @@
       font-weight: 700;
     }
     @media (max-width: 600px) {
-      .hero-title { font-size: 22px; }
+      .hero-title { font-size: 24px; }
     }
     .container {
       background: white;
@@ -78,12 +78,12 @@
     h1 {
       margin: 0 0 10px 0;
       color: #333;
-      font-size: 28px;
+      font-size: 30px;
     }
     .subtitle {
       color: #666;
       margin-bottom: 30px;
-      font-size: 14px;
+      font-size: 16px;
     }
     .form-group {
       margin-bottom: 24px;
@@ -93,7 +93,7 @@
       margin-bottom: 8px;
       font-weight: 600;
       color: #333;
-      font-size: 14px;
+      font-size: 16px;
     }
     input[type="email"],
     input[type="text"],
@@ -102,7 +102,7 @@
       padding: 12px;
       border: 2px solid #e0e0e0;
       border-radius: 6px;
-      font-size: 16px;
+      font-size: 18px;
       transition: border-color 0.2s;
     }
     input:focus,
@@ -161,7 +161,7 @@
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -180,12 +180,12 @@
     }
     .error {
       color: #e74c3c;
-      font-size: 14px;
+      font-size: 16px;
       margin-top: 8px;
     }
     .success {
       color: #27ae60;
-      font-size: 14px;
+      font-size: 16px;
       margin-top: 8px;
     }
     .loading {
@@ -259,7 +259,7 @@
       padding: 16px;
       margin-bottom: 24px;
       color: #856404;
-      font-size: 14px;
+      font-size: 16px;
       line-height: 1.6;
       text-align: center;
     }
@@ -269,7 +269,7 @@
     .page-warning strong {
       display: block;
       margin-bottom: 8px;
-      font-size: 15px;
+      font-size: 17px;
       color: #856404;
     }
     .confirmation-page {
@@ -470,7 +470,7 @@
             <label for="ruc" data-i18n="form.rucLabel">RUC (opcional)</label>
             <input type="text" id="ruc" name="ruc" data-i18n-placeholder="form.rucPlaceholder" placeholder="Ej: 1157961-1-573219 — déjelo en blanco si no lo sabe" />
           </div>
-          <p class="field-hint" data-i18n="form.mercantilHint" style="color:#666; font-size:13px; margin-top:-12px;">Ingrese el nombre, el RUC, o ambos.</p>
+          <p class="field-hint" data-i18n="form.mercantilHint" style="color:#666; font-size:15px; margin-top:-12px;">Ingrese el nombre, el RUC, o ambos.</p>
         </div>
 
         <!-- Inmueble Fields -->
@@ -490,7 +490,7 @@
                 <input type="text" id="codigo" name="codigo" data-i18n-placeholder="form.codigoPlaceholder" placeholder="Déjelo en blanco si no lo sabe" />
               </div>
             </div>
-            <p class="field-hint" data-i18n="form.inmuebleHint" style="color:#666; font-size:13px; margin-top:8px;">Ingrese el Folio, el Nombre del Propietario, o ambos. Si su Folio tiene varios resultados, le enviaremos una lista para que elija el correcto.</p>
+            <p class="field-hint" data-i18n="form.inmuebleHint" style="color:#666; font-size:15px; margin-top:8px;">Ingrese el Folio, el Nombre del Propietario, o ambos. Si su Folio tiene varios resultados, le enviaremos una lista para que elija el correcto.</p>
           </div>
         </div>
 
@@ -597,12 +597,11 @@
       es: {
         'nav.subscribe': 'Subscribe',
         'nav.about': 'About',
-        // TEMPORARY: English placeholder pending Spanish approval — see hero.* keys in `en` below.
-        'hero.title': 'Complete the form to receive weekly updates about your property or entity.',
-        'hero.subline': 'Once you submit the form, we\'ll send you a confirmation email to make sure we found the correct property or entity.',
-        'hero.bullet1': 'Protect what\'s yours.',
-        'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
-        'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
+        'hero.title': 'Complete el formulario para recibir actualizaciones semanales sobre su propiedad o entidad.',
+        'hero.subline': 'Una vez que envíe el formulario, le enviaremos un correo de confirmación para asegurarnos de haber encontrado la propiedad o entidad correcta.',
+        'hero.bullet1': 'Proteja lo que es suyo.',
+        'hero.bullet2': 'Entérese de cambios en su propiedad o entidad antes de que sea demasiado tarde.',
+        'hero.bullet3': 'Revisamos el Registro Público de Panamá todos los días, para que usted no tenga que hacerlo.',
         'form.title': 'Búsqueda Diaria',
         'form.subtitle': 'Complete el formulario para recibir información diaria sobre su propiedad o entidad',
         'form.emailLabel': '1. Email Address *',
