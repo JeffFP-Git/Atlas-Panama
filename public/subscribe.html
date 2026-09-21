@@ -447,6 +447,24 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label data-i18n="form.relationshipLabel">3. ¿Cuál es su relación con la propiedad o entidad? *</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="relationship-owner" name="relationship" value="owner" required />
+              <label for="relationship-owner" data-i18n="form.relationshipOwner">A. Propietario o representante autorizado</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="relationship-interested" name="relationship" value="interested_party" required />
+              <label for="relationship-interested" data-i18n="form.relationshipInterested">B. Parte interesada (contador, abogado, banco, etc.)</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="relationship-third" name="relationship" value="third_party" required />
+              <label for="relationship-third" data-i18n="form.relationshipThird">C. Tercero sin relación directa con el propietario (ej. comprador o inversionista potencial)</label>
+            </div>
+          </div>
+        </div>
+
         <!-- WhatsApp opt-in (shown once a tipo is selected, wording adapts to it) -->
         <div id="whatsappFields" class="form-group hidden">
           <div class="radio-option" style="align-items: flex-start; cursor: default;">
@@ -539,6 +557,10 @@
         'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
         'form.tipoFundacion': 'B. Fundación',
         'form.tipoInmueble': 'C. Inmueble',
+        'form.relationshipLabel': '3. ¿Cuál es su relación con la propiedad o entidad? *',
+        'form.relationshipOwner': 'A. Propietario o representante autorizado',
+        'form.relationshipInterested': 'B. Parte interesada (contador, abogado, banco, etc.)',
+        'form.relationshipThird': 'C. Tercero sin relación directa con el propietario (ej. comprador o inversionista potencial)',
         'form.entityNameLabel': 'Nombre de la Empresa o Fundación',
         'form.entityNamePlaceholder': 'Ej: Mi Empresa, S.A.',
         'form.rucLabel': 'RUC (opcional)',
@@ -570,6 +592,7 @@
         'confirm.codePlaceholder': 'Ingrese el código de 8 caracteres',
         'confirm.yesButton': 'Sí - Verificar y Activar',
         'confirm.noButton': 'No - Volver al Formulario',
+        'errors.relationshipRequired': 'Por favor indique su relación con la propiedad o entidad',
         'errors.nameOrRucRequired': 'Por favor ingrese el nombre de la empresa/fundación, el RUC, o ambos',
         'errors.folioOrOwnerRequired': 'Por favor ingrese el Folio, el Nombre del Propietario, o ambos',
         'errors.whatsappPhoneRequired': 'Por favor ingrese su número de WhatsApp, o desmarque la casilla',
@@ -593,6 +616,10 @@
         'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
         'form.tipoFundacion': 'B. Foundation',
         'form.tipoInmueble': 'C. Property',
+        'form.relationshipLabel': '3. What is your relationship to the property or entity? *',
+        'form.relationshipOwner': 'A. Owner or authorized representative',
+        'form.relationshipInterested': 'B. Interested party (accountant, lawyer, bank, etc.)',
+        'form.relationshipThird': 'C. Third party with no direct relationship to the owner (e.g. prospective buyer or investor)',
         'form.entityNameLabel': 'Company or Foundation Name',
         'form.entityNamePlaceholder': 'E.g: My Company, S.A.',
         'form.rucLabel': 'RUC (optional)',
@@ -624,6 +651,7 @@
         'confirm.codePlaceholder': 'Enter the 8-character code',
         'confirm.yesButton': 'Yes - Verify and Activate',
         'confirm.noButton': 'No - Back to Form',
+        'errors.relationshipRequired': 'Please indicate your relationship to the property or entity',
         'errors.nameOrRucRequired': 'Please enter the company/foundation name, the RUC, or both',
         'errors.folioOrOwnerRequired': 'Please enter the Folio, the Owner Name, or both',
         'errors.whatsappPhoneRequired': 'Please enter your WhatsApp number, or uncheck the box',
@@ -1143,10 +1171,17 @@
       const formData = new FormData(subscribeForm);
       const tipo = formData.get('tipo');
       const email = formData.get('email');
-      
+      const relationship = formData.get('relationship');
+      if (!relationship) {
+        showError(t('errors.relationshipRequired'));
+        isSubmitting = false;
+        return;
+      }
+
       let payload = {
         email,
         tipo,
+        relationship,
         language: currentLang
       };
 

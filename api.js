@@ -645,7 +645,7 @@ app.get('/files/:name', requireAdminApiKey, (req, res) => {
 app.post('/subscribe/submit', async (req, res) => {
   const startTime = Date.now();
   try {
-    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, whatsappOptIn, whatsappPhone, language } = req.body;
+    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, relationship, whatsappOptIn, whatsappPhone, language } = req.body;
     // `name` is the primary field for mercantil/fundacion (most subscribers know the
     // entity's name, not its RUC); `nameOrFolio` is accepted too for older callers.
     const entityName = name || nameOrFolio;
@@ -680,6 +680,13 @@ app.post('/subscribe/submit', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'valid_tipo_required' });
     }
 
+    // Captures the subscriber's stated relationship to the property/entity — the
+    // concrete, on-record version of the TOS §3 legitimate-interest representation.
+    if (!relationship || !['owner', 'interested_party', 'third_party'].includes(relationship)) {
+      process.stdout.write(`   ❌ Validation failed: valid_relationship_required\n`);
+      return res.status(400).json({ ok: false, error: 'valid_relationship_required' });
+    }
+
     if ((tipo === 'mercantil' || tipo === 'fundacion') && !entityName && !ruc) {
       process.stdout.write(`   ❌ Validation failed: name_or_ruc_required\n`);
       return res.status(400).json({ ok: false, error: 'name_or_ruc_required' });
@@ -705,6 +712,7 @@ app.post('/subscribe/submit', async (req, res) => {
       folio: tipo === 'inmueble' ? (folio || null) : null,
       codigo: tipo === 'inmueble' ? (codigo || null) : null,
       ownerName: tipo === 'inmueble' ? (ownerName || null) : null,
+      relationship,
       whatsappOptIn: wantsWhatsapp,
       whatsappPhone: wantsWhatsapp ? whatsappPhone : null,
       language
