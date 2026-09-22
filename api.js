@@ -16,6 +16,7 @@ import { getStripeClient, createCheckoutSession, PRICING } from './lib/stripe.js
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
 import * as qaSearchLog from './lib/qaSearchLog.js';
+import * as rpAccounts from './lib/rpAccounts.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -592,6 +593,12 @@ app.get('/jobs', requireAdminApiKey, (_req, res) => {
 
 // View the live in-memory FIFO queue (ADMIN ONLY)
 // This is the source of truth for the order jobs will run in.
+// Reports only a count, never the actual usernames/passwords — safe to use for
+// confirming a new RP_USERNAME_N/RP_PASSWORD_N pair actually took effect on Railway.
+app.get('/admin/rp-accounts-status', requireAdminApiKey, (_req, res) => {
+  res.json({ ok: true, accountCount: rpAccounts.accountCount() });
+});
+
 app.get('/queue', requireAdminApiKey, (_req, res) => {
   const running = Array.from(jobs.values())
     .filter(j => j && j.status === 'running')
