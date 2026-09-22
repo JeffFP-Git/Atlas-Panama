@@ -1111,11 +1111,31 @@ function confirmAndScheduleSubscription(requestId) {
   }
   // Fire-and-forget: one-time welcome email, separate from daily monitoring emails
   // (which start the next scheduled check). Failure here shouldn't fail activation.
-  sendWelcomeEmail({
-    recipientEmail: confirmedRequest.email,
-    displayName: confirmedRequest.name || confirmedRequest.nameOrFolio,
-    language: confirmedRequest.language
-  }).catch(err => console.error(`[API] Error sending welcome email for ${requestId}:`, err));
+  // Payment details (plan label from the local PRICING table, renewal date fetched
+  // from Stripe if we have a subscription ID) are best-effort — missing either one
+  // just means the email skips that line rather than failing to send.
+  (async () => {
+    const planLabel = PRICING[confirmedRequest.plan]?.label || null;
+    let renewalDate = null;
+    if (confirmedRequest.stripeSubscriptionId) {
+      try {
+        const stripe = getStripeClient();
+        const sub = await stripe.subscriptions.retrieve(confirmedRequest.stripeSubscriptionId);
+        if (sub.current_period_end) {
+          renewalDate = new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
+        }
+      } catch (err) {
+        console.error(`[API] Could not fetch Stripe subscription for welcome email (${requestId}):`, err.message);
+      }
+    }
+    return sendWelcomeEmail({
+      recipientEmail: confirmedRequest.email,
+      displayName: confirmedRequest.name || confirmedRequest.nameOrFolio,
+      language: confirmedRequest.language,
+      planLabel,
+      renewalDate
+    });
+  })().catch(err => console.error(`[API] Error sending welcome email for ${requestId}:`, err));
   return confirmedRequest;
 }
 
