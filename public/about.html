@@ -108,6 +108,9 @@
       font-size: 16px;
       margin-bottom: 24px;
     }
+    .description p { margin: 0 0 16px 0; }
+    .description p:last-child { margin-bottom: 0; }
+    .description strong { color: #333; }
     .cta-button {
       display: inline-block;
       padding: 14px 28px;
@@ -240,16 +243,11 @@
     </div>
   </nav>
   <div class="container">
-    <p class="subtitle" data-i18n="about.eyebrow" style="margin-bottom:6px;font-weight:600;color:#667eea;">About Atlas Panama</p>
     <h1 data-i18n="about.title">Protect What's Yours in Panama</h1>
-    <p class="subtitle" data-i18n="about.subtitle">Panama's most reliable monitoring service for property owners and business owners</p>
+    <p class="subtitle" data-i18n="about.subtitle">Reliable monitoring for real estate owners, business owners, and company owners in Panama.</p>
 
     <div class="section">
-      <div class="description" data-i18n="about.description">
-        Atlas Panama provides comprehensive property data and monitoring services for Panama's real estate market.
-        We offer automated data collection, change tracking, and timely notifications to help you stay informed
-        about property records and transactions.
-      </div>
+      <div class="description" data-i18n-html="about.description"></div>
       <a href="/subscribe" class="cta-button" data-i18n="about.ctaButton">Subscribe Now</a>
     </div>
 
@@ -304,10 +302,9 @@
         'nav.subscribe': 'Subscribe',
         'nav.about': 'About',
         'nav.qa': 'Q&A',
-        'about.eyebrow': 'Acerca de Atlas Panama',
         'about.title': 'Proteja lo que es suyo en Panamá',
-        'about.subtitle': 'El servicio de monitoreo más confiable de Panamá para propietarios y empresarios',
-        'about.description': 'Si usted es dueño de una propiedad, una sociedad o una fundación en Panamá, sabe lo difícil que puede ser mantenerse al tanto de lo que ocurre en el Registro Público, hasta que algo cambia sin que usted se entere. Atlas Panama resuelve eso. Monitoreamos sus propiedades y entidades legales todos los días y le enviamos una alerta apenas detectamos un cambio, dándole la tranquilidad de estar verdaderamente informado. Es el mejor servicio de monitoreo disponible en Panamá hoy en día, y es solo el comienzo: estamos construyendo una creciente gama de productos de información pública de Panamá para servir aún mejor a propietarios y empresarios en los próximos meses.',
+        'about.subtitle': 'Monitoreo confiable para propietarios de bienes raíces, empresarios y dueños de sociedades en Panamá.',
+        'about.description': '<p>Si usted tiene una propiedad, una sociedad o una fundación en Panamá, sabe que no siempre es fácil estar pendiente de cualquier movimiento o cambio que aparezca en el Registro Público.</p><p>Con <strong>Atlas Panama</strong>, usted no tiene que estar revisando constantemente. Nosotros monitoreamos diariamente sus propiedades y entidades legales, y le enviamos una alerta apenas detectamos algún cambio.</p><p>Así usted puede mantenerse informado y actuar rápidamente si aparece un movimiento que no reconoce o que requiere su atención.</p><p><strong>Más tranquilidad, más control y menos sorpresas.</strong></p><p>Atlas Panama le ayuda a proteger y mantener vigilado lo que ha construido en Panamá.</p><p>Y esto apenas comienza. Estamos desarrollando nuevas herramientas de información pública para brindar cada vez más apoyo a propietarios, inversionistas y empresarios en Panamá.</p>',
         'about.ctaButton': 'Suscribirse Ahora',
         'about.contactTitle': 'Información de Contacto',
         'about.emailLabel': 'Correo Electrónico',
@@ -319,10 +316,9 @@
         'nav.subscribe': 'Subscribe',
         'nav.about': 'About',
         'nav.qa': 'Q&A',
-        'about.eyebrow': 'About Atlas Panama',
         'about.title': 'Protect What\'s Yours in Panama',
-        'about.subtitle': 'Panama\'s most reliable monitoring service for property owners and business owners',
-        'about.description': 'If you own property, a corporation, or a foundation in Panama, you know how hard it can be to keep track of what\'s happening in the Public Registry — until something changes without your knowledge. Atlas Panama solves that. We monitor your property titles and legal entities every day and send you an alert the instant we detect a change, giving you the peace of mind that comes with truly staying informed. It\'s the best monitoring service available in Panama today, and it\'s just the beginning — we\'re building a growing suite of Panama public information tools to serve property and business owners even better in the months ahead.',
+        'about.subtitle': 'Reliable monitoring for real estate owners, business owners, and company owners in Panama.',
+        'about.description': '<p>If you own a property, a company, or a foundation in Panama, you know it\'s not always easy to keep track of every movement or change that shows up in the Public Registry.</p><p>With <strong>Atlas Panama</strong>, you don\'t have to keep checking yourself. We monitor your properties and legal entities every day, and send you an alert the moment we detect a change.</p><p>That way, you stay informed and can act quickly if something shows up that you don\'t recognize or that needs your attention.</p><p><strong>More peace of mind, more control, and fewer surprises.</strong></p><p>Atlas Panama helps you protect and keep an eye on what you\'ve built in Panama.</p><p>And this is just the beginning. We\'re building new public information tools to support property owners, investors, and business owners in Panama even more.</p>',
         'about.ctaButton': 'Subscribe Now',
         'about.contactTitle': 'Contact Information',
         'about.emailLabel': 'Email',
@@ -343,6 +339,10 @@
     function applyTranslations() {
       document.documentElement.lang = currentLang;
       document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+      // data-i18n-html: same lookup, but sets innerHTML instead of textContent —
+      // only used for our own authored copy (e.g. about.description) that needs
+      // <p>/<strong> formatting, never for anything containing user input.
+      document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
     }
 
     function setLanguage(lang) {
