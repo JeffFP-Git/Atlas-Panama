@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Preguntas Frecuentes (Alt) - Atlas Panama</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #1a1a2e; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0; padding: 0;
+      position: relative;
+      min-height: 100vh; min-height: 100dvh;
+      padding: 20px;
+      padding-top: 110px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20px; left: -20px; right: -20px; bottom: -20px;
+      background: linear-gradient(rgba(20,20,40,0.35), rgba(20,20,40,0.55)), url('/images/homepage-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px);
+      z-index: -1;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    h1 { margin: 0 0 8px 0; color: #333; font-size: 28px; font-weight: 700; }
+    .subtitle { color: #666; margin-bottom: 24px; font-size: 15px; line-height: 1.5; }
+    .search-box {
+      width: 100%; padding: 14px 16px; font-size: 16px;
+      border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 8px;
+    }
+    .search-box:focus { outline: none; border-color: #667eea; }
+    .no-results { color: #999; font-style: italic; padding: 16px 0; display: none; }
+    .qa-category { font-size: 18px; font-weight: 700; color: #667eea; margin: 28px 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
+    .qa-category:first-of-type { margin-top: 20px; }
+    .qa-item { margin-bottom: 18px; }
+    .qa-q { font-weight: 600; color: #333; font-size: 16px; margin-bottom: 6px; }
+    .qa-a { color: #555; line-height: 1.6; font-size: 15px; }
+    .qa-a a { color: #667eea; }
+    .nav-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #667eea; text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { color: #333; text-decoration: none; font-weight: 500; font-size: 14px; }
+    .lang-toggle { display: inline-flex; border: 2px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-left: 8px; }
+    .lang-btn { padding: 4px 10px; font-size: 12px; font-weight: 700; background: white; color: #667eea; border: none; cursor: pointer; }
+    .lang-btn:hover { background: #f8f9ff; }
+    .lang-btn.active { background: #667eea; color: white; }
+    .alt-badge {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 20px;
+      font-size: 14px; font-weight: 600; z-index: 1001;
+    }
+    .alt-badge a { color: #a5b4fc; text-decoration: none; font-weight: 700; margin-left: 10px; }
+    .alt-badge a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .nav-bar { flex-direction: column; gap: 12px; padding: 12px 20px; }
+      body { padding-top: 150px; }
+      .alt-badge { top: 100px; }
+      .container { padding: 24px; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/subscribe" class="nav-brand">Atlas Panama</a>
+    <div class="nav-links">
+      <a href="/subscribe" data-i18n="nav.subscribe">Subscribe</a>
+      <a href="/about.html" data-i18n="nav.about">About</a>
+      <a href="/qa" data-i18n="nav.qa">Q&amp;A</a>
+      <span class="lang-toggle">
+        <button type="button" id="langEs" class="lang-btn active">ES</button>
+        <button type="button" id="langEn" class="lang-btn">EN</button>
+      </span>
+    </div>
+  </nav>
+  <div class="alt-badge">Versión alternativa (más simple) — <a href="/qa">ver la original</a></div>
+  <div class="container">
+    <h1 data-i18n="qa.title">Preguntas Frecuentes</h1>
+    <p class="subtitle" data-i18n="qa.subtitle">Busque una palabra o dos, o navegue por categoría.</p>
+    <input type="text" id="qaSearch" class="search-box" data-i18n-placeholder="qa.searchPlaceholder" placeholder="Buscar..." autocomplete="off" />
+    <p class="no-results" id="qaNoResults" data-i18n="qa.noResults">No se encontraron preguntas que coincidan con su búsqueda.</p>
+    <div id="qaList"></div>
+  </div>
+
+  <script>
+    // ALTERNATE, simpler/more conversational tone — for comparison against /qa.
+    // This version does NOT log searches (kept out to avoid double-counting a
+    // temporary comparison page in the real search-gap analysis).
+    const QA_DATA = {
+      es: [
+        { category: 'Por Qué Creamos Este Servicio', items: [
+          { q: '¿Qué tipo de situaciones hacen que este servicio sea realmente necesario?', a: 'Estos son ejemplos reales que hemos visto de cerca — y es la razón por la que creamos Atlas Panama a un precio tan accesible:<ul>' +
+            '<li><strong>Alguien registra un poder sobre una empresa.</strong> Poco después, saca un préstamo sobre la propiedad y no lo paga. El dueño se entera meses después, cuando ya empezó el proceso de embargo.</li>' +
+            '<li><strong>Una propiedad queda sin revisar por años, y alguien más se apodera de ella poco a poco (posesión ilegal).</strong> Después de un tiempo, es casi imposible sacarlos. Si lo detecta a tiempo, todavía puede actuar. <em>(Esto no es consejo legal — hable con un abogado.)</em></li>' +
+            '<li><strong>Peleas de herencia.</strong> Un heredero se adelanta y toma acción sobre una propiedad o empresa, generando problemas entre los demás. Con este servicio, usted se entera al momento — no meses después, cuando ya es tarde.</li>' +
+            '<li><strong>Le ponen un gravamen a su propiedad por una deuda — real o no — y nunca le avisan.</strong> Después de un tiempo, también es muy difícil quitarlo.</li></ul>' }
+        ]},
+        { category: 'Sobre el Servicio', items: [
+          { q: '¿Qué es Atlas Panama?', a: 'Atlas Panama vigila el Registro Público de Panamá por usted. Si algo cambia en su propiedad o empresa, le avisamos al momento — no años después, cuando ya sea tarde para actuar.' },
+          { q: '¿Qué puedo monitorear — solo propiedades, o también empresas?', a: 'Los dos. Puede registrar una propiedad (finca/folio), una empresa (S.A., Corp, Inc. o S.R.L.), o una fundación.' },
+          { q: '¿Con qué frecuencia revisan el Registro Público?', a: 'Todos los días. Para cada propiedad y empresa que tenga registrada con nosotros — sin importar cada cuánto le mandemos correos.' },
+          { q: 'Si revisan a diario, ¿por qué no recibo un correo todos los días?', a: 'Para no llenarle el correo de cosas. Si no hay cambios, le mandamos un resumen semanal. Pero si algo cambia de verdad, le avisamos ese mismo día — no esperamos a la semana.' },
+          { q: '¿Qué cuenta como un "cambio"?', a: 'Cualquier cosa distinta en todo el expediente — no solo la Prelación. También revisamos Miembros Relacionados (junta directiva) y Apoderados. Vemos todo, no solo una parte.' },
+          { q: '¿Por qué es tan importante un cambio en un Poder?', a: 'Un poder nuevo le puede dar a alguien el derecho de actuar legalmente por su propiedad o empresa — a veces sin que usted lo sepa o lo autorice. Es de los cambios más peligrosos que vigilamos.' },
+          { q: '¿De dónde salen los cambios en mi propiedad o empresa?', a: 'Todo pasa por la Prelación — alguien presenta un documento (escritura de venta, orden judicial, cambio de junta, poder, y más), y el Registro Público lo revisa: lo rechaza, pide correcciones, o lo aprueba. En el momento que lo aprueban, nosotros ya lo detectamos.' },
+          { q: '¿Me mandan el PDF completo siempre?', a: 'Si tiene 1 o 2 propiedades registradas, sí, cada vez. Si tiene 3 o más, solo mandamos el PDF completo cuando algo cambió o en su primera revisión. Si no hay cambios, solo le decimos en una línea — para no llenarle el correo. Se lo explicamos ahí mismo.' },
+          { q: '¿Puedo registrar más de una propiedad?', a: 'Todavía no en un solo registro — esa función viene después del lanzamiento. Por ahora es una por suscripción. Pero si registra varias con el mismo correo, le mandamos todo en un solo correo, no uno por cada una.' },
+          { q: '¿Garantizan que van a detectar todos los cambios?', a: 'No, y se lo decimos claro desde el principio. El Registro Público puede tener errores o demoras, y a veces nuestras revisiones fallan o se bloquean. Este servicio es una herramienta de apoyo — no reemplaza que usted mismo verifique cosas importantes.' },
+          { q: '¿Cómo consiguen esta información — tienen acceso especial?', a: 'No, ningún acceso especial. Todo lo que revisamos es información pública que cualquiera puede consultar. Nosotros solo lo hacemos por usted, todos los días, automáticamente.' }
+        ]},
+        { category: 'Precios y Facturación', items: [
+          { q: '¿Cuánto cuesta?', a: 'Empezamos con $1 al mes o $10 al año, como precio de lanzamiento. Después de unos meses subimos a $2 al mes. Si ya está suscrito antes de eso, se queda con su precio original.' },
+          { q: '¿Hay descuento por registrar varias propiedades?', a: 'Todavía no — viene junto con la función de registro múltiple, después del lanzamiento.' },
+          { q: '¿Mi suscripción se renueva sola?', a: 'Sí, automáticamente, a menos que la cancele antes.' },
+          { q: '¿Cómo cancelo?', a: 'Con el enlace de su suscripción. Cancele cuando quiera — sigue activa hasta el final del período que ya pagó.' },
+          { q: '¿Dan reembolsos?', a: 'No. No reembolsamos tiempo ya facturado.' },
+          { q: '¿Me avisan antes de renovar?', a: 'Sí. Unos días antes le avisamos, siempre: si todo está bien, le decimos "todo listo, aquí puede cancelar si quiere". Si hay un problema con el pago, le decimos "está a punto de perder su cobertura".' }
+        ]},
+        { category: 'Privacidad y Aspectos Legales', items: [
+          { q: '¿Quién ve mi información personal?', a: 'Solo lo necesario: Stripe (pagos) y Postmark (correos). No compartimos nada con el Registro Público — usamos nuestras propias credenciales, no las suyas. Y no vendemos sus datos, punto.' },
+          { q: '¿Es legal monitorear una propiedad que no es mía?', a: 'Sí, si tiene un interés legítimo — como comprador, inversionista, prestamista, o por su trabajo. El Registro Público es información pública. Para eso existe.' },
+          { q: '¿Qué hago si veo un cambio que no reconozco?', a: 'Llame a su abogado o contador de inmediato. Nuestras alertas son informativas — no son consejo legal ni financiero.' },
+          { q: '¿Qué pasa si hay un problema entre usted y Atlas Panama?', a: 'Se resuelve bajo la ley de Panamá, por arbitraje en Panamá — no en tribunales de Estados Unidos.' }
+        ]},
+        { category: 'Cuenta y Aspectos Técnicos', items: [
+          { q: '¿En qué idiomas está disponible?', a: 'Español e inglés.' },
+          { q: '¿Mandan notificaciones por WhatsApp?', a: 'Todavía no. Ya guardamos su preferencia cuando se registra, y lo vamos a activar más adelante, cuando crezcamos.' },
+          { q: '¿Qué pasa si falla una revisión?', a: 'Lo intentamos de nuevo automáticamente. Si sigue fallando, le mandamos un correo corto avisando que no pudimos revisar ese día, y lo intentamos otra vez en la próxima revisión.' },
+          { q: '¿Puedo cambiar mi correo o idioma después de registrarme?', a: 'Por ahora, escríbanos a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> y se lo arreglamos nosotros. Pronto va a poder hacerlo usted mismo.' }
+        ]},
+        { category: 'Registro Público', items: [
+          { q: 'En palabras simples, ¿qué es la Prelación?', a: 'Es la fila/proceso por el que pasa un documento antes de quedar oficial en el Registro Público — una escritura, una orden judicial, un poder, o algo así. Lo revisan, y lo rechazan, piden correcciones, o lo aprueban. Cuando lo aprueban, queda en el expediente.' },
+          { q: '¿Hay propiedades con poco o ningún expediente digital?', a: 'Sí. Propiedades viejas sin movimiento reciente pueden no tener toda la información digitalizada. La primera vez que hay un cambio, pasa por una "migración a folio electrónico" — ahí suben lo que tengan en el expediente viejo al sistema digital.' },
+          { q: '¿Pueden usar el servicio los extranjeros?', a: 'Sí, sin ningún problema. No hay restricción por ciudadanía o residencia.' },
+          { q: '¿Cuánto tarda una Prelación en resolverse?', a: 'Varía mucho. Puede ser 24 horas si paga la tarifa exprés (<em>alteración de turno</em>, como $300), o semanas y hasta meses si es un tema legal. Lo típico es de unos días a una semana, dependiendo también de cuánto trabajo tenga el Registro Público en ese momento.' },
+          { q: '¿Hay propiedades que el Registro Público no cubre?', a: 'Sí — terrenos sin título (<em>derechos posesorios</em>) no están en el Registro Público. Si no está ahí, no lo podemos monitorear.' },
+          { q: 'Si hay varios dueños, ¿cada uno puede suscribirse por su cuenta?', a: 'Cada suscripción es por correo electrónico. Si varios dueños quieren su propio monitoreo, cada uno se suscribe por separado — aunque siempre pueden compartir los correos entre ustedes.' },
+          { q: '¿Funciona igual si la propiedad está en un fideicomiso?', a: 'Sí. La propiedad aparece a nombre del <em>fiduciario</em>, pero cada finca tiene su propio expediente independiente. La puede monitorear igual que si estuviera a su nombre, sin importar cuántas otras propiedades tenga ese fiduciario.' },
+          { q: '¿Qué pasa si no encuentran mi propiedad al registrarme?', a: 'Si después de dos intentos no la encontramos, le pedimos que nos escriba a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> con toda la información que tenga. Lo ayudamos a buscarla, sin costo.' },
+          { q: '¿Un embargo recibe instrucciones distintas a una venta normal?', a: 'No. Todos los cambios llevan la misma notificación y el mismo consejo: si no reconoce o no autorizó el cambio, llame a su abogado o contador.' }
+        ]}
+      ],
+      en: [
+        { category: 'Why We Built This', items: [
+          { q: 'What kinds of things actually happen that make this service necessary?', a: 'Here are real examples we\'ve seen up close — and why we built Atlas Panama at such an accessible price:<ul>' +
+            '<li><strong>Someone records a power of attorney on a company.</strong> Soon after, they take out a loan on the property and never pay it back. The owner finds out months later, once foreclosure has already started.</li>' +
+            '<li><strong>A property goes unchecked for years, and someone slowly takes it over (squatting).</strong> After enough time, it\'s almost impossible to remove them. Catch it early, and you can usually still act. <em>(Not legal advice — talk to a lawyer.)</em></li>' +
+            '<li><strong>Inheritance fights.</strong> An heir jumps ahead and takes action on a property or company, causing problems for everyone else. With this service, you find out right away — not months later, when it\'s too late.</li>' +
+            '<li><strong>A lien gets placed on your property over a debt — real or not — and you\'re never told.</strong> After enough time, that\'s also very hard to remove.</li></ul>' }
+        ]},
+        { category: 'About the Service', items: [
+          { q: 'What is Atlas Panama?', a: 'Atlas Panama watches Panama\'s Public Registry for you. If anything changes on your property or company, we tell you right away — not years later, when it\'s too late to act.' },
+          { q: 'What can I monitor — just property, or businesses too?', a: 'Both. A property (finca/folio), a company (S.A., Corp, Inc., or S.R.L.), or a foundation.' },
+          { q: 'How often do you actually check the Registry?', a: 'Every day. For every property and company you\'ve registered — no matter how often we email you.' },
+          { q: 'If you check daily, why don\'t I get an email every day?', a: 'So we don\'t flood your inbox. No changes, we send a weekly summary. Something real changes, we tell you that same day — we don\'t wait for the week.' },
+          { q: 'What counts as a "change"?', a: 'Anything different anywhere in the record — not just Prelación. We also check Miembros Relacionados (the board) and Apoderados (powers of attorney). We look at everything, not just a piece of it.' },
+          { q: 'Why does a Power of Attorney change matter so much?', a: 'A new power of attorney can let someone act legally for your property or company — sometimes without you knowing or approving it. It\'s one of the most dangerous changes we watch for.' },
+          { q: 'Where do changes actually come from?', a: 'It all goes through Prelación — someone files a document (a deed, a court order, a board change, a power of attorney, and more), and the Registry reviews it: rejects it, asks for corrections, or approves it. The moment it\'s approved, we\'ve already caught it.' },
+          { q: 'Do you always send the full PDF?', a: '1 or 2 properties registered, yes, every time. 3 or more, we only send the full PDF when something changed or on your first check. No changes, we just give you one line — to keep your inbox light. We explain it right there.' },
+          { q: 'Can I register more than one property?', a: 'Not in one signup yet — that\'s coming after launch. For now, it\'s one per subscription. But register a few under the same email, and you get one combined email, not a separate one for each.' },
+          { q: 'Do you guarantee you\'ll catch every change?', a: 'No, and we say so upfront. The Registry itself can have errors or delays, and our checks can sometimes fail or get blocked. This is a monitoring tool — not a replacement for checking anything important yourself.' },
+          { q: 'How do you get this information — special access?', a: 'No special access. Everything we check is public — anyone could look it up. We just do it for you, automatically, every day.' }
+        ]},
+        { category: 'Pricing & Billing', items: [
+          { q: 'How much does it cost?', a: 'We\'re starting at $1/month or $10/year as a launch price. After a few months, it goes up to $2/month. Already subscribed before that? You keep your original price.' },
+          { q: 'Discount for registering multiple properties?', a: 'Not yet — that\'s coming with the multi-property signup feature, after launch.' },
+          { q: 'Does my subscription auto-renew?', a: 'Yes, automatically, unless you cancel first.' },
+          { q: 'How do I cancel?', a: 'With your subscription link. Cancel anytime — it stays active until the end of what you already paid for.' },
+          { q: 'Do you offer refunds?', a: 'No. We don\'t refund time already billed.' },
+          { q: 'Do you remind me before renewal?', a: 'Yes, always, a few days ahead: all good, we say "you\'re all set, click here to cancel if you want." Payment issue, we say "you\'re about to lose coverage."' }
+        ]},
+        { category: 'Privacy & Legal', items: [
+          { q: 'Who sees my personal information?', a: 'Only what\'s needed: Stripe (payments) and Postmark (emails). Nothing goes to the Registry — we use our own credentials, not yours. And we don\'t sell your data. Period.' },
+          { q: 'Is it legal to monitor a property that\'s not mine?', a: 'Yes, if you have a legitimate interest — as a buyer, investor, lender, or for your work. The Registry is public information. That\'s the whole point of it.' },
+          { q: 'What do I do if I see a change I don\'t recognize?', a: 'Call your lawyer or accountant right away. Our alerts are informational — not legal or financial advice.' },
+          { q: 'What happens if there\'s a problem between you and Atlas Panama?', a: 'It\'s handled under Panama law, through arbitration in Panama — not US courts.' }
+        ]},
+        { category: 'Account & Technical', items: [
+          { q: 'What languages is this in?', a: 'Spanish and English.' },
+          { q: 'Do you send WhatsApp notifications?', a: 'Not yet. We already save your preference at signup, and we\'ll turn it on later, as we grow.' },
+          { q: 'What happens if a check fails?', a: 'We automatically try again. Still fails, we send a short email letting you know, and try again at the next check.' },
+          { q: 'Can I change my email or language after signing up?', a: 'For now, email us at <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> and we\'ll handle it. Soon, you\'ll be able to do it yourself.' }
+        ]},
+        { category: 'Registro Público', items: [
+          { q: 'In simple terms, what is "Prelación"?', a: 'It\'s the line/process a document goes through before it becomes official at the Registry — a deed, a court order, a power of attorney, that kind of thing. They review it, and either reject it, ask for corrections, or approve it. Approved, it\'s in the record.' },
+          { q: 'Are there properties with little or no digital record?', a: 'Yes. Older properties with no recent activity might not be fully digitized. First time there\'s a change, it goes through a "migración a folio electrónico" — that\'s when whatever\'s in the old paper record gets uploaded to the digital system.' },
+          { q: 'Can foreigners use the service?', a: 'Yes, no problem at all. No restriction based on citizenship or residency.' },
+          { q: 'How long does a Prelación take to resolve?', a: 'It varies a lot. Could be 24 hours if you pay the express fee (<em>alteración de turno</em>, around $300), or weeks to months if it\'s a legal matter. Typically a few days to a week, depending on how busy the Registry is at the time.' },
+          { q: 'Are there properties the Registry doesn\'t cover?', a: 'Yes — untitled land (<em>derechos posesorios</em>) isn\'t in the Registry. If it\'s not there, we can\'t monitor it.' },
+          { q: 'Multiple owners — can each one subscribe on their own?', a: 'Each subscription is one email. Multiple owners who each want their own monitoring subscribe separately — though you can always just share the emails you get amongst yourselves.' },
+          { q: 'Does this work the same for property in a trust (fideicomiso)?', a: 'Yes. The property shows up under the fiduciary\'s name, but each finca still has its own independent record. You monitor it exactly the same as if it were in your own name — no matter how many other properties that fiduciary holds.' },
+          { q: 'What if you can\'t find my property when I sign up?', a: 'Two tries and no match, we\'ll ask you to email us at <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> with whatever info you have. We\'ll help you find it, free.' },
+          { q: 'Does an embargo get different guidance than a regular sale?', a: 'No. Every change gets the same notification and the same advice: don\'t recognize it or didn\'t authorize it, call your lawyer or accountant.' }
+        ]}
+      ]
+    };
+
+    const TRANSLATIONS = {
+      es: {
+        'nav.subscribe': 'Subscribe', 'nav.about': 'About', 'nav.qa': 'Q&A',
+        'qa.title': 'Preguntas Frecuentes',
+        'qa.subtitle': 'Busque una palabra o dos, o navegue por categoría.',
+        'qa.searchPlaceholder': 'Buscar...',
+        'qa.noResults': 'No se encontraron preguntas que coincidan con su búsqueda.'
+      },
+      en: {
+        'nav.subscribe': 'Subscribe', 'nav.about': 'About', 'nav.qa': 'Q&A',
+        'qa.title': 'Frequently Asked Questions',
+        'qa.subtitle': 'Search a word or two, or browse by category.',
+        'qa.searchPlaceholder': 'Search...',
+        'qa.noResults': 'No questions matched your search.'
+      }
+    };
+
+    let currentLang = localStorage.getItem('atlaspanama_lang') || 'es';
+    if (currentLang !== 'es' && currentLang !== 'en') currentLang = 'es';
+
+    function t(key) {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
+      return dict[key] || TRANSLATIONS.es[key] || key;
+    }
+
+    function renderQA(filterText) {
+      const list = document.getElementById('qaList');
+      const noResults = document.getElementById('qaNoResults');
+      const categories = QA_DATA[currentLang] || QA_DATA.es;
+      const needle = (filterText || '').trim().toLowerCase();
+      list.innerHTML = '';
+      let anyVisible = false;
+
+      categories.forEach(cat => {
+        const matches = cat.items.filter(item =>
+          !needle || item.q.toLowerCase().includes(needle) || item.a.toLowerCase().includes(needle)
+        );
+        if (matches.length === 0) return;
+        anyVisible = true;
+        const catEl = document.createElement('div');
+        catEl.className = 'qa-category';
+        catEl.textContent = cat.category;
+        list.appendChild(catEl);
+        matches.forEach(item => {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'qa-item';
+          itemEl.innerHTML = `<div class="qa-q">${item.q}</div><div class="qa-a">${item.a}</div>`;
+          list.appendChild(itemEl);
+        });
+      });
+
+      noResults.style.display = anyVisible ? 'none' : 'block';
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
+      renderQA(document.getElementById('qaSearch').value);
+    }
+
+    function setLanguage(lang) {
+      if (lang !== 'es' && lang !== 'en') return;
+      currentLang = lang;
+      localStorage.setItem('atlaspanama_lang', lang);
+      document.getElementById('langEs').classList.toggle('active', lang === 'es');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      applyTranslations();
+    }
+
+    document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
+    document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+    document.getElementById('qaSearch').addEventListener('input', () => renderQA(document.getElementById('qaSearch').value));
+
+    setLanguage(currentLang);
+  </script>
+</body>
+</html>

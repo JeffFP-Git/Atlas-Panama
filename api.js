@@ -144,6 +144,13 @@ app.get('/qa', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'public', 'qa.html'));
 });
 
+// Temporary side-by-side comparison page: simplified/Panamanian-tone rewrite of
+// the Q&A copy, for the user to show for feedback before deciding whether to
+// replace the live /qa page. Remove this route + public/qa-alt.html once decided.
+app.get('/qa/1', (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, 'public', 'qa-alt.html'));
+});
+
 // Anonymous Q&A search logging — no subscriber identity attached, just the query
 // text/language/timestamp. See lib/qaSearchLog.js. Best-effort: never fails loudly,
 // the page's own fetch call already ignores errors too.
