@@ -47,6 +47,11 @@ const corsOriginsFromEnv = process.env.CORS_ORIGINS
   : [];
 
 const allowedOrigins = [
+  // Production domain — hardcoded rather than relying solely on CORS_ORIGINS,
+  // since a missing/stale env var here silently 500s every real browser
+  // request while curl/no-Origin requests keep working fine (hard to notice).
+  'https://atlaspanama.com',
+  'https://www.atlaspanama.com',
   // Local development
   'http://localhost:3000',
   'http://localhost:8080',
