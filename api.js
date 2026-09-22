@@ -144,24 +144,6 @@ app.get('/qa', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'public', 'qa.html'));
 });
 
-// Temporary: side-by-side homepage-background comparison pages. Remove once a
-// background is picked and wired permanently into about.html.
-const BG_PREVIEWS = {
-  1: { file: 'bg-option1-skyline.png', label: '1' },
-  2: { file: 'bg-option2-boquete.png', label: '2' },
-  3: { file: 'bg-option3-blend.png', label: '3' }
-};
-app.get(['/1', '/2', '/3'], (req, res) => {
-  const num = req.path.replace('/', '');
-  const preview = BG_PREVIEWS[num];
-  if (!preview) return res.status(404).send('Not found');
-  const template = fs.readFileSync(path.join(ROOT_DIR, 'public', 'preview-bg-template.html'), 'utf8');
-  const html = template
-    .replace(/%%BG_IMAGE%%/g, `/images/${preview.file}`)
-    .replace(/%%PREVIEW_NUM%%/g, preview.label);
-  res.send(html);
-});
-
 // Anonymous Q&A search logging — no subscriber identity attached, just the query
 // text/language/timestamp. See lib/qaSearchLog.js. Best-effort: never fails loudly,
 // the page's own fetch call already ignores errors too.
