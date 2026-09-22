@@ -1720,7 +1720,17 @@ async function processSubscriptionPipeline(requestId) {
             rpAccounts.advanceToNextAccount();
           }
         }
-        if (!loggedIn) throw new Error(`Registro Público login failed (tried ${maxLoginAttempts} account${maxLoginAttempts === 1 ? '' : 's'}, last: ${lastAccount ? lastAccount.username : 'unknown'})`);
+        if (!loggedIn) {
+          // Surface WHY the login failed (no CAPTCHA solver plugin loaded, solver
+          // errored, or it solved fine and login still failed) — this is visible via
+          // the subscription's `error` field on /subscribe/request/:id, no Railway
+          // log access needed. See lib/auth.js getLastLoginDiagnostics().
+          const diag = auth.getLastLoginDiagnostics ? auth.getLastLoginDiagnostics() : null;
+          const diagStr = diag
+            ? ` [captcha plugin: ${diag.pluginLoaded === null ? 'unknown' : (diag.pluginLoaded ? 'loaded' : 'NOT LOADED')}, checkbox auto-verified: ${diag.verifiedViaCheckbox}, solve attempts: ${JSON.stringify(diag.solveAttempts)}]`
+            : '';
+          throw new Error(`Registro Público login failed (tried ${maxLoginAttempts} account${maxLoginAttempts === 1 ? '' : 's'}, last: ${lastAccount ? lastAccount.username : 'unknown'})${diagStr}`);
+        }
         await auth.saveSessionCookies(page);
       }
 
