@@ -93,8 +93,7 @@
   </div>
 
   <script>
-    // Q&A content. `es` is a temporary mirror of `en` pending Spanish translation
-    // approval (see legal/QA_Draft_EN.md) — same pattern used on subscribe.html's hero.
+    // Q&A content, English source in legal/QA_Draft_EN.md. Both languages real content.
     const QA_DATA = {
       en: [
         { category: 'Why We Built This', items: [
@@ -150,7 +149,59 @@
         ]}
       ]
     };
-    QA_DATA.es = QA_DATA.en; // TEMPORARY mirror pending Spanish translation approval.
+    QA_DATA.es = [
+      { category: 'Por Qué Creamos Este Servicio', items: [
+        { q: '¿Qué tipo de situaciones hacen que este servicio sea realmente necesario?', a: 'Aquí tiene algunos ejemplos reales que los desarrolladores de la plataforma han presenciado personalmente — y gran parte de la razón por la que creamos este servicio y lo ofrecemos a un precio tan accesible:<ul>' +
+          '<li><strong>Se registra un poder sobre una persona jurídica.</strong> Poco después, la persona que lo posee obtiene un préstamo sobre la propiedad y nunca lo paga — el propietario se entera meses después, cuando ya ha comenzado un proceso ejecutivo inmobiliario.</li>' +
+          '<li><strong>Una propiedad queda sin vigilancia durante años, y alguien completa un proceso de posesión adversa (ocupación ilegal).</strong> Después de suficiente tiempo, se vuelve extremadamente difícil desalojarlos. Detectarlo a tiempo, cuando comienza, generalmente significa que todavía puede detenerlo. <em>(Esto no es asesoría legal — consulte a un abogado.)</em></li>' +
+          '<li><strong>Disputas de herencia.</strong> Un heredero toma una acción preventiva sobre una propiedad o entidad, generando enojo, frustración y confusión entre los demás herederos. Este servicio le avisa mientras está ocurriendo — no meses o años después, cuando ya puede ser demasiado tarde para hacer algo al respecto.</li>' +
+          '<li><strong>Se coloca un gravamen sobre su propiedad por una factura impaga — real o no — y usted nunca es notificado,</strong> por lo que nunca tiene la oportunidad de defenderse. Después de suficiente tiempo, esto también se vuelve muy difícil o imposible de eliminar.</li></ul>' }
+      ]},
+      { category: 'Sobre el Servicio', items: [
+        { q: '¿Qué es Atlas Panama?', a: 'Atlas Panama monitorea el Registro Público de Panamá en busca de cambios en las propiedades y entidades legales que usted registre con nosotros, y le avisa en el momento en que algo cambia — para que se entere por nosotros, no años después, cuando ya sea demasiado tarde para actuar.' },
+        { q: '¿Qué puedo monitorear — solo propiedades, o también empresas?', a: 'Ambos. Puede registrar una propiedad (finca/folio), una entidad Mercantil (S.A., Corp, Inc. o S.R.L.), o una Fundación de Interés Privado.' },
+        { q: '¿Con qué frecuencia revisan realmente el Registro Público?', a: 'Todos los días, para cada propiedad y entidad registrada en la plataforma — sin importar con qué frecuencia le enviemos correos al respecto.' },
+        { q: 'Si revisan a diario, ¿por qué no recibo un correo todos los días?', a: 'Para mantener su bandeja de entrada manejable. Las actualizaciones rutinarias de "sin cambios" se envían semanalmente por defecto. Si algo realmente cambia, le enviamos un correo de inmediato, el mismo día que lo detectamos — las alertas reales nunca esperan el calendario semanal.' },
+        { q: '¿Qué se considera exactamente un "cambio" que me notificarían?', a: 'Cualquier diferencia en todo el expediente — no solo en la pestaña de Prelación, sino en cada sección relevante, incluyendo Miembros Relacionados (directivos/dignatarios) y Apoderados. Revisamos el expediente completo, no solo una parte.' },
+        { q: '¿Por qué es tan importante un cambio en un Poder (Apoderado)?', a: 'Un poder nuevo o modificado puede permitir que alguien actúe legalmente en nombre de su propiedad o empresa — incluso, en el peor de los casos, sin su conocimiento o autorización. Es uno de los cambios más importantes que vigilamos.' },
+        { q: '¿De dónde provienen realmente los cambios en mi propiedad o entidad?', a: 'Los cambios se realizan a través del proceso de Prelación — se presenta un documento (una escritura de venta, una orden judicial, un cambio en la junta directiva, una declaración de mejoras, un poder, y más), y el Registro Público lo revisa: lo rechaza, solicita correcciones, o lo aprueba. Una vez aprobado, actualiza su expediente oficial — que es exactamente el momento en que lo detectamos.' },
+        { q: '¿Adjuntarán un informe PDF completo cada vez?', a: 'Si tiene 1 o 2 propiedades/entidades registradas, sí, en cada revisión. Si tiene 3 o más, solo adjuntamos el PDF completo cuando algo realmente cambió o en su primera revisión — las actualizaciones rutinarias de "sin cambios" solo muestran una línea de estado por cada una, para mantener el correo manejable. Lo explicamos directamente en el correo.' },
+        { q: '¿Puedo registrar más de una propiedad o entidad?', a: 'Todavía no en un solo registro — esa es una función de registro múltiple que estamos construyendo para después del lanzamiento. Por ahora es una propiedad o entidad por suscripción, aunque si registra varias bajo el mismo correo, recibirá un solo correo combinado que las cubre todas, no un correo separado para cada una.' },
+        { q: '¿Garantizan que detectarán absolutamente todos los cambios?', a: 'No — somos honestos sobre esto desde el principio. El propio Registro Público puede tener errores o retrasos, y nuestras revisiones automatizadas pueden fallar ocasionalmente o ser bloqueadas temporalmente. Esta es una herramienta de monitoreo, no un sustituto de su propia verificación independiente en asuntos importantes.' },
+        { q: '¿Cómo obtiene Atlas Panama esta información — tienen acceso especial?', a: 'No tenemos acceso especial. Todo lo que revisamos es información pública que cualquiera podría consultar por sí mismo en el Registro Público — simplemente lo hacemos por usted, automáticamente, todos los días.' }
+      ]},
+      { category: 'Precios y Facturación', items: [
+        { q: '¿Cuánto cuesta?', a: 'Estamos comenzando con $1/mes o $10/año como precio promocional de lanzamiento. Subiremos el precio a $2/mes después de algunos meses. Si ya está suscrito antes de que eso ocurra, mantiene su precio original.' },
+        { q: '¿Ofrecen descuento por registrar varias propiedades?', a: 'Todavía no — los precios por volumen para suscripciones de múltiples propiedades están planeados junto con la función de registro masivo, disponible después del lanzamiento.' },
+        { q: '¿Mi suscripción se renueva automáticamente?', a: 'Sí, automáticamente, a menos que cancele primero.' },
+        { q: '¿Cómo cancelo?', a: 'A través de su enlace de gestión de suscripción — cancele en cualquier momento, y tomará efecto al final de su período de facturación actual.' },
+        { q: '¿Ofrecen reembolsos?', a: 'No — las suscripciones no se reembolsan por el tiempo ya facturado.' },
+        { q: '¿Me avisarán antes de que se renueve mi suscripción?', a: 'Sí — recibirá un aviso unos días antes de la renovación, en cualquier caso: un simple "todo está listo, aquí le mostramos cómo cancelar si lo desea" si su renovación automática está funcionando normalmente, o "está a punto de perder su cobertura" si hay un problema con el pago.' }
+      ]},
+      { category: 'Privacidad y Aspectos Legales', items: [
+        { q: '¿Quién ve mi información personal?', a: 'Solo lo necesario para operar el servicio: Stripe (procesamiento de pagos) y Postmark (envío de correos). No compartimos su información con el Registro Público — nuestras consultas usan nuestras propias credenciales, no las suyas — y no vendemos sus datos.' },
+        { q: '¿Es legal monitorear una propiedad que no me pertenece?', a: 'Sí, siempre que tenga un interés legítimo en ella — como comprador potencial, inversionista, prestamista, u otra razón profesional. El Registro Público es información pública; ese es precisamente el propósito de un registro público.' },
+        { q: '¿Qué debo hacer si veo un cambio que no reconozco?', a: 'Contacte a un abogado o contador de inmediato. Las alertas de Atlas Panama son informativas, no son asesoría legal ni financiera.' },
+        { q: '¿Qué sucede si hay una disputa entre usted y Atlas Panama?', a: 'Se rige por la ley panameña, resuelta mediante arbitraje vinculante en Panamá — no en tribunales de EE.UU.' }
+      ]},
+      { category: 'Cuenta y Aspectos Técnicos', items: [
+        { q: '¿En qué idiomas está disponible?', a: 'Español e inglés.' },
+        { q: '¿Envían notificaciones por WhatsApp?', a: 'Todavía no — recopilamos su preferencia al registrarse, y está planeado como una función futura a medida que crezca la base de suscriptores.' },
+        { q: '¿Qué sucede si falla una revisión diaria?', a: 'Reintentamos automáticamente. Si aún así falla, recibirá un breve correo de "no pudimos revisar hoy", e intentaremos de nuevo en la próxima revisión programada.' },
+        { q: '¿Puedo cambiar mi correo registrado o preferencia de idioma después de suscribirme?', a: 'Por ahora, escríbanos a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> y nosotros nos encargamos. Una forma de hacerlo usted mismo está planeada para el futuro cercano.' }
+      ]},
+      { category: 'Registro Público', items: [
+        { q: 'En términos sencillos, ¿qué es la "Prelación"?', a: 'Es la cola/proceso por el que pasa un documento en el Registro Público antes de volverse oficial — se presenta una escritura, una orden judicial, un poder, o similar, se revisa, y se rechaza, se devuelve para correcciones, o se aprueba. Una vez aprobado, actualiza el expediente permanente.' },
+        { q: '¿Hay propiedades con muy poco o ningún expediente digital real — por ejemplo, terrenos antiguos sin transacciones recientes?', a: 'Sí — las propiedades o entidades antiguas sin actividad reciente pueden no mostrar un expediente digital completo. La primera vez que se realiza cualquier cambio, la propiedad pasa por una "migración a folio electrónico", donde la información histórica que tenga el Registro Público se carga al nuevo expediente digital.' },
+        { q: '¿Pueden los extranjeros (no ciudadanos/residentes panameños) usar este servicio?', a: 'Sí — no hay ninguna restricción vinculada a la ciudadanía o residencia.' },
+        { q: '¿Cuánto tiempo tarda normalmente en resolverse una entrada de Prelación?', a: 'Varía mucho: tan rápido como 24 horas si se paga una tarifa exprés (<em>alteración de turno</em>, alrededor de $300), hasta semanas o incluso meses si es un asunto legal. El procesamiento típico es de unos días a una semana, y el tiempo también depende del volumen que esté manejando el Registro Público en ese momento.' },
+        { q: '¿Hay propiedades o situaciones de propiedad que el Registro Público no cubre?', a: 'Sí — el Registro Público no tiene registros de terrenos sin título (<em>derechos posesorios</em>). Atlas Panama no puede monitorear lo que no está en el registro.' },
+        { q: 'Si una propiedad tiene varios copropietarios, ¿puede cada uno suscribirse independientemente?', a: 'Cada suscripción cubre una dirección de correo. Si varios propietarios desean su propio monitoreo, cada uno debe suscribirse por separado — aunque los propietarios siempre pueden compartir entre ellos los correos que reciben.' },
+        { q: '¿Funciona igual para una propiedad en un fideicomiso?', a: 'Sí. Una propiedad en un fideicomiso aparece en el Registro Público a nombre del <em>fiduciario</em>, pero cada finca individual sigue teniendo su propio expediente independiente — puede monitorearla exactamente como si la propiedad estuviera a su propio nombre, sin importar cuántas otras propiedades tenga ese mismo fiduciario en fideicomiso.' },
+        { q: '¿Qué pasa si no encuentran mi propiedad o entidad al registrarme?', a: 'Si dos intentos de búsqueda no encuentran una coincidencia, se le pedirá que nos escriba a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> con toda la información que tenga — le ayudaremos a encontrarla, sin costo alguno.' },
+        { q: '¿Los casos de embargo/secuestro reciben instrucciones diferentes a una venta rutinaria?', a: 'No — todos los cambios reciben el mismo tipo de notificación y la misma indicación estándar: si no reconoce o no autorizó el cambio, contacte a su abogado o contador.' }
+      ]}
+    ];
 
     const TRANSLATIONS = {
       es: {
