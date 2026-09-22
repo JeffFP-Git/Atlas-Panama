@@ -12,6 +12,7 @@ Atlas Panama (atlaspanama.com) is a subscription service that monitors Panama's 
 - Give instructions one step at a time when something needs to be done outside Claude Code (e.g. in a browser, in a file manager).
 - Before changing or running anything that touches live systems, working code, or real data — explain what you're about to do and get confirmation first. Free investigation, reading, and reporting does not require confirmation. Changing code or running the scraper against the live Registro Público site does.
 - This person also uses a separate Claude.ai chat window ("Claude Sonnet 5") for planning, business decisions, and second opinions. If something feels like a bigger product/business decision rather than a coding task, it's fine to flag that and suggest they run it by that conversation too.
+- **✅ Standing policy (Sept 2026): every change ships in both English and Spanish together — webpages, emails, subscription forms, everything, going forward.** Not English-first-then-approve-then-Spanish (that was the pattern early on; explicitly ended). If Spanish can't be done immediately for some reason, say so explicitly rather than silently shipping an English-only or mirrored placeholder — that happened once (the Q&A page briefly shipped with Spanish just mirroring English) and the user caught it and corrected it; don't repeat that.
 
 ## Project history / how we got here
 
