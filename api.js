@@ -15,6 +15,7 @@ import { sendEmail, sendWelcomeEmail } from './lib/email.js';
 import { getStripeClient, createCheckoutSession, PRICING } from './lib/stripe.js';
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
+import * as qaSearchLog from './lib/qaSearchLog.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -136,6 +137,25 @@ app.get('/terminos', (req, res) => {
 // instead of the raw .html filename.
 app.get('/subscribe', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'public', 'subscribe.html'));
+});
+
+app.get('/qa', (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, 'public', 'qa.html'));
+});
+
+// Anonymous Q&A search logging — no subscriber identity attached, just the query
+// text/language/timestamp. See lib/qaSearchLog.js. Best-effort: never fails loudly,
+// the page's own fetch call already ignores errors too.
+app.post('/qa/search-log', (req, res) => {
+  try {
+    const { query, language } = req.body || {};
+    if (query && typeof query === 'string') {
+      qaSearchLog.logSearch(query, language);
+    }
+  } catch (err) {
+    console.error('[API] Failed to log Q&A search:', err.message);
+  }
+  res.status(204).end();
 });
 
 // Job state
