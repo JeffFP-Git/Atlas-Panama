@@ -1705,8 +1705,22 @@ async function processSubscriptionPipeline(requestId) {
       await auth.restoreSessionCookies(page);
       let loggedIn = await auth.isLoggedIn(page);
       if (!loggedIn) {
-        loggedIn = await auth.performLogin(page, { username: process.env.RP_USERNAME, password: process.env.RP_PASSWORD });
-        if (!loggedIn) throw new Error('Registro Público login failed');
+        // Retry across every configured RP account (see lib/rpAccounts.js) instead of
+        // failing outright on the first account's login failure — this is the same
+        // failover the daily monitoring scheduler already uses, and this is the very
+        // first thing every new subscriber hits, so it needs it at least as much.
+        const maxLoginAttempts = Math.max(1, rpAccounts.accountCount());
+        let lastAccount = null;
+        for (let attempt = 1; attempt <= maxLoginAttempts && !loggedIn; attempt++) {
+          const account = rpAccounts.getCurrentAccount();
+          lastAccount = account;
+          console.log(`   🔐 [Pipeline ${requestId}] Login attempt ${attempt}/${maxLoginAttempts} (account: ${account.username})...`);
+          loggedIn = await auth.performLogin(page, { username: account.username, password: account.password });
+          if (!loggedIn && attempt < maxLoginAttempts) {
+            rpAccounts.advanceToNextAccount();
+          }
+        }
+        if (!loggedIn) throw new Error(`Registro Público login failed (tried ${maxLoginAttempts} account${maxLoginAttempts === 1 ? '' : 's'}, last: ${lastAccount ? lastAccount.username : 'unknown'})`);
         await auth.saveSessionCookies(page);
       }
 
