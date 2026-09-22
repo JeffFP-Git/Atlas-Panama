@@ -93,7 +93,7 @@ Not yet — we collect your preference at signup, and it's planned as a future a
 We automatically retry. If it still fails, you'll get a brief "we couldn't check today" email, and we try again at the next scheduled check.
 
 **26. Can I change my registered email or language preference after signing up?**
-Yes — through your account profile page, where you can view and update your information yourself. (See the profile-tab feature note in the project's build log — planned so subscribers never need to email in for routine changes.)
+Right now, email us at operations@atlaspanama.com and we'll take care of it for you. A self-service way to do this yourself is planned for the near future.
 
 ## Registro Público — Answered
 
