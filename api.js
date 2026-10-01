@@ -1746,14 +1746,22 @@ async function processSubscriptionPipeline(requestId) {
     const lang = request.language === 'en' ? 'en' : 'es';
 
     if (searchResult.classification === 'none') {
+      // Matches the promise on the Q&A page: after 2 failed search attempts, point the
+      // subscriber at operations@atlaspanama.com for free manual help instead of just
+      // asking them to keep guessing. Count prior no_match requests from this same
+      // email (across any property/entity) before this one is saved as the latest.
+      const priorNoMatchCount = storage.listSubscriptionRequests({ email: request.email, status: 'no_match' }).length;
+      const isRepeat = priorNoMatchCount >= 1;
+      const noMatchKeyPrefix = isRepeat ? 'noMatchRepeat' : 'noMatch';
+
       storage.updateSubscriptionRequest(requestId, { status: 'no_match' });
       await sendEmail({
         to: request.email,
-        subject: tEmail(lang, 'noMatch.subject', { searchLabel }),
-        text: tEmail(lang, 'noMatch.text', { searchLabel }),
-        html: tEmail(lang, 'noMatch.html', { searchLabel })
+        subject: tEmail(lang, `${noMatchKeyPrefix}.subject`, { searchLabel }),
+        text: tEmail(lang, `${noMatchKeyPrefix}.text`, { searchLabel }),
+        html: tEmail(lang, `${noMatchKeyPrefix}.html`, { searchLabel })
       });
-      console.log(`   ✅ [Pipeline ${requestId}] No match — notified subscriber.`);
+      console.log(`   ✅ [Pipeline ${requestId}] No match (attempt #${priorNoMatchCount + 1} for this email) — notified subscriber${isRepeat ? ' with operations@ help offer' : ''}.`);
       return;
     }
 
