@@ -1324,6 +1324,69 @@ app.post('/webhooks/stripe', async (req, res) => {
   res.status(200).send('ok');
 });
 
+// Postmark delivery webhook (Bounce/SpamComplaint) — a subscriber's email can start
+// silently bouncing (bad address, mailbox full, blocked) with no other signal that
+// anything's wrong; this surfaces it as an internal admin alert instead of letting
+// it go unnoticed indefinitely. Configure in Postmark (My First Server > Default
+// Transactional Stream > Webhooks): URL = https://<user>:<pass>@atlaspanama.com/webhooks/postmark
+// (Basic Auth credentials embedded in the URL, matching POSTMARK_WEBHOOK_USER/
+// POSTMARK_WEBHOOK_PASS below), Events = Bounce + SpamComplaint.
+function requirePostmarkWebhookAuth(req, res, next) {
+  const expectedUser = process.env.POSTMARK_WEBHOOK_USER;
+  const expectedPass = process.env.POSTMARK_WEBHOOK_PASS;
+  if (!expectedUser || !expectedPass) {
+    // Fail closed rather than silently accept unauthenticated webhook calls.
+    return res.status(503).json({ ok: false, error: 'webhook_auth_not_configured' });
+  }
+  const authHeader = req.headers['authorization'] || '';
+  const [scheme, encoded] = authHeader.split(' ');
+  if (scheme !== 'Basic' || !encoded) {
+    res.set('WWW-Authenticate', 'Basic realm="Postmark Webhook"');
+    return res.status(401).json({ ok: false, error: 'auth_required' });
+  }
+  let decoded;
+  try {
+    decoded = Buffer.from(encoded, 'base64').toString('utf8');
+  } catch {
+    return res.status(401).json({ ok: false, error: 'invalid_auth' });
+  }
+  const sepIndex = decoded.indexOf(':');
+  const user = sepIndex >= 0 ? decoded.slice(0, sepIndex) : decoded;
+  const pass = sepIndex >= 0 ? decoded.slice(sepIndex + 1) : '';
+  if (user !== expectedUser || pass !== expectedPass) {
+    return res.status(401).json({ ok: false, error: 'invalid_credentials' });
+  }
+  next();
+}
+
+app.post('/webhooks/postmark', requirePostmarkWebhookAuth, async (req, res) => {
+  try {
+    const event = req.body || {};
+    const recordType = event.RecordType || 'Unknown';
+    const email = event.Email || event.Recipient || '(unknown)';
+    const bounceType = event.Type || '';
+    console.log(`📬 [Postmark Webhook] ${recordType} for ${email}${bounceType ? ` (${bounceType})` : ''}`);
+
+    if (recordType === 'Bounce' || recordType === 'SpamComplaint') {
+      await sendAdminAlertEmail({
+        subject: `Postmark ${recordType}: ${email}`,
+        context: 'POST /webhooks/postmark',
+        error: `${recordType}${bounceType ? ` (${bounceType})` : ''}: ${event.Description || event.Details || '(no description)'}`,
+        extra: {
+          email,
+          messageId: event.MessageID || '(unknown)',
+          subject: event.Subject || '(unknown)'
+        }
+      }).catch(() => {});
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('[Postmark Webhook] Error processing event:', err.message || String(err));
+    res.status(200).json({ ok: true }); // Still 200 — don't make Postmark retry on our own bug.
+  }
+});
+
 app.post('/subscribe/verify', async (req, res) => {
   try {
     const { requestId, email, code } = req.body;
