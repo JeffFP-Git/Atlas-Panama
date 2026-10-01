@@ -28,11 +28,44 @@ const MAX_QUEUE = parseInt(process.env.MAX_QUEUE || '1000', 10);          // saf
 
 const app = express();
 
+// Subscription access tokens and the admin API key are bearer-style secrets, not
+// identifiers — logging them verbatim (as query params or POST body fields) means
+// anyone with Railway log access effectively has them. Redact both logging points
+// below (found during the Postmark SMTP outage investigation, Oct 2026).
+const SENSITIVE_FIELD_NAMES = ['token', 'accesstoken', 'apikey', 'api_key', 'password'];
+
+function redactSensitiveQueryParams(url) {
+  try {
+    const [pathPart, query] = url.split('?');
+    if (!query) return url;
+    const params = new URLSearchParams(query);
+    let redacted = false;
+    for (const key of params.keys()) {
+      if (SENSITIVE_FIELD_NAMES.includes(key.toLowerCase())) {
+        params.set(key, 'REDACTED');
+        redacted = true;
+      }
+    }
+    return redacted ? `${pathPart}?${params.toString()}` : url;
+  } catch {
+    return url;
+  }
+}
+
+function redactSensitiveBody(body) {
+  if (!body || typeof body !== 'object') return body;
+  const clone = {};
+  for (const [k, v] of Object.entries(body)) {
+    clone[k] = SENSITIVE_FIELD_NAMES.includes(k.toLowerCase()) ? 'REDACTED' : v;
+  }
+  return clone;
+}
+
 // Enhanced request log (before body parsing to catch all requests)
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
   // Use process.stdout.write for immediate output (no buffering)
-  process.stdout.write(`\n🌐 [${timestamp}] ${req.method} ${req.url}\n`);
+  process.stdout.write(`\n🌐 [${timestamp}] ${req.method} ${redactSensitiveQueryParams(req.url)}\n`);
   next();
 });
 
@@ -108,7 +141,7 @@ app.use(cors({
 // Log request body after parsing (for POST requests)
 app.use((req, res, next) => {
   if (req.method === 'POST' && req.body && Object.keys(req.body).length > 0) {
-    process.stdout.write(`   📦 Body: ${JSON.stringify(req.body)}\n`);
+    process.stdout.write(`   📦 Body: ${JSON.stringify(redactSensitiveBody(req.body))}\n`);
   }
   next();
 });
@@ -1812,9 +1845,24 @@ async function processSubscriptionPipeline(requestId) {
       datosDelInmueble: request.tipo === 'inmueble' ? storedMatchData : null
     });
 
-    await sendConfirmedMatchVerificationEmail({ ...request, ...identity }, renderMatchAsPropertyData(match));
+    const verificationEmailSent = await sendConfirmedMatchVerificationEmail({ ...request, ...identity }, renderMatchAsPropertyData(match));
     const elapsed = Date.now() - startTime;
-    console.log(`   ✅ [Pipeline ${requestId}] Completed in ${elapsed}ms - Verification email sent to ${request.email}`);
+    if (verificationEmailSent) {
+      console.log(`   ✅ [Pipeline ${requestId}] Completed in ${elapsed}ms - Verification email sent to ${request.email}`);
+    } else {
+      // Don't claim success when the send actually failed — this subscriber matched
+      // fine but will never get the confirmation/checkout link, so it's worth an
+      // internal alert, not just a quiet log line (this exact gap let a real Postmark
+      // SMTP outage go unnoticed — see CLAUDE.md, Oct 2026).
+      console.error(`   ❌ [Pipeline ${requestId}] Completed search in ${elapsed}ms but FAILED to send verification email to ${request.email}`);
+      storage.updateSubscriptionRequest(requestId, { emailSendFailed: true });
+      await sendAdminAlertEmail({
+        subject: 'Verification email failed to send',
+        context: 'processSubscriptionPipeline (classification A, single confirmed match)',
+        subscription: request,
+        error: 'sendConfirmedMatchVerificationEmail() returned false — the subscriber matched successfully but will never receive their confirmation/checkout link unless this is caught manually.'
+      }).catch(() => {});
+    }
   } catch (err) {
     const elapsed = Date.now() - startTime;
     console.error(`   ❌ [Pipeline ${requestId}] Failed after ${elapsed}ms:`, err.message || String(err));
