@@ -1753,6 +1753,7 @@ function matchDisplayLabel(tipo, match) {
 
 async function processSubscriptionPipeline(requestId) {
   const startTime = Date.now();
+  rpAccounts.assertLoginsNotPaused();
   const request = storage.getSubscriptionRequest(requestId);
   if (!request) {
     console.error(`   ❌ [Pipeline ${requestId}] Request not found`);
