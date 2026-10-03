@@ -124,11 +124,11 @@ const TERMS = {
     },
     {
       es: { h: 'Suscripción, Renovación Automática, Cancelación y Reembolsos', p: [
-        'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente a través de su portal de gestión de suscripción. La cancelación surtirá efecto al final del período de facturación vigente.',
+        'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente escribiendo a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>. La cancelación surtirá efecto al final del período de facturación vigente.',
         '<strong>No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados</strong>, salvo que la ley aplicable exija lo contrario.',
       ] },
       en: { h: 'Subscription, Automatic Renewal, Cancellation, and Refunds', p: [
-        'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand through their subscription management portal. Cancellation takes effect at the end of the current billing period.',
+        'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand by emailing <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>. Cancellation takes effect at the end of the current billing period.',
         '<strong>No refunds, whether full or partial, are offered for periods already billed</strong>, unless applicable law requires otherwise.',
       ] },
     },
@@ -357,7 +357,7 @@ const paras = (ps, indent) => ps.map(p => `${indent}<p>${p}</p>`).join('\n');
 
 function buildSpanish(doc) {
   const body = [
-    `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEn}" lang="en">English version (bilingual)</a></div>`,
+    `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEn}" lang="en">English version (bilingual) / Versión bilingüe &rarr;</a></div>`,
     `    <h1>${doc.title.es}</h1>`,
     `    <p class="dates">Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Última actualización: ${UPDATED.es}</p>`,
     doc.intro ? `    <p>${doc.intro.es}</p>` : '',
@@ -369,7 +369,7 @@ function buildSpanish(doc) {
 function buildBilingual(doc) {
   const esBlock = (h, ps) => `      <div class="es-block" lang="es">\n        <span class="lang-tag">ESPAÑOL</span>\n${h ? `        <h3>${h}</h3>\n` : ''}${paras(ps, '        ')}\n      </div>`;
   const body = [
-    `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEs}" lang="es">Versión solo en español</a></div>`,
+    `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEs}" lang="es">Read in Spanish only / Leer solo en español &rarr;</a></div>`,
     `    <h1>${doc.title.en}<span class="h1-es" lang="es">${doc.title.es}</span></h1>`,
     `    <p class="dates">Effective date: ${EFFECTIVE.en} · Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Last updated: ${UPDATED.en} · Última actualización: ${UPDATED.es}</p>`,
     `    <div class="notice">\n      <p>${PREVAILS_NOTICE.en}</p>\n      <p lang="es">${PREVAILS_NOTICE.es}</p>\n    </div>`,

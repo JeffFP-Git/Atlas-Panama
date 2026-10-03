@@ -114,13 +114,13 @@ Atlas Panama se reserva el derecho de incluir contenido publicitario o patrocina
 
 ## 11. Subscription, Automatic Renewal, Cancellation, and Refunds
 
-The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions **renew automatically** at the end of each period unless the Subscriber cancels beforehand through their subscription management portal. Cancellation takes effect at the end of the current billing period.
+The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions **renew automatically** at the end of each period unless the Subscriber cancels beforehand by emailing operations@atlaspanama.com. Cancellation takes effect at the end of the current billing period.
 
 **No refunds, whether full or partial, are offered for periods already billed**, unless applicable law requires otherwise.
 
 ### 11. Suscripción, Renovación Automática, Cancelación y Reembolsos (ES)
 
-El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente a través de su portal de gestión de suscripción. La cancelación surtirá efecto al final del período de facturación vigente.
+El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente escribiendo a operations@atlaspanama.com. La cancelación surtirá efecto al final del período de facturación vigente.
 
 **No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados**, salvo que la ley aplicable exija lo contrario.
 

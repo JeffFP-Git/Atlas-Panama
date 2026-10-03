@@ -149,9 +149,7 @@ app.use((req, res, next) => {
 // www.atlaspanama.com is a separate Railway custom domain pointed at this
 // same service; redirect it to the root domain rather than serving it twice.
 app.use((req, res, next) => {
-  // app.atlaspanama.com was the domain on file with Stripe before Oct 2026 —
-  // keep its old links (e.g. /about.html) working by redirecting the same way.
-  if (req.hostname === 'www.atlaspanama.com' || req.hostname === 'app.atlaspanama.com') {
+  if (req.hostname === 'www.atlaspanama.com') {
     return res.redirect(301, `https://atlaspanama.com${req.originalUrl}`);
   }
   next();
