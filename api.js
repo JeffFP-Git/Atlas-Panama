@@ -19,6 +19,7 @@ import * as qaSearchLog from './lib/qaSearchLog.js';
 import * as rpAccounts from './lib/rpAccounts.js';
 import fs from 'fs';
 import path from 'path';
+import { DATA_DIR, MONITORING_DIR } from './lib/dataPaths.js';
 
 // Serial job runner: we intentionally run ONE job at a time to avoid concurrent Puppeteer runs
 // and shared-state collisions (sessions, output files, RP site throttling).
@@ -412,6 +413,33 @@ function maybeStartNext() {
 const sseClients = new Map(); // jobId -> Set<res>
 
 // Health
+// Admin-only storage check: shows where persistent data lives and when that storage
+// was first used. If "storageFirstUsedAt" stays the same across a redeploy, the
+// Railway volume is working; if it resets to the latest deploy time, data is being
+// wiped on every deploy (DATA_DIR isn't pointing at the volume).
+const STORAGE_MARKER = path.join(DATA_DIR, '.storage-created-at');
+try {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(STORAGE_MARKER)) fs.writeFileSync(STORAGE_MARKER, new Date().toISOString());
+} catch (err) {
+  console.error('[Storage] Could not write storage marker:', err.message);
+}
+const SERVER_STARTED_AT = new Date().toISOString();
+
+app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
+  let storageFirstUsedAt = null;
+  try { storageFirstUsedAt = fs.readFileSync(STORAGE_MARKER, 'utf8').trim(); } catch {}
+  res.json({
+    ok: true,
+    dataDirSetting: process.env.DATA_DIR || '(not set — using project folder)',
+    dataDir: DATA_DIR,
+    monitoringDir: MONITORING_DIR,
+    storageFirstUsedAt,
+    serverStartedAt: SERVER_STARTED_AT,
+    subscriptionRequests: storage.listSubscriptionRequests().length
+  });
+});
+
 app.get('/health', (_req, res) => {
   res.json({ ok: true, running: runningCount, queued: queue.length, concurrency: MAX_CONCURRENCY });
 });
