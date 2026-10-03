@@ -1231,8 +1231,11 @@ function confirmAndScheduleSubscription(requestId) {
       try {
         const stripe = getStripeClient();
         const sub = await stripe.subscriptions.retrieve(confirmedRequest.stripeSubscriptionId);
-        if (sub.current_period_end) {
-          renewalDate = new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
+        // Newer Stripe API versions moved current_period_end from the subscription
+        // onto each subscription item.
+        const periodEnd = sub.current_period_end || sub.items?.data?.[0]?.current_period_end;
+        if (periodEnd) {
+          renewalDate = new Date(periodEnd * 1000).toISOString().slice(0, 10);
         }
       } catch (err) {
         console.error(`[API] Could not fetch Stripe subscription for welcome email (${requestId}):`, err.message);
@@ -1240,7 +1243,7 @@ function confirmAndScheduleSubscription(requestId) {
     }
     return sendWelcomeEmail({
       recipientEmail: confirmedRequest.email,
-      displayName: confirmedRequest.name || confirmedRequest.nameOrFolio,
+      displayName: scheduler.displayNameFor(confirmedRequest),
       language: confirmedRequest.language,
       planLabel,
       renewalDate
@@ -1750,7 +1753,7 @@ async function sendConfirmedMatchVerificationEmail(request, propertyData) {
       ${activateButtonHtml}
     `;
   } else {
-    const displayName = request.name || request.nameOrFolio;
+    const displayName = scheduler.displayNameFor(request);
     emailSubject = tEmail(lang, 'verify.subjectEntity', { label: displayName });
     emailText =
       `${lang === 'es' ? 'Hola' : 'Hello'},\n\n` +

@@ -665,6 +665,8 @@
         'outcome.selectButton': 'Esta es la correcta',
         'outcome.refinementTitle': 'Demasiados resultados',
         'outcome.refinementBody': 'Su búsqueda encontró demasiados resultados para mostrarlos individualmente. Por favor vuelva a intentar con más detalles (por ejemplo, el Código de Ubicación, el RUC, o un nombre más específico).',
+        'outcome.completedTitle': '¡Encontramos su registro! Revise su correo',
+        'outcome.completedBody': 'Le enviamos un correo a {email}. Ábralo y haga clic en <strong>"Confirmar correo y elegir mi plan"</strong> para confirmar su correo y completar su suscripción. Si no lo ve en unos minutos, revise su carpeta de spam.',
         'outcome.noMatchTitle': 'No se encontró ningún resultado',
         'outcome.noMatchBody': 'No pudimos encontrar ningún resultado que coincida con lo que ingresó. Por favor verifique los datos e intente de nuevo.',
         'outcome.timeoutTitle': 'Seguimos procesando su solicitud',
@@ -732,6 +734,8 @@
         'outcome.selectButton': 'This is the one',
         'outcome.refinementTitle': 'Too many results',
         'outcome.refinementBody': 'Your search returned too many results to show individually. Please try again with more details (e.g. the Location Code, the RUC, or a more specific name).',
+        'outcome.completedTitle': 'We found your record! Check your email',
+        'outcome.completedBody': 'We sent an email to {email}. Open it and click <strong>"Confirm Email & Choose My Plan"</strong> to confirm your email and complete your subscription. If you don\'t see it within a few minutes, check your spam folder.',
         'outcome.noMatchTitle': 'No results found',
         'outcome.noMatchBody': 'We couldn\'t find anything matching what you entered. Please double-check your details and try again.',
         'outcome.timeoutTitle': 'Still working on your request',
@@ -1429,9 +1433,16 @@
       const request = outcome && outcome.request;
 
       if (status === 'completed') {
-        const verifyUrl = 'verify.html?id=' + encodeURIComponent(currentRequestId) + '&email=' + encodeURIComponent(email);
-        console.log('[Frontend] Redirecting to verification page:', verifyUrl);
-        window.location.href = verifyUrl;
+        // Single match: the backend has already emailed the "Confirm Email & Choose My
+        // Plan" link, so just point them to it (the old verify.html code-entry page no
+        // longer matches what the email contains).
+        const match = request && Array.isArray(request.matches) && request.matches[0];
+        const matchLine = match ? '<p><strong>' + describeMatchForDisplay(request.tipo, match) + '</strong></p>' : '';
+        const safeEmail = String(email || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        showOutcomeScreen(
+          t('outcome.completedTitle'),
+          matchLine + '<p>' + t('outcome.completedBody', { email: '<strong>' + safeEmail + '</strong>' }) + '</p>'
+        );
         return;
       }
 
