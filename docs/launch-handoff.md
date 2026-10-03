@@ -41,8 +41,8 @@ Steps:
 - [x] Jeff deleted CNAME `app`.
 - [x] `STRIPE_PRICE_ID` in Railway is unused by the code → leave it.
 - [x] Code: `DATA_DIR` storage setting + `GET /admin/storage-check` published (commit `0a824ee`).
-- [ ] **BLOCKER before any real payment:** persistent storage. Chrome reads the Railway volume's mount path and adds `DATA_DIR` = that path. Jeff deploys once (together with the live Stripe key + webhook secret). Claude Code verifies with `/admin/storage-check` and one extra redeploy.
-- [ ] Chrome: Stripe Billing → failed payments → "If all retries fail" = Cancel the subscription.
+- [x] **Persistent storage fixed + verified** (`DATA_DIR=/data`, volume `api-volume`; survived a redeploy). Live Stripe key + webhook secret deployed. Was: Chrome reads the Railway volume's mount path and adds `DATA_DIR` = that path. Jeff deploys once (together with the live Stripe key + webhook secret). Claude Code verifies with `/admin/storage-check` and one extra redeploy.
+- [x] (already set) Stripe Billing → failed payments → "If all retries fail" = Cancel the subscription.
 - [ ] Jeff: delete CNAME `api`.
 - [ ] Jeff: own property + entity signup (live purchase); check no "Test mode" label.
 
