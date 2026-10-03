@@ -34,6 +34,18 @@ Steps:
 - [ ] Jeff: delete Squarespace CNAMEs `app` and `api`
 - [ ] Verify: Jeff's own first subscription shows no "Test mode" label on Stripe's checkout; Chrome confirms the webhook delivery succeeded in Stripe's log; Claude Code checks the subscription activated
 
+## Oct 3 update
+
+- [x] Chrome: LIVE webhook created — `we_1UMWh7L7hEKlxMTikoCYm9Xk`, `https://atlaspanama.com/webhooks/stripe`, events `checkout.session.completed` + `customer.subscription.deleted`, API version 2020-08-27 (OK). Route verifies signatures (400 when unsigned).
+- [x] Stripe account: no active tasks; payments + payouts active.
+- [x] Jeff deleted CNAME `app`.
+- [x] `STRIPE_PRICE_ID` in Railway is unused by the code → leave it.
+- [x] Code: `DATA_DIR` storage setting + `GET /admin/storage-check` published (commit `0a824ee`).
+- [ ] **BLOCKER before any real payment:** persistent storage. Chrome reads the Railway volume's mount path and adds `DATA_DIR` = that path. Jeff deploys once (together with the live Stripe key + webhook secret). Claude Code verifies with `/admin/storage-check` and one extra redeploy.
+- [ ] Chrome: Stripe Billing → failed payments → "If all retries fail" = Cancel the subscription.
+- [ ] Jeff: delete CNAME `api`.
+- [ ] Jeff: own property + entity signup (live purchase); check no "Test mode" label.
+
 ## Open TODOs
 
 See CLAUDE.md → "START HERE — current status" for the full post-launch list.
