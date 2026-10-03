@@ -1331,6 +1331,31 @@ app.post('/webhooks/stripe', async (req, res) => {
     }
   }
 
+  // A Stripe subscription has ended — cancelled (cancellations are done by hand in the
+  // Stripe Dashboard when a subscriber emails in; with "at period end" Stripe sends this
+  // when the paid period runs out) or given up on after failed payments. Stop monitoring
+  // so we don't keep checking and emailing for someone who's no longer paying.
+  if (event.type === 'customer.subscription.deleted') {
+    const stripeSub = event.data.object;
+    const matches = storage.listSubscriptionRequests()
+      .filter(s => s.stripeSubscriptionId === stripeSub.id && s.status !== 'cancelled');
+    for (const s of matches) {
+      try {
+        scheduler.stopDailyJob(s.id);
+      } catch (err) {
+        console.error(`[Stripe webhook] Error stopping job for ${s.id}:`, err);
+      }
+      storage.updateSubscriptionRequest(s.id, { scheduled: false, status: 'cancelled' });
+      console.log(`[Stripe webhook] Stopped monitoring ${s.id} — Stripe subscription ${stripeSub.id} ended`);
+      await sendAdminAlertEmail({
+        subject: `Subscription ended: ${s.email}`,
+        context: 'POST /webhooks/stripe (customer.subscription.deleted)',
+        subscription: s,
+        error: `Stripe subscription ${stripeSub.id} ended (cancellation reason: ${stripeSub.cancellation_details?.reason || 'unknown'}). Monitoring stopped — informational, no action needed.`
+      }).catch(() => {});
+    }
+  }
+
   res.status(200).send('ok');
 });
 

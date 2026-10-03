@@ -6,6 +6,47 @@ This file is read automatically by Claude Code at the start of every session in 
 
 Atlas Panama (atlaspanama.com) is a subscription service that monitors Panama's Registro Público (public property/corporate registry) for changes to specific properties or legal entities, and notifies subscribers by email when something changes.
 
+## START HERE — current status (updated Oct 3, 2026)
+
+**Source of truth for status.** Detailed history is further down; the live checklist with Claude in Chrome is `docs/launch-handoff.md`; the prompt to restart a session is `docs/RESTART.md`.
+
+**Where things stand**
+- **Website live at https://atlaspanama.com** (Railway project `panama-scraper`, service `api`, custom domains `atlaspanama.com` + `www.atlaspanama.com`; Railway is at its custom-domain limit). Pages: `/` (homepage with pricing), `/subscribe`, `/qa`, `/contact`, `/terms` + `/privacy` (bilingual, Spanish prevails), `/terminos` + `/privacidad` (Spanish).
+- **Stripe** (account `acct_1K8zqyL7hEKlxMTi`): website review task **COMPLETED Oct 3**; payments and payouts active; Public details and product description set. **But Railway's `STRIPE_SECRET_KEY` is still a TEST key — switching to live is in progress** (see `docs/launch-handoff.md`). No price-ID variables needed: `lib/stripe.js` creates the product + prices (`atlas_monthly_v1` $1/mo, `atlas_annual_v1` $10/yr) by lookup key on the first checkout. Live webhook: `https://atlaspanama.com/webhooks/stripe`, events `checkout.session.completed` + `customer.subscription.deleted`. No Customer Portal; cancellations by email, done by hand in the Stripe Dashboard (the webhook then stops monitoring automatically).
+- **DNS (Squarespace):** `app` and `api` CNAMEs point at dead CloudFront distributions → to be deleted by Jeff (nothing depends on them). Don't touch MX, Postmark (`pm-bounces`, DKIM), SPF/DMARC TXT, `www`, or validation CNAMEs.
+- **Email:** Postmark (Pro) via HTTPS API, sender `monitoring@atlaspanama.com`; human inbox `operations@atlaspanama.com` (Google Workspace).
+- **RP accounts:** 3 configured in Railway (#4 pending, not blocking). `RP_LOGINS_PAUSED=0`.
+- **Legal:** Terms/Privacy are published drafts awaiting the attorney — swap in final versions before public advertising.
+
+**Division of labor**
+- **Claude Code:** code, publishing to the live site, curl checks, anything touching secrets (prefixes only). Publishes tested low-risk changes without asking.
+- **Claude in Chrome:** dashboard clicks (Stripe, Railway, Squarespace) using values Claude Code confirmed, with Jeff's OK before saving. **Cannot** reveal/copy/type secrets, change or delete DNS records, or delete anything; no memory between sessions → every brief is one self-contained block with a REPORT BACK template.
+- **Jeff only:** secrets, DNS deletes, deletions, real-card purchases. Keep his list short and numbered with exact locations.
+
+**Next up (in order)**
+1. Finish the Stripe test→live switch (Chrome creates the live webhook; Jeff pastes 2 secrets into Railway and deploys once; Jeff deletes the `app`/`api` CNAMEs).
+2. Jeff subscribes one property + one entity himself (the first real live purchase) and checks every page; Claude Code verifies activation + webhook delivery.
+3. Bulk-subscribe Jeff's ~30 entities (build an admin bulk-submit path, reusing the single pipeline).
+4. Attorney feedback → update `scripts/build-legal-pages.js` → start advertising.
+
+**Full post-launch TODO list (website + platform)**
+- Legal: attorney-final Terms/Privacy (also: arbitration center for §16, retention period, confirm the bilingual "Spanish prevails" approach); possible Panama foreign-entity registration (~$400).
+- Business phone line → footer (`public/site-footer.js`), `/contact`, Stripe support phone; WhatsApp Business later.
+- `ADMIN_ALERT_EMAIL` → `operations@atlaspanama.com` (Railway variable, currently the throwaway Gmail).
+- Stripe Customer Portal / self-service profile page (then update Terms §11, `/contact`, homepage cancellation text).
+- Renewal reminder email 5 days before renewal (check Stripe's built-in reminders first).
+- Multi-property signup + annual volume pricing (2–10: $18, 11–50: $15, 50+: quote); raise price to $2/mo · $20/yr at 50 subscribers (bump `PRICING_VERSION`).
+- Per-subscriber email frequency choice (weekly/monthly/only-on-change); 2–3×/day checks while a Prelación entry is active.
+- Short-term second recipient on a subscription (attorney + client case).
+- WhatsApp alerts at 25–50 subscribers.
+- RP: account #4; structured log of every RP re-login (for capacity planning); capacity plan before thousands of subscribers.
+- Q&A: Spanish version of the full Q&A; confirm the 2-failed-attempts flow points to operations@.
+- Split homepage and About page once there's more than one product.
+- Migrate every service's login email to the business identity, one at a time; rotate the old 2Captcha key/RP password; 2FA once the business phone exists.
+- Competitive research on Pandata / Dato Capital (public sites only — never probe RP access controls).
+- Tax/entity question at ~200 subscribers; per-property operating cost model.
+- Favicon (browsers request `/favicon.ico`, currently 404 — cosmetic).
+
 ## The person you're working with
 
 - Not a programmer. Explain steps in plain, non-technical language.
@@ -279,7 +320,7 @@ Throughout earlier work in this file, `app.atlaspanama.com` is referenced as "th
 
 ## ⚠️ Stripe website review — ACTIVE, deadlines (Oct 3 2026)
 
-Changing Stripe's business website to `https://atlaspanama.com` (Oct 3) opened a Stripe task, **"Provide a valid business URL," now "In review."** Stripe's rule: the site must be accessible and describe the business and products sold; placeholder/under-construction sites fail. **If the review fails: payouts pause Oct 17, 2026; payments pause Oct 31, 2026.** Reviews take 24h–3 business days.
+Changing Stripe's business website to `https://atlaspanama.com` (Oct 3) opened a Stripe task, **"Provide a valid business URL" — ✅ COMPLETED Oct 3 2026 (payments and payouts active).** Stripe's rule: the site must be accessible and describe the business and products sold; placeholder/under-construction sites fail. **If the review fails: payouts pause Oct 17, 2026; payments pause Oct 31, 2026.** Reviews take 24h–3 business days.
 
 **Built and pushed Oct 3 2026 (commit `95cfdd9`) to pass it:**
 - **Homepage (`/`, `public/about.html`):** Plans & Pricing section — "for as little as $1/month or $10/year you can monitor your property or entity daily," Monthly $1 USD / Annual $10 USD cards (recurring, auto-renew), cancellation/no-refund fine print linking to Terms, and "operated by Atlas Panama LLC, a provider of real estate market information and data analysis for the Panamanian market" (matches the Stripe product description). The Contact block moved off the homepage into the footer and `/contact`, per the user.
