@@ -1847,7 +1847,7 @@ async function processSubscriptionPipeline(requestId) {
     const tipoLabel = request.tipo === 'inmueble' ? 'Inmueble' : (request.tipo === 'fundacion' ? 'Fundación' : 'Mercantil');
     const searchLabel = request.tipo === 'inmueble'
       ? (request.folio ? `Folio ${request.folio}` : `owner "${request.ownerName}"`)
-      : (request.name || request.nameOrFolio);
+      : ([request.name || request.nameOrFolio, request.ruc ? `RUC ${request.ruc}` : null].filter(Boolean).join(', ') || '—');
     console.log(`   🔍 [Pipeline ${requestId}] Searching Registro Público (${tipoLabel}) — ${searchLabel}...`);
 
     const puppeteerLib = await getPuppeteerLib();
