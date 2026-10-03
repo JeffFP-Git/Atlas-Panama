@@ -613,6 +613,8 @@
         'hero.bullet2': 'Entérese de cambios en su propiedad o entidad antes de que sea demasiado tarde.',
         'hero.bullet3': 'Revisamos el Registro Público de Panamá todos los días, para que usted no tenga que hacerlo.',
         'form.title': 'Búsqueda Diaria',
+        'searching.title': 'Buscando su registro...',
+        'searching.subtitle': 'Estamos buscando su propiedad o entidad en el Registro Público. Esto puede tardar uno o dos minutos; por favor no cierre esta página.',
         'form.subtitle': 'Complete el formulario para recibir información diaria sobre su propiedad o entidad',
         'form.emailLabel': '1. Correo electrónico *',
         'form.tipoLabel': '2. Tipo de Suscripción / Búsqueda Diaria *',
@@ -678,6 +680,8 @@
         'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
         'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
         'form.title': 'Daily Search',
+        'searching.title': 'Finding your record...',
+        'searching.subtitle': 'We are looking up your property or entity in the Public Registry. This can take a minute or two; please keep this page open.',
         'form.subtitle': 'Complete the form to receive daily updates about your property or entity',
         'form.emailLabel': '1. Email Address *',
         'form.tipoLabel': '2. Subscription Type / Daily Search *',
@@ -1374,11 +1378,8 @@
         // backend had even generated a code.
         currentRequestId = apiResult.requestId;
 
-        subscribeForm.style.display = 'none';
+        setSearchingMode(true);
         const pageWarning = document.getElementById('pageWarning');
-        if (pageWarning) {
-          pageWarning.classList.remove('active');
-        }
 
         const outcome = await startLoadingBar(apiResult.requestId);
         stopLoadingBar();
@@ -1396,10 +1397,31 @@
         if (pageWarning) {
           pageWarning.classList.remove('active');
         }
+        setSearchingMode(false);
         showError('Error: ' + error.message);
         isSubmitting = false;
       }
     });
+
+    // While the Registro Público search runs: hide the form's input fields and button
+    // but keep the progress bar and "keep this page open" notice (both live inside the
+    // form) visible, and swap the heading to a "please wait" message. Hiding the whole
+    // form used to leave only the "Daily Search" heading on screen.
+    function setSearchingMode(on) {
+      subscribeForm.querySelectorAll(':scope > .form-group, :scope > .search-type-fields, #submitBtn')
+        .forEach(el => { el.style.display = on ? 'none' : ''; });
+      if (!on) {
+        // Restore the conditional sections' normal show/hide state
+        subscribeForm.querySelectorAll(':scope > .search-type-fields, #whatsappFields')
+          .forEach(el => { el.style.display = ''; });
+      }
+      const title = formPage.querySelector('h1');
+      const subtitle = formPage.querySelector('.subtitle');
+      title.setAttribute('data-i18n', on ? 'searching.title' : 'form.title');
+      subtitle.setAttribute('data-i18n', on ? 'searching.subtitle' : 'form.subtitle');
+      title.textContent = t(title.getAttribute('data-i18n'));
+      subtitle.textContent = t(subtitle.getAttribute('data-i18n'));
+    }
 
     // Shows the right screen for whatever the search actually found.
     function renderSearchOutcome(outcome, email) {

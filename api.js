@@ -1894,9 +1894,25 @@ async function processSubscriptionPipeline(requestId) {
         await auth.saveSessionCookies(page);
       }
 
+      const entityName = request.name || request.nameOrFolio;
       searchResult = request.tipo === 'inmueble'
         ? await searchPropertyMatches(page, { folio: request.folio, codigo: request.codigo, ownerName: request.ownerName })
-        : await searchEntityMatches(page, { entityType: request.tipo, name: request.name || request.nameOrFolio, idNumber: request.ruc });
+        : await searchEntityMatches(page, { entityType: request.tipo, name: entityName, idNumber: request.ruc });
+
+      // Foundations live in a separate RP section (Personas) from companies (Mercantil),
+      // and every foundation's name contains "Fundación"/"Foundation". If someone picked
+      // Mercantil but typed a foundation's name and nothing was found, retry once as a
+      // foundation — and save it as one, so daily monitoring searches the right section.
+      if (request.tipo === 'mercantil' && searchResult.classification === 'none'
+          && /fundaci[oó]n|foundation/i.test(entityName || '')) {
+        console.log(`   🔁 [Pipeline ${requestId}] No Mercantil match for a foundation-like name — retrying as Fundación...`);
+        const retry = await searchEntityMatches(page, { entityType: 'fundacion', name: entityName, idNumber: request.ruc });
+        if (retry.classification !== 'none') {
+          searchResult = retry;
+          storage.updateSubscriptionRequest(requestId, { tipo: 'fundacion' });
+          request.tipo = 'fundacion';
+        }
+      }
     } finally {
       await browser.close().catch(() => {});
     }
