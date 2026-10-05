@@ -20,6 +20,7 @@ import * as rpAccounts from './lib/rpAccounts.js';
 import fs from 'fs';
 import path from 'path';
 import { DATA_DIR, MONITORING_DIR } from './lib/dataPaths.js';
+import * as snapshots from './lib/snapshotStore.js';
 
 // Serial job runner: we intentionally run ONE job at a time to avoid concurrent Puppeteer runs
 // and shared-state collisions (sessions, output files, RP site throttling).
@@ -436,7 +437,13 @@ app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
     monitoringDir: MONITORING_DIR,
     storageFirstUsedAt,
     serverStartedAt: SERVER_STARTED_AT,
-    subscriptionRequests: storage.listSubscriptionRequests().length
+    subscriptionRequests: storage.listSubscriptionRequests().length,
+    // Last daily check per active subscription (date of its newest snapshot)
+    lastChecks: storage.listSubscriptionRequests({ confirmed: true, status: 'confirmed' }).map(s => ({
+      name: scheduler.displayNameFor(s),
+      email: s.email,
+      lastCheck: snapshots.getLatestSnapshot(s.id)?.dateStr || null
+    }))
   });
 });
 
