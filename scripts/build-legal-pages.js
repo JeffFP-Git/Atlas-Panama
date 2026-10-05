@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EFFECTIVE = { es: '3 de octubre de 2026', en: 'October 3, 2026' };
-const UPDATED = { es: '3 de octubre de 2026', en: 'October 3, 2026' };
+const UPDATED = { es: '4 de octubre de 2026', en: 'October 4, 2026' };
 const CONTACT = {
   es: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, Estados Unidos — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
   en: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, United States — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
@@ -126,10 +126,12 @@ const TERMS = {
       es: { h: 'Suscripción, Renovación Automática, Cancelación y Reembolsos', p: [
         'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.',
         '<strong>No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados</strong>, salvo que la ley aplicable exija lo contrario.',
+        'Si el Suscriptor no renueva el pago de su suscripción antes de su vencimiento, su información será eliminada de los archivos de Atlas Panama transcurridos dos (2) meses, conforme a la <a href="/privacidad">Política de Privacidad</a>.',
       ] },
       en: { h: 'Subscription, Automatic Renewal, Cancellation, and Refunds', p: [
         'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand using the "Manage subscription" link included in every email Atlas Panama sends them. Cancellation takes effect at the end of the current billing period.',
         '<strong>No refunds, whether full or partial, are offered for periods already billed</strong>, unless applicable law requires otherwise.',
+        'If the Subscriber does not renew payment of their subscription before it expires, their information will be deleted from Atlas Panama\'s files after two (2) months, in accordance with the <a href="/privacy">Privacy Policy</a>.',
       ] },
     },
     {
@@ -255,18 +257,18 @@ const PRIVACY = {
     },
     {
       es: { h: 'Retención de Datos', p: [
-        'Conservamos su información mientras su suscripción esté activa y por un período razonable posterior a la cancelación.',
+        'Conservamos su información mientras su suscripción esté activa. Una vez vencida, si usted no desea renovarla, transcurridos dos (2) meses su información será eliminada de nuestros archivos.',
       ] },
       en: { h: 'Data Retention', p: [
-        'We retain your information while your subscription is active and for a reasonable period after cancellation.',
+        'We retain your information while your subscription is active. Once it has expired, if you do not wish to renew it, your information will be deleted from our files after two (2) months.',
       ] },
     },
     {
       es: { h: 'Sus Derechos', p: [
-        'Conforme a la Ley 81 de 2019 de Panamá sobre Protección de Datos Personales, usted tiene derecho a acceder, rectificar, cancelar/eliminar, u oponerse al tratamiento de su información personal. Para ejercer estos derechos, contáctenos en <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>.',
+        'Conforme a la Ley 81 de 2019 de Panamá sobre Protección de Datos Personales, usted tiene derecho a acceder a su información personal, a que sea rectificada, a cancelarla o eliminarla, y a oponerse a su tratamiento. Para ejercer estos derechos, escríbanos a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> y procederemos conforme a su petición.',
       ] },
       en: { h: 'Your Rights', p: [
-        'Under Panama\'s Law 81 of 2019 on Personal Data Protection, you have the right to access, rectify, cancel/delete, or object to the processing of your personal information. To exercise these rights, contact us at <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>.',
+        'Under Panama\'s Law 81 of 2019 on Personal Data Protection, you have the right to access your personal information, to have it rectified, to cancel or delete it, and to object to its processing. To exercise these rights, write to us at <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> and we will proceed in accordance with your request.',
       ] },
     },
     {
@@ -288,6 +290,14 @@ const PRIVACY = {
     {
       es: { h: 'Contacto', p: [CONTACT.es + '.'] },
       en: { h: 'Contact', p: [CONTACT.en + '.'] },
+    },
+    {
+      es: { h: 'Aceptación', p: [
+        'Al suscribirse a nuestra plataforma, usted acepta nuestros <a href="/terminos">Términos y Condiciones</a>, así como nuestra Política de Privacidad en el servicio. Para consultas sobre esta Política, escríbanos a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>.',
+      ] },
+      en: { h: 'Acceptance', p: [
+        'By subscribing to our platform, you accept our <a href="/terms">Terms of Service</a>, as well as our Privacy Policy for the service. For questions about this Policy, write to us at <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>.',
+      ] },
     },
   ],
 };

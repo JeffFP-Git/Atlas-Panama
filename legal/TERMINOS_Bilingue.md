@@ -118,11 +118,15 @@ The Service is offered through monthly or annual subscription plans, as describe
 
 **No refunds, whether full or partial, are offered for periods already billed**, unless applicable law requires otherwise.
 
+If the Subscriber does not renew payment of their subscription before it expires, their information will be deleted from Atlas Panama's files after two (2) months, in accordance with the [Privacy Policy](https://atlaspanama.com/privacy).
+
 ### 11. Suscripción, Renovación Automática, Cancelación y Reembolsos (ES)
 
 El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.
 
 **No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados**, salvo que la ley aplicable exija lo contrario.
+
+Si el Suscriptor no renueva el pago de su suscripción antes de su vencimiento, su información será eliminada de los archivos de Atlas Panama transcurridos dos (2) meses, conforme a la [Política de Privacidad](https://atlaspanama.com/privacidad).
 
 ## 12. Modification, Suspension, and Termination of the Service; Price Changes
 

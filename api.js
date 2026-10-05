@@ -1037,7 +1037,8 @@ async function handleCancel(req, res, isGet) {
   // Update subscription status
   storage.updateSubscriptionRequest(id, {
     scheduled: false,
-    status: 'cancelled'
+    status: 'cancelled',
+    cancelledAt: new Date().toISOString()
   });
   
   console.log(`✅ Subscription ${id} cancelled by user`);
@@ -1187,7 +1188,8 @@ app.post('/subscribe/end-all', requireAdminApiKey, (req, res) => {
         storage.updateSubscriptionRequest(subscription.id, {
           status: 'cancelled',
           scheduled: false,
-          confirmed: false
+          confirmed: false,
+          cancelledAt: new Date().toISOString()
         });
         cancelledSubscriptions++;
       } catch (err) {
@@ -1411,7 +1413,7 @@ app.post('/webhooks/stripe', async (req, res) => {
       } catch (err) {
         console.error(`[Stripe webhook] Error stopping job for ${s.id}:`, err);
       }
-      storage.updateSubscriptionRequest(s.id, { scheduled: false, status: 'cancelled' });
+      storage.updateSubscriptionRequest(s.id, { scheduled: false, status: 'cancelled', cancelledAt: new Date().toISOString() });
       console.log(`[Stripe webhook] Stopped monitoring ${s.id} — Stripe subscription ${stripeSub.id} ended`);
       await sendAdminAlertEmail({
         subject: `Subscription ended: ${s.email}`,

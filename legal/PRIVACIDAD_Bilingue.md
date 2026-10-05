@@ -54,19 +54,19 @@ Atlas Panama y sus empresas afiliadas podrán utilizar **patrones de datos agreg
 
 ## 5. Data Retention
 
-We retain your information while your subscription is active and for a reasonable period after cancellation.
+We retain your information while your subscription is active. Once it has expired, if you do not wish to renew it, your information will be deleted from our files after two (2) months.
 
 ### 5. Retención de Datos (ES)
 
-Conservamos su información mientras su suscripción esté activa y por un período razonable posterior a la cancelación.
+Conservamos su información mientras su suscripción esté activa. Una vez vencida, si usted no desea renovarla, transcurridos dos (2) meses su información será eliminada de nuestros archivos.
 
 ## 6. Your Rights
 
-Under Panama's Law 81 of 2019 on Personal Data Protection, you have the right to access, rectify, cancel/delete, or object to the processing of your personal information. To exercise these rights, contact us at operations@atlaspanama.com.
+Under Panama's Law 81 of 2019 on Personal Data Protection, you have the right to access your personal information, to have it rectified, to cancel or delete it, and to object to its processing. To exercise these rights, write to us at operations@atlaspanama.com and we will proceed in accordance with your request.
 
 ### 6. Sus Derechos (ES)
 
-Conforme a la Ley 81 de 2019 de Panamá sobre Protección de Datos Personales, usted tiene derecho a acceder, rectificar, cancelar/eliminar, u oponerse al tratamiento de su información personal. Para ejercer estos derechos, contáctenos en operations@atlaspanama.com.
+Conforme a la Ley 81 de 2019 de Panamá sobre Protección de Datos Personales, usted tiene derecho a acceder a su información personal, a que sea rectificada, a cancelarla o eliminarla, y a oponerse a su tratamiento. Para ejercer estos derechos, escríbanos a operations@atlaspanama.com y procederemos conforme a su petición.
 
 ## 7. Security
 
@@ -91,3 +91,11 @@ Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, United States
 ### 9. Contacto (ES)
 
 Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, Estados Unidos — operations@atlaspanama.com.
+
+## 10. Acceptance
+
+By subscribing to our platform, you accept our [Terms of Service](https://atlaspanama.com/terms), as well as our Privacy Policy for the service. For questions about this Policy, write to us at operations@atlaspanama.com.
+
+### 10. Aceptación (ES)
+
+Al suscribirse a nuestra plataforma, usted acepta nuestros [Términos y Condiciones](https://atlaspanama.com/terminos), así como nuestra Política de Privacidad en el servicio. Para consultas sobre esta Política, escríbanos a operations@atlaspanama.com.
