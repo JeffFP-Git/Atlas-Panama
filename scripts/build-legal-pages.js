@@ -225,12 +225,14 @@ const PRIVACY = {
       es: { h: 'Información que Recopilamos', p: [
         'Recopilamos únicamente la información necesaria para prestar el Servicio: su correo electrónico; los datos de identificación del bien inmueble o entidad que usted registra para monitoreo (folio, código de ubicación, RUC, nombre); su idioma preferido; y, si usted lo proporciona de forma opcional, su número de teléfono (por ejemplo, para notificaciones vía WhatsApp).',
         'También registramos de forma anónima los términos que se escriben en el buscador de nuestra página de Preguntas Frecuentes, sin vincularlos a ningún usuario, con el fin de mejorar su contenido.',
+        'Contamos las visitas a nuestro sitio web de forma anónima y sin cookies: la dirección IP se convierte en un código no reversible que cambia cada día y se descarta, y solo conservamos totales (número de visitas, páginas vistas y sitio de procedencia).',
         'Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico y el identificador de tarjeta que nos proporciona Stripe (no el número de su tarjeta). Estos códigos se conservan aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.',
         '<strong>No almacenamos su información de pago.</strong> El procesamiento de pagos lo realiza Stripe, Inc., un tercero, conforme a su propia política de privacidad.',
       ] },
       en: { h: 'Information We Collect', p: [
         'We collect only the information necessary to provide the Service: your email address; the identifying details of the real property or entity you register for monitoring (folio, location code, RUC, name); your preferred language; and, if you optionally provide it, your phone number (for example, for WhatsApp notifications).',
         'We also anonymously record the terms typed into the search box on our Frequently Asked Questions page, without linking them to any user, in order to improve its content.',
+        'We count visits to our website anonymously and without cookies: the IP address is turned into a non-reversible code that changes every day and is discarded, and we keep only totals (number of visits, pages viewed, and referring site).',
         'To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address and the card identifier provided by Stripe (not your card number). These codes are kept even after the rest of your information is deleted, solely to prevent repeated free trials.',
         '<strong>We do not store your payment information.</strong> Payments are processed by Stripe, Inc., a third party, under its own privacy policy.',
       ] },

@@ -11,6 +11,8 @@ import { searchPropertyMatches } from './lib/propertySearch.js';
 import * as auth from './lib/auth.js';
 import * as storage from './lib/introPipelineStorage.js';
 import * as trials from './lib/trials.js';
+import * as analytics from './lib/analytics.js';
+import { buildDailyReport, sendDailyReport, startDailyReport } from './lib/dailyReport.js';
 import * as scheduler from './lib/dailyScheduler.js';
 import { sendEmail, sendWelcomeEmail } from './lib/email.js';
 import { getStripeClient, createCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
@@ -157,6 +159,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Count human visits to public pages for the daily report (no cookies; see lib/analytics.js)
+app.use(analytics.trackPageView);
 
 // Serve static dashboard
 const ROOT_DIR = process.cwd();
@@ -434,6 +439,22 @@ try {
   console.error('[Storage] Could not write storage marker:', err.message);
 }
 const SERVER_STARTED_AT = new Date().toISOString();
+
+// Daily activity report: preview any day's report as a web page (?date=YYYY-MM-DD,
+// default yesterday; date=today for today so far), or resend it with ?send=1.
+app.get('/admin/daily-report', requireAdminApiKey, async (req, res) => {
+  const date = req.query.date === 'today' ? analytics.panamaDateString() : (/^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : undefined);
+  try {
+    if (req.query.send === '1') {
+      const sent = await sendDailyReport(date);
+      return res.json({ ok: true, sent });
+    }
+    const { subject, html } = buildDailyReport(date);
+    return res.send(`<html><head><meta charset="utf-8"><title>${subject}</title></head><body style="font-family:sans-serif;max-width:720px;margin:24px auto;padding:0 16px;">${html}</body></html>`);
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
   let storageFirstUsedAt = null;
@@ -2386,6 +2407,7 @@ try {
     // This ensures scheduled jobs don't block API requests
     setImmediate(() => {
       initializeScheduler();
+      startDailyReport();
       try {
         const seeded = trials.seedFromExistingSubscriptions(storage.listSubscriptionRequests());
         if (seeded > 0) console.log(`[Trial] Marked ${seeded} existing subscriber email(s) as already subscribed (no free trial on their next signup).`);
