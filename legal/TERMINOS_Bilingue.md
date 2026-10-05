@@ -116,6 +116,8 @@ Atlas Panama se reserva el derecho de incluir contenido publicitario o patrocina
 
 The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions **renew automatically** at the end of each period unless the Subscriber cancels beforehand using the "Manage subscription" link included in every email Atlas Panama sends them. Cancellation takes effect at the end of the current billing period.
 
+**Free trial.** Each Subscriber's first subscription includes a thirty (30) day free trial. A valid payment card is required to subscribe, but no charge is made during the trial. When the trial ends, the subscription continues automatically at the price of the chosen plan, unless the Subscriber cancels before it ends, in which case no charge is made. Only one free trial is allowed per person, per email address, and per card; if the card or email was already used for a free trial, billing starts immediately. Additional subscriptions by the same Subscriber are billed from day one.
+
 **No refunds, whether full or partial, are offered for periods already billed**, unless applicable law requires otherwise.
 
 If the Subscriber does not renew payment of their subscription before it expires, their information will be deleted from Atlas Panama's files after two (2) months, in accordance with the [Privacy Policy](https://atlaspanama.com/privacy).
@@ -123,6 +125,8 @@ If the Subscriber does not renew payment of their subscription before it expires
 ### 11. Suscripción, Renovación Automática, Cancelación y Reembolsos (ES)
 
 El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.
+
+**Prueba gratis.** La primera suscripción de cada Suscriptor incluye una prueba gratis de treinta (30) días. Se requiere una tarjeta de pago válida al suscribirse, pero no se realiza ningún cargo durante la prueba. Al terminar la prueba, la suscripción continúa automáticamente al precio del plan elegido, salvo que el Suscriptor la cancele antes de su vencimiento, en cuyo caso no se realiza ningún cargo. Se permite una sola prueba gratis por persona, por dirección de correo electrónico y por tarjeta; si la tarjeta o el correo ya se utilizaron para una prueba gratis, el cobro comienza de inmediato. Las suscripciones adicionales del mismo Suscriptor se facturan desde el primer día.
 
 **No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados**, salvo que la ley aplicable exija lo contrario.
 

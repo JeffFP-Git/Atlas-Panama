@@ -10,6 +10,7 @@ import { searchEntityMatches } from './lib/entitySearch.js';
 import { searchPropertyMatches } from './lib/propertySearch.js';
 import * as auth from './lib/auth.js';
 import * as storage from './lib/introPipelineStorage.js';
+import * as trials from './lib/trials.js';
 import * as scheduler from './lib/dailyScheduler.js';
 import { sendEmail, sendWelcomeEmail } from './lib/email.js';
 import { getStripeClient, createCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
@@ -919,8 +920,9 @@ app.get('/subscribe/request/:id', async (req, res) => {
     });
   }
   
-  // Return subscription data (including extracted data)
-  return res.json({ ok: true, request });
+  // Return subscription data (including extracted data), plus whether this email still
+  // qualifies for the free trial (the plan page shows the trial offer only if so).
+  return res.json({ ok: true, request, trialEligible: request.confirmed !== true && trials.isEmailEligible(request.email), trialDays: trials.TRIAL_DAYS });
 });
 
 // Subscriber clicks "This is the one" from the disambiguation email (classification
@@ -1236,6 +1238,53 @@ app.post('/subscribe/end-all', requireAdminApiKey, (req, res) => {
 
 // Public endpoint: Verify subscription with email and code
 // Shared by both the manual-code POST endpoint and the one-click GET link below.
+/**
+ * Runs once at activation, before confirmAndScheduleSubscription: records the email as
+ * having had its one subscription (so it never gets another free trial) and, if this
+ * subscription started on a free trial, enforces one-trial-per-card — a card that
+ * already had a trial has its trial ended immediately (billing starts today). Stores
+ * trialStatus ('trialing' | 'ended_card_reused' | 'none') and trialEndsAt (YYYY-MM-DD)
+ * for the welcome email, the plan page, and the trial-ending reminder.
+ * Never throws: a Stripe hiccup here must not block activation.
+ */
+async function applyTrialRules(requestId, stripeSubscriptionId) {
+  const request = storage.getSubscriptionRequest(requestId);
+  if (!request || request.trialStatus) return; // already applied (success page + webhook can both fire)
+  trials.recordEmail(request.email);
+  let trialStatus = 'none';
+  let trialEndsAt = null;
+  try {
+    const stripe = getStripeClient();
+    const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId, { expand: ['default_payment_method'] });
+    if (sub.status === 'trialing' && sub.trial_end) {
+      let fingerprint = sub.default_payment_method?.card?.fingerprint || null;
+      if (!fingerprint && sub.customer) {
+        const pms = await stripe.paymentMethods.list({ customer: sub.customer, type: 'card', limit: 1 });
+        fingerprint = pms.data[0]?.card?.fingerprint || null;
+      }
+      if (fingerprint && trials.cardAlreadyUsed(fingerprint)) {
+        await stripe.subscriptions.update(stripeSubscriptionId, { trial_end: 'now', proration_behavior: 'none' });
+        trialStatus = 'ended_card_reused';
+        console.log(`[Trial] ${requestId}: card already had a free trial — trial ended, billing starts today.`);
+      } else {
+        trials.recordCard(fingerprint);
+        trialStatus = 'trialing';
+        // Calendar date in Panama time, matching what Stripe shows the subscriber
+        trialEndsAt = new Date(sub.trial_end * 1000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+      }
+    }
+  } catch (err) {
+    console.error(`[Trial] Could not apply trial rules for ${requestId}:`, err.message);
+    await sendAdminAlertEmail({
+      subject: `Free-trial check failed: ${request.email}`,
+      context: 'applyTrialRules',
+      subscription: request,
+      error: err
+    }).catch(() => {});
+  }
+  storage.updateSubscriptionRequest(requestId, { trialStatus, trialEndsAt });
+}
+
 function confirmAndScheduleSubscription(requestId) {
   const confirmedRequest = storage.confirmSubscription(requestId, true);
   if (!confirmedRequest) return null;
@@ -1272,6 +1321,8 @@ function confirmAndScheduleSubscription(requestId) {
       recipientEmail: confirmedRequest.email,
       displayName: scheduler.displayNameFor(confirmedRequest),
       manageUrl: scheduler.manageUrlFor(confirmedRequest),
+      trialStatus: confirmedRequest.trialStatus,
+      trialEndsAt: confirmedRequest.trialEndsAt,
       language: confirmedRequest.language,
       planLabel,
       renewalDate
@@ -1312,6 +1363,7 @@ app.get('/subscribe/request/:id/checkout', async (req, res) => {
     }
     const chosenPlan = plan === 'annual' ? 'annual' : 'monthly';
     const session = await createCheckoutSession(request, chosenPlan, {
+      trialDays: trials.isEmailEligible(request.email) ? trials.TRIAL_DAYS : 0,
       successUrl: `${API_BASE_URL}/subscribe/request/${id}/checkout-success?token=${token}&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${API_BASE_URL}/payment.html?requestId=${id}&token=${token}&result=cancelled`
     });
@@ -1336,7 +1388,8 @@ app.get('/subscribe/request/:id/checkout-success', async (req, res) => {
     }
     const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.retrieve(session_id);
-    if (session.payment_status !== 'paid' || session.metadata?.requestId !== id) {
+    const checkoutDone = session.status === 'complete' && (session.payment_status === 'paid' || session.payment_status === 'no_payment_required');
+    if (!checkoutDone || session.metadata?.requestId !== id) {
       // Not confirmed yet (e.g. still processing) — send them back to the plan page;
       // if the webhook or a refresh catches up, confirmed will already be true by then.
       return res.redirect(303, `/payment.html?requestId=${id}&token=${token}`);
@@ -1346,6 +1399,7 @@ app.get('/subscribe/request/:id/checkout-success', async (req, res) => {
       stripeSubscriptionId: session.subscription,
       plan: session.metadata.plan
     });
+    await applyTrialRules(id, session.subscription);
     confirmAndScheduleSubscription(id);
     return res.redirect(303, `/payment.html?requestId=${id}&token=${token}&result=success`);
   } catch (err) {
@@ -1403,7 +1457,7 @@ app.post('/webhooks/stripe', async (req, res) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const requestId = session.metadata?.requestId;
-    if (requestId && session.payment_status === 'paid') {
+    if (requestId && (session.payment_status === 'paid' || session.payment_status === 'no_payment_required')) {
       const request = storage.getSubscriptionRequest(requestId);
       if (request && request.confirmed !== true) {
         storage.updateSubscriptionRequest(requestId, {
@@ -1411,6 +1465,7 @@ app.post('/webhooks/stripe', async (req, res) => {
           stripeSubscriptionId: session.subscription,
           plan: session.metadata.plan
         });
+        await applyTrialRules(requestId, session.subscription);
         confirmAndScheduleSubscription(requestId);
         console.log(`[Stripe webhook] Activated subscription ${requestId} via checkout.session.completed`);
       }
@@ -2331,6 +2386,12 @@ try {
     // This ensures scheduled jobs don't block API requests
     setImmediate(() => {
       initializeScheduler();
+      try {
+        const seeded = trials.seedFromExistingSubscriptions(storage.listSubscriptionRequests());
+        if (seeded > 0) console.log(`[Trial] Marked ${seeded} existing subscriber email(s) as already subscribed (no free trial on their next signup).`);
+      } catch (err) {
+        console.error('[Trial] Could not seed trial registry:', err.message);
+      }
       recoverInterruptedSignups().catch(err => console.error('[Recovery] Failed:', err));
     });
     console.log('📡 Server is running. Press Ctrl+C to stop.\n');

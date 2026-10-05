@@ -125,11 +125,13 @@ const TERMS = {
     {
       es: { h: 'Suscripción, Renovación Automática, Cancelación y Reembolsos', p: [
         'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.',
+        '<strong>Prueba gratis.</strong> La primera suscripción de cada Suscriptor incluye una prueba gratis de treinta (30) días. Se requiere una tarjeta de pago válida al suscribirse, pero no se realiza ningún cargo durante la prueba. Al terminar la prueba, la suscripción continúa automáticamente al precio del plan elegido, salvo que el Suscriptor la cancele antes de su vencimiento, en cuyo caso no se realiza ningún cargo. Se permite una sola prueba gratis por persona, por dirección de correo electrónico y por tarjeta; si la tarjeta o el correo ya se utilizaron para una prueba gratis, el cobro comienza de inmediato. Las suscripciones adicionales del mismo Suscriptor se facturan desde el primer día.',
         '<strong>No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados</strong>, salvo que la ley aplicable exija lo contrario.',
         'Si el Suscriptor no renueva el pago de su suscripción antes de su vencimiento, su información será eliminada de los archivos de Atlas Panama transcurridos dos (2) meses, conforme a la <a href="/privacidad">Política de Privacidad</a>.',
       ] },
       en: { h: 'Subscription, Automatic Renewal, Cancellation, and Refunds', p: [
         'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand using the "Manage subscription" link included in every email Atlas Panama sends them. Cancellation takes effect at the end of the current billing period.',
+        '<strong>Free trial.</strong> Each Subscriber\'s first subscription includes a thirty (30) day free trial. A valid payment card is required to subscribe, but no charge is made during the trial. When the trial ends, the subscription continues automatically at the price of the chosen plan, unless the Subscriber cancels before it ends, in which case no charge is made. Only one free trial is allowed per person, per email address, and per card; if the card or email was already used for a free trial, billing starts immediately. Additional subscriptions by the same Subscriber are billed from day one.',
         '<strong>No refunds, whether full or partial, are offered for periods already billed</strong>, unless applicable law requires otherwise.',
         'If the Subscriber does not renew payment of their subscription before it expires, their information will be deleted from Atlas Panama\'s files after two (2) months, in accordance with the <a href="/privacy">Privacy Policy</a>.',
       ] },
@@ -223,11 +225,13 @@ const PRIVACY = {
       es: { h: 'Información que Recopilamos', p: [
         'Recopilamos únicamente la información necesaria para prestar el Servicio: su correo electrónico; los datos de identificación del bien inmueble o entidad que usted registra para monitoreo (folio, código de ubicación, RUC, nombre); su idioma preferido; y, si usted lo proporciona de forma opcional, su número de teléfono (por ejemplo, para notificaciones vía WhatsApp).',
         'También registramos de forma anónima los términos que se escriben en el buscador de nuestra página de Preguntas Frecuentes, sin vincularlos a ningún usuario, con el fin de mejorar su contenido.',
+        'Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico y el identificador de tarjeta que nos proporciona Stripe (no el número de su tarjeta). Estos códigos se conservan aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.',
         '<strong>No almacenamos su información de pago.</strong> El procesamiento de pagos lo realiza Stripe, Inc., un tercero, conforme a su propia política de privacidad.',
       ] },
       en: { h: 'Information We Collect', p: [
         'We collect only the information necessary to provide the Service: your email address; the identifying details of the real property or entity you register for monitoring (folio, location code, RUC, name); your preferred language; and, if you optionally provide it, your phone number (for example, for WhatsApp notifications).',
         'We also anonymously record the terms typed into the search box on our Frequently Asked Questions page, without linking them to any user, in order to improve its content.',
+        'To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address and the card identifier provided by Stripe (not your card number). These codes are kept even after the rest of your information is deleted, solely to prevent repeated free trials.',
         '<strong>We do not store your payment information.</strong> Payments are processed by Stripe, Inc., a third party, under its own privacy policy.',
       ] },
     },

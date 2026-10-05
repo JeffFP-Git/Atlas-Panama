@@ -173,6 +173,7 @@
       <div class="icon info">💳</div>
       <h1 data-i18n="payment.chooseTitle">Confirme su correo y elija su plan</h1>
       <p class="subtitle" id="chooseSubtitle" data-i18n="payment.chooseBody">Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.</p>
+      <div class="info-box" id="trialBanner" hidden></div>
       <a id="monthlyLink" class="plan-btn" href="#">
         <span class="plan-price">$1 / <span data-i18n="payment.month">mes</span></span>
         <span class="plan-note" data-i18n="payment.monthlyNote">Facturado mensualmente</span>
@@ -181,6 +182,7 @@
         <span class="plan-price">$10 / <span data-i18n="payment.year">año</span></span>
         <span class="plan-note" data-i18n="payment.annualNote">Facturado anualmente · Ahorre ~17%</span>
       </a>
+      <p id="trialFine" class="plan-fine" style="font-size:13px;color:#777;margin-top:12px;" hidden></p>
     </div>
 
     <div id="stateAlreadyActive" hidden>
@@ -239,7 +241,13 @@
         'payment.tryAgainBtn': 'Elegir plan de nuevo',
         'payment.errorTitle': 'No pudimos continuar',
         'payment.errorBody': 'No pudimos encontrar esta solicitud de suscripción, o hubo un problema al confirmar el pago. Use el enlace de su correo más reciente.',
-        'payment.forLabel': 'Para: {name}'
+        'payment.forLabel': 'Para: {name}',
+        'payment.trialBanner': '🎁 <strong>{days} días gratis.</strong> No se le cobrará nada hoy; su tarjeta se usará a partir del <strong>{date}</strong>. Cancele antes de esa fecha y no paga nada.',
+        'payment.monthlyNoteTrial': '{days} días gratis, luego facturado mensualmente',
+        'payment.annualNoteTrial': '{days} días gratis, luego facturado anualmente · Ahorre ~17%',
+        'payment.trialFine': 'Una prueba gratis por persona y por tarjeta. Si su tarjeta ya se usó para una prueba gratis, el cobro comienza de inmediato.',
+        'payment.successTrial': 'Su prueba gratis está activa: no se le cobrará nada hasta el {date}.',
+        'payment.successCardReused': 'Esta tarjeta ya se había usado para una prueba gratis, por lo que el cobro de su plan comenzó hoy.'
       },
       en: {
         'nav.subscribe': 'Subscribe',
@@ -261,7 +269,13 @@
         'payment.tryAgainBtn': 'Choose a plan again',
         'payment.errorTitle': 'We couldn\'t continue',
         'payment.errorBody': 'We couldn\'t find this subscription request, or there was a problem confirming payment. Please use the link from your most recent email.',
-        'payment.forLabel': 'For: {name}'
+        'payment.forLabel': 'For: {name}',
+        'payment.trialBanner': '🎁 <strong>{days} days free.</strong> You won\'t be charged today; your card will be charged starting <strong>{date}</strong>. Cancel before then and you pay nothing.',
+        'payment.monthlyNoteTrial': '{days} days free, then billed monthly',
+        'payment.annualNoteTrial': '{days} days free, then billed annually · Save ~17%',
+        'payment.trialFine': 'One free trial per person and per card. If your card was already used for a free trial, billing starts right away.',
+        'payment.successTrial': 'Your free trial is active: no charge until {date}.',
+        'payment.successCardReused': 'This card had already been used for a free trial, so billing for your plan started today.'
       }
     };
 
@@ -289,6 +303,7 @@
       document.getElementById('langEn').classList.toggle('active', lang === 'en');
       applyTranslations();
       updateDynamicText();
+      if (typeof updateTrialText === 'function' && lastRequest) updateTrialText();
     }
 
     document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
@@ -313,6 +328,38 @@
         return 'Folio ' + (request.folio || '?') + (request.codigo ? ' / ' + request.codigo : '');
       }
       return request.name || request.nameOrFolio || '';
+    }
+
+    let trialInfo = { eligible: false, days: 30 };
+
+    function formatDate(isoDate) {
+      // isoDate 'YYYY-MM-DD' — format as a calendar date without timezone shifts
+      const [y, m, d] = isoDate.split('-').map(Number);
+      return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-PA', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    }
+
+    function updateTrialText() {
+      const banner = document.getElementById('trialBanner');
+      const fine = document.getElementById('trialFine');
+      const monthlyNote = document.querySelector('#monthlyLink .plan-note');
+      const annualNote = document.querySelector('#annualLink .plan-note');
+      if (trialInfo.eligible) {
+        // Same calendar date Stripe shows: today + trial days, in Panama time
+        const firstCharge = new Date(Date.now() + trialInfo.days * 86400000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+        banner.innerHTML = t('payment.trialBanner', { days: trialInfo.days, date: formatDate(firstCharge) });
+        fine.textContent = t('payment.trialFine');
+        monthlyNote.textContent = t('payment.monthlyNoteTrial', { days: trialInfo.days });
+        annualNote.textContent = t('payment.annualNoteTrial', { days: trialInfo.days });
+      }
+      banner.hidden = fine.hidden = !trialInfo.eligible;
+      const successInfo = document.getElementById('successInfo');
+      if (successInfo && lastRequest) {
+        if (lastRequest.trialStatus === 'trialing' && lastRequest.trialEndsAt) {
+          successInfo.innerHTML += '<br>' + t('payment.successTrial', { date: formatDate(lastRequest.trialEndsAt) });
+        } else if (lastRequest.trialStatus === 'ended_card_reused') {
+          successInfo.innerHTML += '<br>' + t('payment.successCardReused');
+        }
+      }
     }
 
     function updateDynamicText() {
@@ -348,7 +395,9 @@
           return;
         }
         lastRequest = data.request;
+        trialInfo = { eligible: data.trialEligible === true, days: data.trialDays || 30 };
         updateDynamicText();
+        updateTrialText();
 
         if (result === 'success') {
           showState('stateSuccess');

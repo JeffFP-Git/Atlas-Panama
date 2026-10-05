@@ -18,6 +18,8 @@ We collect only the information necessary to provide the Service: your email add
 
 We also anonymously record the terms typed into the search box on our Frequently Asked Questions page, without linking them to any user, in order to improve its content.
 
+To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address and the card identifier provided by Stripe (not your card number). These codes are kept even after the rest of your information is deleted, solely to prevent repeated free trials.
+
 **We do not store your payment information.** Payments are processed by Stripe, Inc., a third party, under its own privacy policy.
 
 ### 1. Información que Recopilamos (ES)
@@ -25,6 +27,8 @@ We also anonymously record the terms typed into the search box on our Frequently
 Recopilamos únicamente la información necesaria para prestar el Servicio: su correo electrónico; los datos de identificación del bien inmueble o entidad que usted registra para monitoreo (folio, código de ubicación, RUC, nombre); su idioma preferido; y, si usted lo proporciona de forma opcional, su número de teléfono (por ejemplo, para notificaciones vía WhatsApp).
 
 También registramos de forma anónima los términos que se escriben en el buscador de nuestra página de Preguntas Frecuentes, sin vincularlos a ningún usuario, con el fin de mejorar su contenido.
+
+Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico y el identificador de tarjeta que nos proporciona Stripe (no el número de su tarjeta). Estos códigos se conservan aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.
 
 **No almacenamos su información de pago.** El procesamiento de pagos lo realiza Stripe, Inc., un tercero, conforme a su propia política de privacidad.
 
