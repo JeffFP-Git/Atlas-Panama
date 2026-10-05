@@ -247,6 +247,7 @@
         'payment.annualNoteTrial': '{days} días gratis, luego facturado anualmente · Ahorre ~17%',
         'payment.trialFine': 'Una prueba gratis por persona y por tarjeta. Si su tarjeta ya se usó para una prueba gratis, el cobro comienza de inmediato.',
         'payment.successTrial': 'Su prueba gratis está activa: no se le cobrará nada hasta el {date}.',
+        'payment.noTrialNote': 'La prueba gratis de 30 días aplica a la primera suscripción de cada correo electrónico. Como este correo ya tiene una suscripción, esta propiedad o entidad se factura desde hoy.',
         'payment.successCardReused': 'Esta tarjeta ya se había usado para una prueba gratis, por lo que el cobro de su plan comenzó hoy.'
       },
       en: {
@@ -275,6 +276,7 @@
         'payment.annualNoteTrial': '{days} days free, then billed annually · Save ~17%',
         'payment.trialFine': 'One free trial per person and per card. If your card was already used for a free trial, billing starts right away.',
         'payment.successTrial': 'Your free trial is active: no charge until {date}.',
+        'payment.noTrialNote': 'The 30-day free trial applies to the first subscription for each email address. Since this email already has a subscription, this property or entity is billed starting today.',
         'payment.successCardReused': 'This card had already been used for a free trial, so billing for your plan started today.'
       }
     };
@@ -356,7 +358,9 @@
         monthlyNote.textContent = t('payment.monthlyNoteTrial', { days: trialInfo.days });
         annualNote.textContent = t('payment.annualNoteTrial', { days: trialInfo.days });
       }
-      banner.hidden = fine.hidden = !trialInfo.eligible;
+      banner.hidden = !trialInfo.eligible;
+      fine.hidden = false;
+      if (!trialInfo.eligible) fine.textContent = t('payment.noTrialNote');
       const successInfo = document.getElementById('successInfo');
       if (successInfo && lastRequest) {
         if (lastRequest.trialStatus === 'trialing' && lastRequest.trialEndsAt) {
