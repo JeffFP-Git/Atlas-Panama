@@ -400,7 +400,14 @@ async function startJob(id) {
   }
 }
 
+// Set when Railway asks this process to stop (SIGTERM during a redeploy). From then on no
+// new queue jobs start; the one already running is allowed to finish (see shutdown
+// handler near the bottom). Anything still queued is picked up again by the next
+// process via recoverInterruptedSignups().
+let shuttingDown = false;
+
 function maybeStartNext() {
+  if (shuttingDown) return;
   while (runningCount < MAX_CONCURRENCY && queue.length > 0) {
     const nextId = queue.shift();
     const job = jobs.get(nextId);
@@ -862,6 +869,7 @@ app.post('/subscribe/submit', async (req, res) => {
       maybeStartNext();
       process.stdout.write(`   📥 Enqueued subscription pipeline job: ${jobId}\n`);
     } else {
+      storage.updateSubscriptionRequest(request.id, { deferred: true });
       process.stdout.write(`   ⏸️  Processing deferred (deferProcessing=true)\n`);
     }
     
@@ -922,19 +930,26 @@ app.get('/subscribe/request/:id', async (req, res) => {
 // the select and one-click-verify endpoints below. Sent immediately via a streamed
 // response so the subscriber sees it right away, even though (for now) the actual
 // work behind these two specific links is fast — see respondWithWaitingThenResult.
-function waitingMessageForTipo(tipo) {
-  const label = tipo === 'inmueble' ? 'property' : tipo === 'fundacion' ? 'foundation' : 'company';
-  return `We are checking the Registro Público to find your ${label}. This can take a couple of minutes, so please be patient.`;
+function waitingMessageForTipo(tipo, lang) {
+  if (lang === 'en') {
+    const label = tipo === 'inmueble' ? 'property' : tipo === 'fundacion' ? 'foundation' : 'company';
+    return `We are checking the Registro Público to find your ${label}. This can take a couple of minutes, so please be patient.`;
+  }
+  const label = tipo === 'inmueble' ? 'su propiedad' : tipo === 'fundacion' ? 'su fundación' : 'su sociedad';
+  return `Estamos revisando el Registro Público para encontrar ${label}. Esto puede tardar un par de minutos; por favor tenga paciencia.`;
 }
 
 // Streams an immediate "please wait" message, then swaps in the real result once
 // workFn() resolves — so the subscriber never sees a blank/loading browser tab with
 // no explanation while a GET link (email button) is being processed server-side.
-async function respondWithWaitingThenResult(res, waitingMessage, workFn) {
+async function respondWithWaitingThenResult(res, waiting, workFn) {
+  // waiting: { message, lang } (lang 'en' or 'es' — the subscriber's chosen language)
+  const waitingMessage = typeof waiting === 'string' ? waiting : waiting.message;
+  const lang = (waiting && waiting.lang) === 'en' ? 'en' : 'es';
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.write(`<html><body style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:0 20px;">
     <div id="waiting">
-      <h2 style="color:#667eea;">⏳ Please wait...</h2>
+      <h2 style="color:#667eea;">⏳ ${lang === 'en' ? 'Please wait...' : 'Por favor espere...'}</h2>
       <p>${waitingMessage}</p>
     </div>
     <div id="result" style="display:none;"></div>
@@ -943,7 +958,7 @@ async function respondWithWaitingThenResult(res, waitingMessage, workFn) {
   try {
     resultHtml = await workFn();
   } catch (err) {
-    resultHtml = `<h2 style="color:#e74c3c;">⚠️ Something went wrong</h2><p>${(err && err.message) || String(err)}</p>`;
+    resultHtml = `<h2 style="color:#e74c3c;">⚠️ ${lang === 'en' ? 'Something went wrong' : 'Algo salió mal'}</h2><p>${(err && err.message) || String(err)}</p>`;
   }
   res.write(`<script>
     document.getElementById('waiting').style.display = 'none';
@@ -970,7 +985,7 @@ app.get('/subscribe/request/:id/select', async (req, res) => {
     return res.status(400).send('Invalid selection.');
   }
 
-  return respondWithWaitingThenResult(res, waitingMessageForTipo(request.tipo), async () => {
+  return respondWithWaitingThenResult(res, { message: waitingMessageForTipo(request.tipo, request.language), lang: request.language }, async () => {
     const match = request.matches[idx];
     const identity = matchIdentityFields(request.tipo, match);
     // The frontend expects datosDelFolio/datosDelInmueble to carry a rendered {html,
@@ -987,8 +1002,11 @@ app.get('/subscribe/request/:id/select', async (req, res) => {
 
     await sendConfirmedMatchVerificationEmail({ ...request, ...identity }, renderMatchAsPropertyData(match));
 
-    return `<h2 style="color:#27ae60;">✓ Got it — ${matchDisplayLabel(request.tipo, match)}</h2>
-      <p>We've sent you an email with a "Verify &amp; Activate" button — click it to finish setting up your subscription.</p>`;
+    return request.language === 'en'
+      ? `<h2 style="color:#27ae60;">✓ Got it — ${matchDisplayLabel(request.tipo, match)}</h2>
+      <p>We've sent you an email with a <strong>"Confirm Email &amp; Choose My Plan"</strong> button — click it to confirm your email and finish your subscription.</p>`
+      : `<h2 style="color:#27ae60;">✓ Listo — ${matchDisplayLabel(request.tipo, match)}</h2>
+      <p>Le enviamos un correo con el botón <strong>"Confirmar correo y elegir mi plan"</strong> — haga clic en él para confirmar su correo y completar su suscripción.</p>`;
   });
 });
 
@@ -1552,7 +1570,7 @@ app.get('/subscribe/request/:id/verify', async (req, res) => {
     return res.status(400).send(renderVerifyResultPage({ ok: false, message: 'This subscription isn\'t ready to activate yet (no confirmed match on file). Please use the link from a more recent email.' }));
   }
 
-  return respondWithWaitingThenResult(res, waitingMessageForTipo(request.tipo), async () => {
+  return respondWithWaitingThenResult(res, { message: waitingMessageForTipo(request.tipo, request.language), lang: request.language }, async () => {
     const confirmedRequest = confirmAndScheduleSubscription(id);
     if (!confirmedRequest) return renderVerifyResultPage({ ok: false, message: 'Subscription request not found.' });
     return renderVerifyResultPage({ ok: true, message: 'Your subscription is now active! You\'ll receive daily updates by email.', request: confirmedRequest });
@@ -2235,6 +2253,76 @@ process.on('unhandledRejection', (reason, promise) => {
   // Don't exit, keep the server running
 });
 
+// ---------------------------------------------------------------------------
+// Redeploy safety. A redeploy (or any restart) replaces this process; signup searches
+// in progress or waiting in the in-memory queue would otherwise be lost silently, with
+// the subscriber never getting their email.
+// ---------------------------------------------------------------------------
+
+// Signups interrupted more than this long ago are not restarted (the person has likely
+// moved on; emailing them hours later would be confusing) — they get an admin alert.
+const RECOVERY_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+
+/** On startup: re-run signup searches a previous process didn't finish. */
+async function recoverInterruptedSignups() {
+  const interrupted = storage.listSubscriptionRequests()
+    .filter(r => (r.status === 'pending' || r.status === 'processing') && r.confirmed !== true && !r.deferred)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // oldest first
+  if (interrupted.length === 0) return;
+
+  const now = Date.now();
+  for (const r of interrupted) {
+    const lastActivity = new Date(r.updatedAt || r.createdAt).getTime();
+    if (now - lastActivity > RECOVERY_MAX_AGE_MS) {
+      storage.updateSubscriptionRequest(r.id, { status: 'error', error: 'Interrupted by a server restart and too old to restart automatically.' });
+      console.log(`[Recovery] Not restarting stale signup ${r.id} (${r.email}) — last activity ${r.updatedAt || r.createdAt}.`);
+      await sendAdminAlertEmail({
+        subject: `Signup interrupted and not restarted: ${r.email}`,
+        context: 'recoverInterruptedSignups (startup)',
+        subscription: r,
+        error: 'A signup search was cut off by a server restart more than 6 hours ago, so it was not re-run automatically. The subscriber may need a nudge to sign up again.'
+      }).catch(() => {});
+      continue;
+    }
+    storage.updateSubscriptionRequest(r.id, { status: 'pending' });
+    const jobId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    jobs.set(jobId, {
+      id: jobId,
+      type: 'subscriptionPipeline',
+      status: 'queued',
+      payload: { requestId: r.id, recovered: true },
+      enqueuedAt: new Date().toISOString(),
+      logs: []
+    });
+    queue.push(jobId);
+    console.log(`[Recovery] Restarting interrupted signup ${r.id} (${r.email}) as job ${jobId}.`);
+  }
+  maybeStartNext();
+}
+
+// Railway sends SIGTERM before replacing this process. Stop starting new work, let the
+// running job finish (up to SHUTDOWN_GRACE_MS — Railway's own draining time,
+// RAILWAY_DEPLOYMENT_DRAINING_SECONDS, caps how long it actually waits), then exit.
+// If the process is killed before the job finishes, recoverInterruptedSignups() in the
+// next process re-runs it, and the scheduler's catch-up checker re-runs daily checks.
+const SHUTDOWN_GRACE_MS = 150 * 1000;
+
+function handleShutdownSignal(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[Shutdown] ${signal} received — no new jobs will start; waiting for ${runningCount} running job(s) to finish.`);
+  const startedAt = Date.now();
+  const timer = setInterval(() => {
+    if (runningCount === 0 || Date.now() - startedAt > SHUTDOWN_GRACE_MS) {
+      clearInterval(timer);
+      console.log(`[Shutdown] Exiting (${runningCount === 0 ? 'all jobs finished' : 'grace period over'}).`);
+      process.exit(0);
+    }
+  }, 1000);
+}
+process.on('SIGTERM', () => handleShutdownSignal('SIGTERM'));
+process.on('SIGINT', () => handleShutdownSignal('SIGINT'));
+
 const port = process.env.PORT || 3000;
 try {
   const server = app.listen(port, '0.0.0.0', () => {
@@ -2243,6 +2331,7 @@ try {
     // This ensures scheduled jobs don't block API requests
     setImmediate(() => {
       initializeScheduler();
+      recoverInterruptedSignups().catch(err => console.error('[Recovery] Failed:', err));
     });
     console.log('📡 Server is running. Press Ctrl+C to stop.\n');
   });
