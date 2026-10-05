@@ -58,21 +58,21 @@ EL SERVICIO SE PROPORCIONA "TAL CUAL" Y "SEGÚN DISPONIBILIDAD", SIN GARANTÍAS 
 
 ## 6. Accuracy, Completeness, and Timeliness of Information
 
-Atlas Panama extracts and processes information directly from the Public Registry through automated processes. **Atlas Panama does not guarantee the accuracy, completeness, timeliness, or continuous availability of that information.** The Subscriber acknowledges and agrees that:
+Atlas Panama obtains and processes information directly from the Public Registry. **Atlas Panama does not guarantee the accuracy, completeness, timeliness, or continuous availability of that information.** The Subscriber acknowledges and agrees that:
 
 (a) The Public Registry itself may contain errors, delays, or discrepancies that are beyond the control of Atlas Panama.
 
-(b) Automated extraction processes may temporarily fail, be blocked, or encounter technical changes in the Public Registry's systems, which **could result in a notification being delayed or, in exceptional cases, not being generated.**
+(b) Lookup processes may temporarily fail, be interrupted, or encounter technical changes in the Public Registry's systems, which **could result in a notification being delayed or, in exceptional cases, not being generated.**
 
 (c) The Service is a monitoring tool and does not replace direct and independent verification by the Subscriber with the Public Registry, especially for important legal, financial, or business decisions.
 
 ### 6. Exactitud, Integridad y Oportunidad de la Información (ES)
 
-Atlas Panama extrae y procesa información directamente del Registro Público mediante procesos automatizados. **Atlas Panama no garantiza la exactitud, integridad, actualidad o disponibilidad continua de dicha información.** El Suscriptor reconoce y acepta que:
+Atlas Panama obtiene y procesa información directamente del Registro Público. **Atlas Panama no garantiza la exactitud, integridad, actualidad o disponibilidad continua de dicha información.** El Suscriptor reconoce y acepta que:
 
 (a) El propio Registro Público puede contener errores, retrasos o discrepancias que están fuera del control de Atlas Panama.
 
-(b) Los procesos de extracción automatizada pueden fallar temporalmente, verse bloqueados, o encontrarse con cambios técnicos en los sistemas del Registro Público, lo cual **podría resultar en que una notificación se retrase o, en casos excepcionales, no se genere.**
+(b) Los procesos de consulta pueden fallar temporalmente, verse interrumpidos, o encontrarse con cambios técnicos en los sistemas del Registro Público, lo cual **podría resultar en que una notificación se retrase o, en casos excepcionales, no se genere.**
 
 (c) El Servicio es una herramienta de monitoreo y no sustituye la verificación directa e independiente por parte del Suscriptor ante el Registro Público, especialmente en decisiones legales, financieras o de negocios de importancia.
 

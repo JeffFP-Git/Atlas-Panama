@@ -76,15 +76,15 @@ const TERMS = {
     },
     {
       es: { h: 'Exactitud, Integridad y Oportunidad de la Información', p: [
-        'Atlas Panama extrae y procesa información directamente del Registro Público mediante procesos automatizados. <strong>Atlas Panama no garantiza la exactitud, integridad, actualidad o disponibilidad continua de dicha información.</strong> El Suscriptor reconoce y acepta que:',
+        'Atlas Panama obtiene y procesa información directamente del Registro Público. <strong>Atlas Panama no garantiza la exactitud, integridad, actualidad o disponibilidad continua de dicha información.</strong> El Suscriptor reconoce y acepta que:',
         '(a) El propio Registro Público puede contener errores, retrasos o discrepancias que están fuera del control de Atlas Panama.',
-        '(b) Los procesos de extracción automatizada pueden fallar temporalmente, verse bloqueados, o encontrarse con cambios técnicos en los sistemas del Registro Público, lo cual <strong>podría resultar en que una notificación se retrase o, en casos excepcionales, no se genere.</strong>',
+        '(b) Los procesos de consulta pueden fallar temporalmente, verse interrumpidos, o encontrarse con cambios técnicos en los sistemas del Registro Público, lo cual <strong>podría resultar en que una notificación se retrase o, en casos excepcionales, no se genere.</strong>',
         '(c) El Servicio es una herramienta de monitoreo y no sustituye la verificación directa e independiente por parte del Suscriptor ante el Registro Público, especialmente en decisiones legales, financieras o de negocios de importancia.',
       ] },
       en: { h: 'Accuracy, Completeness, and Timeliness of Information', p: [
-        'Atlas Panama extracts and processes information directly from the Public Registry through automated processes. <strong>Atlas Panama does not guarantee the accuracy, completeness, timeliness, or continuous availability of that information.</strong> The Subscriber acknowledges and agrees that:',
+        'Atlas Panama obtains and processes information directly from the Public Registry. <strong>Atlas Panama does not guarantee the accuracy, completeness, timeliness, or continuous availability of that information.</strong> The Subscriber acknowledges and agrees that:',
         '(a) The Public Registry itself may contain errors, delays, or discrepancies that are beyond the control of Atlas Panama.',
-        '(b) Automated extraction processes may temporarily fail, be blocked, or encounter technical changes in the Public Registry\'s systems, which <strong>could result in a notification being delayed or, in exceptional cases, not being generated.</strong>',
+        '(b) Lookup processes may temporarily fail, be interrupted, or encounter technical changes in the Public Registry\'s systems, which <strong>could result in a notification being delayed or, in exceptional cases, not being generated.</strong>',
         '(c) The Service is a monitoring tool and does not replace direct and independent verification by the Subscriber with the Public Registry, especially for important legal, financial, or business decisions.',
       ] },
     },
