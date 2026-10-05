@@ -233,7 +233,12 @@
       }
     };
 
-    let currentLang = localStorage.getItem('atlaspanama_lang') || 'es';
+    // Saved choice from the ES/EN switch if any; otherwise the visitor's browser/phone
+    // language (English → English, anything else → Spanish).
+    let currentLang = (function () {
+      try { const saved = localStorage.getItem('atlaspanama_lang'); if (saved === 'es' || saved === 'en') return saved; } catch (e) {}
+      return /^en\b/i.test(navigator.language || '') ? 'en' : 'es';
+    })();
     if (currentLang !== 'es' && currentLang !== 'en') currentLang = 'es';
 
     function t(key) {

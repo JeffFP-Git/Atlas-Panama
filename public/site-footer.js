@@ -43,7 +43,7 @@
       const saved = localStorage.getItem('atlaspanama_lang');
       if (saved === 'es' || saved === 'en') return saved;
     } catch (e) { /* storage blocked — fall through to default */ }
-    return 'es';
+    return /^en\b/i.test(navigator.language || '') ? 'en' : 'es';
   }
 
   function render() {
