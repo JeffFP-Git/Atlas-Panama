@@ -32,10 +32,10 @@ const TERMS = {
   clauses: [
     {
       es: { h: 'Aceptación de los Términos', p: [
-        'Al registrarse, suscribirse o utilizar de cualquier forma la plataforma Atlas Panama (en adelante, "la Plataforma", "el Servicio" o "Atlas Panama"), operada por Atlas Panama LLC, usted (en adelante, "el Suscriptor" o "usted") acepta estar sujeto a estos Términos y Condiciones (en adelante, "los Términos"), así como a la <a href="/privacidad">Política de Privacidad</a> de Atlas Panama, la cual se incorpora por referencia. Si usted no está de acuerdo con estos Términos, no debe utilizar el Servicio.',
+        'Al registrarse, suscribirse o utilizar de cualquier forma la plataforma Atlas Panama (en adelante, "la Plataforma", "el Servicio" o "Atlas Panama"), operada por Atlas Panama LLC, sociedad de responsabilidad limitada registrada en el Estado de Florida, Estados Unidos de América, usted (en adelante, "el Suscriptor" o "usted") acepta estar sujeto a estos Términos y Condiciones (en adelante, "los Términos"), así como a la <a href="/privacidad">Política de Privacidad</a> de Atlas Panama, la cual se incorpora por referencia. Si usted no está de acuerdo con estos Términos, no debe utilizar el Servicio.',
       ] },
       en: { h: 'Acceptance of the Terms', p: [
-        'By registering for, subscribing to, or using in any way the Atlas Panama platform (hereinafter, the "Platform," the "Service," or "Atlas Panama"), operated by Atlas Panama LLC, you (hereinafter, the "Subscriber" or "you") agree to be bound by these Terms and Conditions (hereinafter, the "Terms"), as well as by the Atlas Panama <a href="/privacy">Privacy Policy</a>, which is incorporated by reference. If you do not agree to these Terms, you must not use the Service.',
+        'By registering for, subscribing to, or using in any way the Atlas Panama platform (hereinafter, the "Platform," the "Service," or "Atlas Panama"), operated by Atlas Panama LLC, a limited liability company registered in the State of Florida, United States of America, you (hereinafter, the "Subscriber" or "you") agree to be bound by these Terms and Conditions (hereinafter, the "Terms"), as well as by the Atlas Panama <a href="/privacy">Privacy Policy</a>, which is incorporated by reference. If you do not agree to these Terms, you must not use the Service.',
       ] },
     },
     {
@@ -124,11 +124,11 @@ const TERMS = {
     },
     {
       es: { h: 'Suscripción, Renovación Automática, Cancelación y Reembolsos', p: [
-        'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente escribiendo a <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>. La cancelación surtirá efecto al final del período de facturación vigente.',
+        'El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones <strong>se renuevan automáticamente</strong> al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.',
         '<strong>No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados</strong>, salvo que la ley aplicable exija lo contrario.',
       ] },
       en: { h: 'Subscription, Automatic Renewal, Cancellation, and Refunds', p: [
-        'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand by emailing <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>. Cancellation takes effect at the end of the current billing period.',
+        'The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions <strong>renew automatically</strong> at the end of each period unless the Subscriber cancels beforehand using the "Manage subscription" link included in every email Atlas Panama sends them. Cancellation takes effect at the end of the current billing period.',
         '<strong>No refunds, whether full or partial, are offered for periods already billed</strong>, unless applicable law requires otherwise.',
       ] },
     },
@@ -213,8 +213,8 @@ const PRIVACY = {
   slugEs: 'privacidad', slugEn: 'privacy', md: 'PRIVACIDAD_Bilingue.md',
   title: { es: 'Política de Privacidad', en: 'Privacy Policy' },
   intro: {
-    es: 'Esta Política de Privacidad describe cómo Atlas Panama LLC ("Atlas Panama" o "nosotros") recopila, utiliza y protege la información personal de los usuarios de la plataforma Atlas Panama (el "Servicio").',
-    en: 'This Privacy Policy describes how Atlas Panama LLC ("Atlas Panama" or "we") collects, uses, and protects the personal information of users of the Atlas Panama platform (the "Service").',
+    es: 'Esta Política de Privacidad describe cómo Atlas Panama LLC, sociedad de responsabilidad limitada registrada en el Estado de Florida, Estados Unidos de América ("Atlas Panama" o "nosotros") recopila, utiliza y protege la información personal de los usuarios de la plataforma Atlas Panama (el "Servicio").',
+    en: 'This Privacy Policy describes how Atlas Panama LLC, a limited liability company registered in the State of Florida, United States of America ("Atlas Panama" or "we") collects, uses, and protects the personal information of users of the Atlas Panama platform (the "Service").',
   },
   clauses: [
     {

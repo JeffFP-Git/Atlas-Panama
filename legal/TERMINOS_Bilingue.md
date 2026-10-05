@@ -10,11 +10,11 @@ Effective date: October 3, 2026 · Fecha de entrada en vigor: 3 de octubre de 20
 
 ## 1. Acceptance of the Terms
 
-By registering for, subscribing to, or using in any way the Atlas Panama platform (hereinafter, the "Platform," the "Service," or "Atlas Panama"), operated by Atlas Panama LLC, you (hereinafter, the "Subscriber" or "you") agree to be bound by these Terms and Conditions (hereinafter, the "Terms"), as well as by the Atlas Panama [Privacy Policy](https://atlaspanama.com/privacy), which is incorporated by reference. If you do not agree to these Terms, you must not use the Service.
+By registering for, subscribing to, or using in any way the Atlas Panama platform (hereinafter, the "Platform," the "Service," or "Atlas Panama"), operated by Atlas Panama LLC, a limited liability company registered in the State of Florida, United States of America, you (hereinafter, the "Subscriber" or "you") agree to be bound by these Terms and Conditions (hereinafter, the "Terms"), as well as by the Atlas Panama [Privacy Policy](https://atlaspanama.com/privacy), which is incorporated by reference. If you do not agree to these Terms, you must not use the Service.
 
 ### 1. Aceptación de los Términos (ES)
 
-Al registrarse, suscribirse o utilizar de cualquier forma la plataforma Atlas Panama (en adelante, "la Plataforma", "el Servicio" o "Atlas Panama"), operada por Atlas Panama LLC, usted (en adelante, "el Suscriptor" o "usted") acepta estar sujeto a estos Términos y Condiciones (en adelante, "los Términos"), así como a la [Política de Privacidad](https://atlaspanama.com/privacidad) de Atlas Panama, la cual se incorpora por referencia. Si usted no está de acuerdo con estos Términos, no debe utilizar el Servicio.
+Al registrarse, suscribirse o utilizar de cualquier forma la plataforma Atlas Panama (en adelante, "la Plataforma", "el Servicio" o "Atlas Panama"), operada por Atlas Panama LLC, sociedad de responsabilidad limitada registrada en el Estado de Florida, Estados Unidos de América, usted (en adelante, "el Suscriptor" o "usted") acepta estar sujeto a estos Términos y Condiciones (en adelante, "los Términos"), así como a la [Política de Privacidad](https://atlaspanama.com/privacidad) de Atlas Panama, la cual se incorpora por referencia. Si usted no está de acuerdo con estos Términos, no debe utilizar el Servicio.
 
 ## 2. Description of the Service
 
@@ -114,13 +114,13 @@ Atlas Panama se reserva el derecho de incluir contenido publicitario o patrocina
 
 ## 11. Subscription, Automatic Renewal, Cancellation, and Refunds
 
-The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions **renew automatically** at the end of each period unless the Subscriber cancels beforehand by emailing operations@atlaspanama.com. Cancellation takes effect at the end of the current billing period.
+The Service is offered through monthly or annual subscription plans, as described on the Platform. Subscriptions **renew automatically** at the end of each period unless the Subscriber cancels beforehand using the "Manage subscription" link included in every email Atlas Panama sends them. Cancellation takes effect at the end of the current billing period.
 
 **No refunds, whether full or partial, are offered for periods already billed**, unless applicable law requires otherwise.
 
 ### 11. Suscripción, Renovación Automática, Cancelación y Reembolsos (ES)
 
-El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente escribiendo a operations@atlaspanama.com. La cancelación surtirá efecto al final del período de facturación vigente.
+El Servicio se ofrece mediante planes de suscripción mensual o anual, según se detalla en la Plataforma. Las suscripciones **se renuevan automáticamente** al final de cada período, salvo que el Suscriptor las cancele previamente mediante el enlace "Administrar suscripción" incluido en cada correo electrónico que Atlas Panama le envía. La cancelación surtirá efecto al final del período de facturación vigente.
 
 **No se ofrecen reembolsos, totales ni parciales, por períodos ya facturados**, salvo que la ley aplicable exija lo contrario.
 

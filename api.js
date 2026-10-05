@@ -12,7 +12,7 @@ import * as auth from './lib/auth.js';
 import * as storage from './lib/introPipelineStorage.js';
 import * as scheduler from './lib/dailyScheduler.js';
 import { sendEmail, sendWelcomeEmail } from './lib/email.js';
-import { getStripeClient, createCheckoutSession, PRICING } from './lib/stripe.js';
+import { getStripeClient, createCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
 import * as qaSearchLog from './lib/qaSearchLog.js';
@@ -1244,6 +1244,7 @@ function confirmAndScheduleSubscription(requestId) {
     return sendWelcomeEmail({
       recipientEmail: confirmedRequest.email,
       displayName: scheduler.displayNameFor(confirmedRequest),
+      manageUrl: scheduler.manageUrlFor(confirmedRequest),
       language: confirmedRequest.language,
       planLabel,
       renewalDate
@@ -1323,6 +1324,33 @@ app.get('/subscribe/request/:id/checkout-success', async (req, res) => {
   } catch (err) {
     console.error(`[API] Stripe checkout-success handling failed for ${id}:`, err);
     return res.redirect(303, `/payment.html?requestId=${id}&token=${token || ''}`);
+  }
+});
+
+// "Manage my subscription" link in every subscriber email: checks the per-subscription
+// access token, then sends them to Stripe's hosted Customer Portal (update card, see
+// invoices, cancel at period end). Cancelling there makes Stripe send
+// customer.subscription.deleted when the paid period ends, which stops monitoring.
+app.get('/subscribe/request/:id/manage', async (req, res) => {
+  const request = storage.getSubscriptionRequest(req.params.id);
+  if (!request || !request.accessToken || request.accessToken !== req.query.token) {
+    return res.status(404).send('Link not found or expired. / Enlace no encontrado o vencido.');
+  }
+  if (!request.stripeCustomerId) {
+    return res.redirect('/contact');
+  }
+  try {
+    const url = await createManageSession(request.stripeCustomerId, request.language);
+    return res.redirect(303, url);
+  } catch (err) {
+    console.error(`[Manage] Could not open Stripe Customer Portal for ${request.id}:`, err.message);
+    await sendAdminAlertEmail({
+      subject: `Manage-subscription link failed: ${request.email}`,
+      context: 'GET /subscribe/request/:id/manage',
+      subscription: request,
+      error: err
+    }).catch(() => {});
+    return res.redirect('/contact');
   }
 });
 

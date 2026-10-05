@@ -8,9 +8,9 @@ Effective date: October 3, 2026 · Fecha de entrada en vigor: 3 de octubre de 20
 >
 > La versión en inglés es una traducción proporcionada únicamente para conveniencia. El texto en español es la versión que rige; en caso de cualquier discrepancia o diferencia de interpretación, prevalecerá la versión en español.
 
-This Privacy Policy describes how Atlas Panama LLC ("Atlas Panama" or "we") collects, uses, and protects the personal information of users of the Atlas Panama platform (the "Service").
+This Privacy Policy describes how Atlas Panama LLC, a limited liability company registered in the State of Florida, United States of America ("Atlas Panama" or "we") collects, uses, and protects the personal information of users of the Atlas Panama platform (the "Service").
 
-*ES:* Esta Política de Privacidad describe cómo Atlas Panama LLC ("Atlas Panama" o "nosotros") recopila, utiliza y protege la información personal de los usuarios de la plataforma Atlas Panama (el "Servicio").
+*ES:* Esta Política de Privacidad describe cómo Atlas Panama LLC, sociedad de responsabilidad limitada registrada en el Estado de Florida, Estados Unidos de América ("Atlas Panama" o "nosotros") recopila, utiliza y protege la información personal de los usuarios de la plataforma Atlas Panama (el "Servicio").
 
 ## 1. Information We Collect
 
