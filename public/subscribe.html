@@ -848,6 +848,9 @@
     // than one valid combination (e.g. Folio OR Owner name for inmueble; Name and/or
     // RUC for entities), so "at least one of X/Y" is validated in JS at submit time
     // instead (see the submit handler below).
+    // WhatsApp alerts aren't built yet: the opt-in stays hidden until they are (Oct 2026,
+    // Jeff: revisit ~Oct 15 along with the relationship question). Set to true to show it.
+    const WHATSAPP_OPTIN_ENABLED = false;
     const whatsappFields = document.getElementById('whatsappFields');
     const whatsappOptIn = document.getElementById('whatsappOptIn');
     const whatsappPhoneField = document.getElementById('whatsappPhoneField');
@@ -864,7 +867,7 @@
           inmuebleFields.classList.remove('hidden');
         }
 
-        whatsappFields.classList.remove('hidden');
+        if (WHATSAPP_OPTIN_ENABLED) whatsappFields.classList.remove('hidden');
         updateWhatsappLabel();
       });
     });
