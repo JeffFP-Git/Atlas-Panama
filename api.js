@@ -826,9 +826,10 @@ app.post('/subscribe/submit', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'valid_tipo_required' });
     }
 
-    // Captures the subscriber's stated relationship to the property/entity — the
-    // concrete, on-record version of the TOS §3 legitimate-interest representation.
-    if (!relationship || !['owner', 'interested_party', 'third_party'].includes(relationship)) {
+    // Relationship to the property/entity: optional since Oct 2026 (removed from the
+    // signup form to reduce friction — Jeff's call; may come back later). Still
+    // validated if a caller sends it.
+    if (relationship && !['owner', 'interested_party', 'third_party'].includes(relationship)) {
       process.stdout.write(`   ❌ Validation failed: valid_relationship_required\n`);
       return res.status(400).json({ ok: false, error: 'valid_relationship_required' });
     }

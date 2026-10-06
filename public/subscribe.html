@@ -438,6 +438,16 @@
         opacity: 0.5;
       }
     }
+    .no-card-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #eafaf0;
+      border: 1px solid #b7e4c7;
+      border-radius: 8px;
+      color: #1e5631;
+      font-size: 14px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -530,24 +540,6 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label data-i18n="form.relationshipLabel">3. ¿Cuál es su relación con la propiedad o entidad? *</label>
-          <div class="radio-group">
-            <div class="radio-option">
-              <input type="radio" id="relationship-owner" name="relationship" value="owner" required />
-              <label for="relationship-owner" data-i18n="form.relationshipOwner">A. Propietario o representante autorizado</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="relationship-interested" name="relationship" value="interested_party" required />
-              <label for="relationship-interested" data-i18n="form.relationshipInterested">B. Parte interesada (contador, abogado, banco, etc.)</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="relationship-third" name="relationship" value="third_party" required />
-              <label for="relationship-third" data-i18n="form.relationshipThird">C. Tercero sin relación directa con el propietario (ej. comprador o inversionista potencial)</label>
-            </div>
-          </div>
-        </div>
-
         <!-- WhatsApp opt-in (shown once a tipo is selected, wording adapts to it) -->
         <div id="whatsappFields" class="form-group hidden">
           <div class="radio-option" style="align-items: flex-start; cursor: default;">
@@ -576,8 +568,9 @@
         </div>
 
         <button type="submit" id="submitBtn">
-          <span id="submitText" data-i18n="form.submitButton">4. Confirmar su Propiedad o Entidad</span>
+          <span id="submitText" data-i18n="form.submitButton">Buscar mi registro — gratis</span>
         </button>
+        <div class="no-card-note" id="noCardNote" data-i18n-html="form.noCardNote"></div>
       </form>
     </div>
 
@@ -650,10 +643,6 @@
         'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
         'form.tipoFundacion': 'B. Fundación',
         'form.tipoInmueble': 'C. Inmueble',
-        'form.relationshipLabel': '3. ¿Cuál es su relación con la propiedad o entidad? *',
-        'form.relationshipOwner': 'A. Propietario o representante autorizado',
-        'form.relationshipInterested': 'B. Parte interesada (contador, abogado, banco, etc.)',
-        'form.relationshipThird': 'C. Tercero sin relación directa con el propietario (ej. comprador o inversionista potencial)',
         'form.entityNameLabel': 'Nombre de la Empresa o Fundación',
         'form.entityNamePlaceholder': 'Ej: Mi Empresa, S.A.',
         'form.rucLabel': 'RUC (opcional)',
@@ -673,7 +662,8 @@
         'form.whatsappPhonePlaceholder': 'Ej: +507 6000-0000',
         'form.warningTitle': '⚠️ No cierre ni abandone esta página',
         'form.warningBody': 'Por favor mantenga esta página abierta mientras se procesa su solicitud. El proceso puede tardar unos minutos.',
-        'form.submitButton': '4. Confirmar su Propiedad o Entidad',
+        'form.submitButton': 'Buscar mi registro — gratis',
+        'form.noCardNote': '✅ <strong>Gratis y sin tarjeta en este paso.</strong> Primero buscamos su registro y le enviamos un correo para que confirme que es el correcto. Solo después elige su plan, y gracias a los <strong>30 días gratis</strong> no se le cobra nada durante el primer mes.',
         'loading.processing': 'Procesando su solicitud...',
         'loading.searching': 'Buscando información...',
         'loading.preparing': 'Preparando resultados...',
@@ -685,7 +675,6 @@
         'confirm.codePlaceholder': 'Ingrese el código de 8 caracteres',
         'confirm.yesButton': 'Sí - Verificar y Activar',
         'confirm.noButton': 'No - Volver al Formulario',
-        'errors.relationshipRequired': 'Por favor indique su relación con la propiedad o entidad',
         'errors.nameOrRucRequired': 'Por favor ingrese el nombre de la empresa/fundación, el RUC, o ambos',
         'errors.folioOrOwnerRequired': 'Por favor ingrese el Folio, el Nombre del Propietario, o ambos',
         'errors.whatsappPhoneRequired': 'Por favor ingrese su número de WhatsApp, o desmarque la casilla',
@@ -721,10 +710,6 @@
         'form.tipoMercantil': 'A. Mercantil – SA, Corp, Inc, or SRL',
         'form.tipoFundacion': 'B. Foundation',
         'form.tipoInmueble': 'C. Property',
-        'form.relationshipLabel': '3. What is your relationship to the property or entity? *',
-        'form.relationshipOwner': 'A. Owner or authorized representative',
-        'form.relationshipInterested': 'B. Interested party (accountant, lawyer, bank, etc.)',
-        'form.relationshipThird': 'C. Third party with no direct relationship to the owner (e.g. prospective buyer or investor)',
         'form.entityNameLabel': 'Company or Foundation Name',
         'form.entityNamePlaceholder': 'E.g: My Company, S.A.',
         'form.rucLabel': 'RUC (optional)',
@@ -744,7 +729,8 @@
         'form.whatsappPhonePlaceholder': 'E.g: +507 6000-0000',
         'form.warningTitle': '⚠️ Do not close or leave this page',
         'form.warningBody': 'Please keep this page open while your request is being processed. This can take a few minutes.',
-        'form.submitButton': '4. Confirm Your Property or Entity',
+        'form.submitButton': 'Find my record — free',
+        'form.noCardNote': '✅ <strong>Free, and no card needed at this step.</strong> We first look up your record and email you to confirm it\'s the right one. Only then do you choose a plan, and with the <strong>30-day free trial</strong> nothing is charged during the first month.',
         'loading.processing': 'Processing your request...',
         'loading.searching': 'Searching for information...',
         'loading.preparing': 'Preparing results...',
@@ -756,7 +742,6 @@
         'confirm.codePlaceholder': 'Enter the 8-character code',
         'confirm.yesButton': 'Yes - Verify and Activate',
         'confirm.noButton': 'No - Back to Form',
-        'errors.relationshipRequired': 'Please indicate your relationship to the property or entity',
         'errors.nameOrRucRequired': 'Please enter the company/foundation name, the RUC, or both',
         'errors.folioOrOwnerRequired': 'Please enter the Folio, the Owner Name, or both',
         'errors.whatsappPhoneRequired': 'Please enter your WhatsApp number, or uncheck the box',
@@ -799,6 +784,10 @@
       });
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+      });
+      // Our own authored copy with <strong> formatting — never user input.
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        el.innerHTML = t(el.getAttribute('data-i18n-html'));
       });
       updateWhatsappLabel();
     }
@@ -1283,17 +1272,9 @@
       const formData = new FormData(subscribeForm);
       const tipo = formData.get('tipo');
       const email = formData.get('email');
-      const relationship = formData.get('relationship');
-      if (!relationship) {
-        showError(t('errors.relationshipRequired'));
-        isSubmitting = false;
-        return;
-      }
-
       let payload = {
         email,
         tipo,
-        relationship,
         language: currentLang
       };
 
@@ -1448,7 +1429,7 @@
     // form) visible, and swap the heading to a "please wait" message. Hiding the whole
     // form used to leave only the "Daily Search" heading on screen.
     function setSearchingMode(on) {
-      subscribeForm.querySelectorAll(':scope > .form-group, :scope > .search-type-fields, #submitBtn')
+      subscribeForm.querySelectorAll(':scope > .form-group, :scope > .search-type-fields, #submitBtn, #noCardNote')
         .forEach(el => { el.style.display = on ? 'none' : ''; });
       if (!on) {
         // Restore the conditional sections' normal show/hide state
