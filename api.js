@@ -163,6 +163,18 @@ app.use((req, res, next) => {
 // Count human visits to public pages for the daily report (no cookies; see lib/analytics.js)
 app.use(analytics.trackPageView);
 
+// Signup-form funnel (anonymous counts): what the server answered to each submission…
+app.use('/subscribe/submit', (req, res, next) => {
+  if (req.method === 'POST') res.on('finish', () => analytics.recordEvent(`server_${res.statusCode}`));
+  next();
+});
+// …and what happened in the browser (button pressed, error message shown, script error).
+app.post('/analytics/event', (req, res) => {
+  const e = String(req.body?.e || '');
+  if (/^(submit_click|error: .{1,80}|js_error: .{1,80})$/.test(e)) analytics.recordEvent(e);
+  res.status(204).end();
+});
+
 // Serve static dashboard
 const ROOT_DIR = process.cwd();
 app.use(express.static(path.join(ROOT_DIR, 'public')));

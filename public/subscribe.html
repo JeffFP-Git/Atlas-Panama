@@ -1253,8 +1253,27 @@
       }
 
     // Handle form submission
+    // Anonymous signup-form funnel counts for the daily report (no personal data):
+    // button presses, which error message was shown, and script errors.
+    function trackFormEvent(name) {
+      try {
+        const body = JSON.stringify({ e: name });
+        if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/analytics/event', new Blob([body], { type: 'application/json' }));
+        else fetch(API_BASE + '/analytics/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true });
+      } catch (err) { /* never block the form */ }
+    }
+    window.addEventListener('error', ev => trackFormEvent('js_error: ' + String(ev.message || 'unknown').slice(0, 80)));
+    // The browser's own checks (missing/invalid email, no type chosen) stop the form
+    // before our submit handler runs — count those too.
+    subscribeForm.addEventListener('invalid', ev => {
+      // A radio group fires once per option — count it once.
+      if (ev.target.type === 'radio' && ev.target !== subscribeForm.querySelector('input[name="' + ev.target.name + '"]')) return;
+      trackFormEvent('error: browser blocked (' + (ev.target.name || ev.target.id || 'field') + ' ' + (ev.target.validity && ev.target.validity.typeMismatch ? 'invalid' : 'missing') + ')');
+    }, true);
+
     subscribeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      trackFormEvent('submit_click');
       
       // Prevent multiple simultaneous submissions (button stays enabled)
       if (isSubmitting) {
@@ -1679,6 +1698,7 @@
     });
 
     function showError(message) {
+      trackFormEvent('error: ' + String(message || '').slice(0, 80));
       errorMessage.textContent = message;
       errorMessage.style.display = 'block';
     }
