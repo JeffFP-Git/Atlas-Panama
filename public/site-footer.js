@@ -55,7 +55,7 @@
         `<a href="/contact">${f.contact}</a>` +
       `</div>` +
       `<div>© 2026 Atlas Panama LLC · 800 Silks Run #1353, Hallandale Beach, FL 33009, ${f.country}</div>` +
-      `<div><a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> · <a href="tel:+17868684257">+1 786 868 4257</a></div>`;
+      `<div><a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a> · <a href="tel:+50760863833">+507 6086-3833</a></div>`;
   }
 
   render();
