@@ -69,6 +69,12 @@
     .trial-badge-main { display: block; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
     .trial-badge-sub { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; }
     @media (max-width: 480px) { .trial-badge-main { font-size: 22px; } }
+    .sample-alert { margin-top: 18px; }
+    .sample-title { font-size: 15px; font-weight: 700; margin: 0 0 8px 0; }
+    .sample-row { display: flex; gap: 12px; justify-content: center; }
+    .sample-row a { flex: 1 1 0; max-width: 240px; color: white; text-decoration: none; font-size: 13px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .sample-row img { display: block; width: 100%; height: 150px; object-fit: cover; object-position: top; border-radius: 8px; border: 3px solid white; box-shadow: 0 6px 18px rgba(0,0,0,0.3); margin-bottom: 4px; background: white; }
+    .sample-note { font-size: 12px; opacity: 0.85; margin: 6px 0 0 0; }
     .hero-title {
       font-size: 28px;
       font-weight: 700;
@@ -475,6 +481,20 @@
       <li data-i18n="hero.bullet2">Find out about changes to your property or entity before it's too late.</li>
       <li data-i18n="hero.bullet3">We check Panama's Public Registry every single day, so you don't have to.</li>
     </ul>
+    <div class="sample-alert">
+      <p class="sample-title" data-i18n="hero.sampleTitle">This is what a change alert looks like (example):</p>
+      <div class="sample-row">
+        <a href="/images/sample-alert-email-en.png" data-i18n-href="hero.sampleEmailSrc" target="_blank" rel="noopener">
+          <img src="/images/sample-alert-email-en.png" data-i18n-src="hero.sampleEmailSrc" alt="Example alert email" />
+          <span data-i18n="hero.sampleEmailCap">The email</span>
+        </a>
+        <a href="/images/sample-alert-pdf-en.png" data-i18n-href="hero.samplePdfSrc" target="_blank" rel="noopener">
+          <img src="/images/sample-alert-pdf-en.png" data-i18n-src="hero.samplePdfSrc" alt="Example PDF report" />
+          <span data-i18n="hero.samplePdfCap">The attached PDF</span>
+        </a>
+      </div>
+      <p class="sample-note" data-i18n="hero.sampleNote">Fictional property, for illustration. Tap to enlarge.</p>
+    </div>
   </div>
   <div class="container">
     <!-- Form Page -->
@@ -633,6 +653,12 @@
         'hero.bullet2': 'Entérese de cambios en su propiedad o entidad antes de que sea demasiado tarde.',
         'hero.bullet3': 'Revisamos el Registro Público de Panamá todos los días, para que usted no tenga que hacerlo.',
         'hero.trialBadge': '🎁 30 DÍAS GRATIS',
+        'hero.sampleTitle': 'Así se ve una alerta de cambio (ejemplo):',
+        'hero.sampleEmailCap': 'El correo',
+        'hero.samplePdfCap': 'El PDF adjunto',
+        'hero.sampleNote': 'Propiedad ficticia, solo como ilustración. Toque para ampliar.',
+        'hero.sampleEmailSrc': '/images/sample-alert-email-es.png',
+        'hero.samplePdfSrc': '/images/sample-alert-pdf-es.png',
         'hero.trialBadgeSub': 'No se le cobra nada el primer mes · cancele cuando quiera y no paga nada',
         'form.title': 'Búsqueda Diaria',
         'searching.title': 'Buscando su registro...',
@@ -647,14 +673,14 @@
         'form.entityNamePlaceholder': 'Ej: Mi Empresa, S.A.',
         'form.rucLabel': 'RUC (opcional)',
         'form.rucPlaceholder': 'Ej: 1157961-1-573219 — déjelo en blanco si no lo sabe',
-        'form.mercantilHint': 'Ingrese el nombre, el RUC, o ambos.',
+        'form.mercantilHint': '💡 ¿No tiene el RUC a mano? Escriba solo el nombre. Puede ingresar el nombre, el RUC, o ambos.',
         'form.ownerNameLabel': 'Nombre del Propietario',
         'form.ownerNamePlaceholder': 'Nombre del propietario registrado',
         'form.folioLabel': 'Folio',
         'form.folioPlaceholder': 'Número de folio',
         'form.codigoLabel': 'Código de Ubicación (opcional)',
         'form.codigoPlaceholder': 'Déjelo en blanco si no lo sabe',
-        'form.inmuebleHint': 'Ingrese el Folio, el Nombre del Propietario, o ambos. Si su Folio tiene varios resultados, le enviaremos una lista para que elija el correcto.',
+        'form.inmuebleHint': '💡 ¿No tiene el folio a mano? Escriba solo el nombre del propietario. Puede ingresar el Folio, el Nombre del Propietario, o ambos; si hay varios resultados, le enviaremos una lista para que elija el correcto.',
         'form.whatsappOptInProperty': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su propiedad, además de la notificación por email?',
         'form.whatsappOptInMercantil': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su empresa, además de la notificación por email?',
         'form.whatsappOptInFundacion': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su fundación, además de la notificación por email?',
@@ -700,6 +726,12 @@
         'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
         'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
         'hero.trialBadge': '🎁 30 DAYS FREE',
+        'hero.sampleTitle': 'This is what a change alert looks like (example):',
+        'hero.sampleEmailCap': 'The email',
+        'hero.samplePdfCap': 'The attached PDF',
+        'hero.sampleNote': 'Fictional property, for illustration. Tap to enlarge.',
+        'hero.sampleEmailSrc': '/images/sample-alert-email-en.png',
+        'hero.samplePdfSrc': '/images/sample-alert-pdf-en.png',
         'hero.trialBadgeSub': 'No charge for the first month · cancel anytime and pay nothing',
         'form.title': 'Daily Search',
         'searching.title': 'Finding your record...',
@@ -714,14 +746,14 @@
         'form.entityNamePlaceholder': 'E.g: My Company, S.A.',
         'form.rucLabel': 'RUC (optional)',
         'form.rucPlaceholder': 'E.g: 1157961-1-573219 — leave blank if you don\'t know it',
-        'form.mercantilHint': 'Enter the name, the RUC, or both.',
+        'form.mercantilHint': '💡 Don\'t have the RUC handy? Just type the name. You can enter the name, the RUC, or both.',
         'form.ownerNameLabel': 'Owner Name',
         'form.ownerNamePlaceholder': 'Registered owner\'s name',
         'form.folioLabel': 'Folio',
         'form.folioPlaceholder': 'Folio number',
         'form.codigoLabel': 'Location Code (optional)',
         'form.codigoPlaceholder': 'Leave blank if you don\'t know it',
-        'form.inmuebleHint': 'Enter the Folio, the Owner Name, or both. If your Folio has multiple matches, we\'ll email you a list to pick the right one.',
+        'form.inmuebleHint': '💡 Don\'t have the folio handy? Just type the owner\'s name. You can enter the Folio, the Owner Name, or both; if there are several matches, we\'ll email you a list to pick the right one.',
         'form.whatsappOptInProperty': 'Would you like to receive a WhatsApp message when we detect a change to your property, in addition to the email notification?',
         'form.whatsappOptInMercantil': 'Would you like to receive a WhatsApp message when we detect a change to your company, in addition to the email notification?',
         'form.whatsappOptInFundacion': 'Would you like to receive a WhatsApp message when we detect a change to your foundation, in addition to the email notification?',
@@ -785,6 +817,9 @@
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
       });
+      // Language-specific images and links (the sample alert screenshots)
+      document.querySelectorAll('[data-i18n-src]').forEach(el => { el.setAttribute('src', t(el.getAttribute('data-i18n-src'))); });
+      document.querySelectorAll('[data-i18n-href]').forEach(el => { el.setAttribute('href', t(el.getAttribute('data-i18n-href'))); });
       // Our own authored copy with <strong> formatting — never user input.
       document.querySelectorAll('[data-i18n-html]').forEach(el => {
         el.innerHTML = t(el.getAttribute('data-i18n-html'));
