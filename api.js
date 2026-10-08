@@ -468,6 +468,54 @@ app.get('/admin/daily-report', requireAdminApiKey, async (req, res) => {
   }
 });
 
+// Debug a day's monitoring result: what was compared and why it did or didn't count as a
+// change. ?folio=6533 (or ?id=<subscriptionId>) &date=YYYY-MM-DD (default: latest).
+// Returns both days' record summaries, the diff, the plain-language lines and highlights.
+app.get('/admin/compare', requireAdminApiKey, async (req, res) => {
+  try {
+    const { compareRecords, describeChangesPlainLanguage, highlightsFor } = await import('./lib/changeDetection.js');
+    const subs = storage.listSubscriptionRequests({ confirmed: true });
+    const sub = subs.find(s => s.id === req.query.id) || subs.find(s => String(s.folio) === String(req.query.folio) || (s.name || '').toUpperCase() === String(req.query.name || '').toUpperCase());
+    if (!sub) return res.status(404).json({ ok: false, error: 'subscription_not_found' });
+    const dir = snapshots.subscriptionDir(sub.id);
+    const dates = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => f.slice(0, 10)).sort() : [];
+    const date = req.query.date || dates[dates.length - 1];
+    const read = d => (d ? JSON.parse(fs.readFileSync(snapshots.snapshotJsonPath(sub.id, d), 'utf8')) : null);
+    const currSnap = read(date);
+    const prevSnap = snapshots.getSnapshotBefore(sub.id, date);
+    const curr = currSnap?.record || currSnap;
+    const prev = prevSnap?.record || null;
+    const comparison = compareRecords(prev, curr);
+    const h = highlightsFor(comparison, curr);
+    const summarize = r => r && ({
+      v2: !!r.datosGeneralesV2,
+      generatedAt: r.generatedAt,
+      tabOrder: r.tabOrder,
+      dgFields: Object.keys(r.datosGenerales || {}).length,
+      prelacionRows: (r.prelacion?.rows || []).length,
+      tabs: Object.fromEntries(Object.entries(r.tabs || {}).map(([k, v]) => [k, (v || []).length]))
+    });
+    res.json({
+      ok: true,
+      subscription: { id: sub.id, name: scheduler.displayNameFor(sub), email: sub.email },
+      dates, date, previousDate: prevSnap?.dateStr || null,
+      current: summarize(curr), previous: summarize(prev),
+      hasChanges: comparison.hasChanges, isFirstRun: comparison.isFirstRun,
+      lines: describeChangesPlainLanguage(comparison, 'es'),
+      diff: {
+        topFieldChanges: comparison.topFieldChanges,
+        prelacion: comparison.prelacionDiff,
+        miembros: comparison.miembrosDiff,
+        otherTabs: comparison.otherTabsDiff
+      },
+      highlights: { ...h, datosGeneralesKeys: [...h.datosGeneralesKeys] },
+      ...(req.query.full === '1' ? { currentRecord: curr, previousRecord: prev } : {})
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
   let storageFirstUsedAt = null;
   try { storageFirstUsedAt = fs.readFileSync(STORAGE_MARKER, 'utf8').trim(); } catch {}
