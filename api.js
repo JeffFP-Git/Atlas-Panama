@@ -475,14 +475,17 @@ app.get('/admin/compare', requireAdminApiKey, async (req, res) => {
   try {
     const { compareRecords, describeChangesPlainLanguage, highlightsFor } = await import('./lib/changeDetection.js');
     const subs = storage.listSubscriptionRequests({ confirmed: true });
-    const sub = subs.find(s => s.id === req.query.id) || subs.find(s => String(s.folio) === String(req.query.folio) || (s.name || '').toUpperCase() === String(req.query.name || '').toUpperCase());
+    const q = req.query;
+    const sub = (q.id && subs.find(s => s.id === q.id))
+      || (q.folio && subs.find(s => String(s.folio) === String(q.folio)))
+      || (q.name && subs.find(s => (s.name || '').toUpperCase() === String(q.name).toUpperCase()));
     if (!sub) return res.status(404).json({ ok: false, error: 'subscription_not_found' });
     const dir = snapshots.subscriptionDir(sub.id);
     const dates = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => f.slice(0, 10)).sort() : [];
     const date = req.query.date || dates[dates.length - 1];
     const read = d => (d ? JSON.parse(fs.readFileSync(snapshots.snapshotJsonPath(sub.id, d), 'utf8')) : null);
     const currSnap = read(date);
-    const prevSnap = snapshots.getSnapshotBefore(sub.id, date);
+    const prevSnap = await snapshots.getHealedPreviousSnapshot(sub.id, date);
     const curr = currSnap?.record || currSnap;
     const prev = prevSnap?.record || null;
     const comparison = compareRecords(prev, curr);
@@ -502,6 +505,7 @@ app.get('/admin/compare', requireAdminApiKey, async (req, res) => {
       current: summarize(curr), previous: summarize(prev),
       hasChanges: comparison.hasChanges, isFirstRun: comparison.isFirstRun,
       lines: describeChangesPlainLanguage(comparison, 'es'),
+      healedSections: prevSnap?.record?._healedSections || [],
       diff: {
         topFieldChanges: comparison.topFieldChanges,
         prelacion: comparison.prelacionDiff,
