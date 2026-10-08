@@ -17,7 +17,10 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EFFECTIVE = { es: '3 de octubre de 2026', en: 'October 3, 2026' };
-const UPDATED = { es: '8 de octubre de 2026', en: 'October 8, 2026' };
+// Each document's own last-updated date (set it when that document's text changes)
+const UPDATED = { es: '8 de octubre de 2026', en: 'October 8, 2026' }; // default
+const TERMS_UPDATED = { es: '4 de octubre de 2026', en: 'October 4, 2026' };
+const PRIVACY_UPDATED = { es: '8 de octubre de 2026', en: 'October 8, 2026' };
 const CONTACT = {
   es: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, Estados Unidos — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
   en: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, United States — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
@@ -27,6 +30,7 @@ const CONTACT = {
 // contain <strong> and <a>; nothing here is user input.
 const TERMS = {
   slugEs: 'terminos', slugEn: 'terms', md: 'TERMINOS_Bilingue.md',
+  updated: TERMS_UPDATED,
   title: { es: 'Términos y Condiciones de Uso y Suscripción', en: 'Terms of Use and Subscription' },
   intro: null,
   clauses: [
@@ -215,6 +219,7 @@ const TERMS = {
 
 const PRIVACY = {
   slugEs: 'privacidad', slugEn: 'privacy', md: 'PRIVACIDAD_Bilingue.md',
+  updated: PRIVACY_UPDATED,
   title: { es: 'Política de Privacidad', en: 'Privacy Policy' },
   intro: {
     es: 'Esta Política de Privacidad describe cómo Atlas Panama LLC, sociedad de responsabilidad limitada registrada en el Estado de Florida, Estados Unidos de América ("Atlas Panama" o "nosotros") recopila, utiliza y protege la información personal de los usuarios de la plataforma Atlas Panama (el "Servicio").',
@@ -377,7 +382,7 @@ function buildSpanish(doc) {
   const body = [
     `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEn}" lang="en">English version (bilingual) / Versión bilingüe &rarr;</a></div>`,
     `    <h1>${doc.title.es}</h1>`,
-    `    <p class="dates">Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Última actualización: ${UPDATED.es}</p>`,
+    `    <p class="dates">Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Última actualización: ${(doc.updated || UPDATED).es}</p>`,
     doc.intro ? `    <p>${doc.intro.es}</p>` : '',
     ...doc.clauses.map((c, i) => `    <h2>${i + 1}. ${c.es.h}</h2>\n${paras(c.es.p, '    ')}`),
   ].filter(Boolean).join('\n\n');
@@ -389,7 +394,7 @@ function buildBilingual(doc) {
   const body = [
     `    <div class="nav-row"><a href="/">&larr; Atlas Panama</a><a href="/${doc.slugEs}" lang="es">Read in Spanish only / Leer solo en español &rarr;</a></div>`,
     `    <h1>${doc.title.en}<span class="h1-es" lang="es">${doc.title.es}</span></h1>`,
-    `    <p class="dates">Effective date: ${EFFECTIVE.en} · Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Last updated: ${UPDATED.en} · Última actualización: ${UPDATED.es}</p>`,
+    `    <p class="dates">Effective date: ${EFFECTIVE.en} · Fecha de entrada en vigor: ${EFFECTIVE.es}<br>Last updated: ${(doc.updated || UPDATED).en} · Última actualización: ${(doc.updated || UPDATED).es}</p>`,
     `    <div class="notice">\n      <p>${PREVAILS_NOTICE.en}</p>\n      <p lang="es">${PREVAILS_NOTICE.es}</p>\n    </div>`,
     doc.intro ? `    <section>\n      <p>${doc.intro.en}</p>\n${esBlock(null, [doc.intro.es])}\n    </section>` : '',
     ...doc.clauses.map((c, i) =>
