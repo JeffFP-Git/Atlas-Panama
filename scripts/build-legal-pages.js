@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EFFECTIVE = { es: '3 de octubre de 2026', en: 'October 3, 2026' };
-const UPDATED = { es: '4 de octubre de 2026', en: 'October 4, 2026' };
+const UPDATED = { es: '8 de octubre de 2026', en: 'October 8, 2026' };
 const CONTACT = {
   es: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, Estados Unidos — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
   en: 'Atlas Panama LLC, 800 Silks Run #1353, Hallandale Beach, FL 33009, United States — <a href="mailto:operations@atlaspanama.com">operations@atlaspanama.com</a>',
@@ -225,14 +225,16 @@ const PRIVACY = {
       es: { h: 'Información que Recopilamos', p: [
         'Recopilamos únicamente la información necesaria para prestar el Servicio: su correo electrónico; los datos de identificación del bien inmueble o entidad que usted registra para monitoreo (folio, código de ubicación, RUC, nombre); su idioma preferido; y, si usted lo proporciona de forma opcional, su número de teléfono (por ejemplo, para notificaciones vía WhatsApp).',
         'También registramos de forma anónima los términos que se escriben en el buscador de nuestra página de Preguntas Frecuentes, sin vincularlos a ningún usuario, con el fin de mejorar su contenido.',
-        'Contamos las visitas a nuestro sitio web de forma anónima y sin cookies: la dirección IP se convierte en un código no reversible que cambia cada día y se descarta, y solo conservamos totales (número de visitas, páginas vistas y sitio de procedencia).',
+        'Contamos las visitas a nuestro sitio web de forma anónima: la dirección IP se convierte en un código no reversible que cambia cada día y se descarta, y solo conservamos totales (número de visitas, páginas vistas, tipo de dispositivo y sitio de procedencia). Para saber cuántas visitas son nuevas o repetidas, su navegador guarda una pequeña cookie que contiene únicamente la fecha de su primera visita, sin ningún dato que lo identifique.',
+        'Si usted nos pide que le enviemos el enlace de suscripción por correo para completarla después, guardamos su correo electrónico solo para enviarle ese enlace y un único recordatorio al día siguiente; lo eliminamos a los dos (2) meses.',
         'Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico y el identificador de tarjeta que nos proporciona Stripe (no el número de su tarjeta). Estos códigos se conservan aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.',
         '<strong>No almacenamos su información de pago.</strong> El procesamiento de pagos lo realiza Stripe, Inc., un tercero, conforme a su propia política de privacidad.',
       ] },
       en: { h: 'Information We Collect', p: [
         'We collect only the information necessary to provide the Service: your email address; the identifying details of the real property or entity you register for monitoring (folio, location code, RUC, name); your preferred language; and, if you optionally provide it, your phone number (for example, for WhatsApp notifications).',
         'We also anonymously record the terms typed into the search box on our Frequently Asked Questions page, without linking them to any user, in order to improve its content.',
-        'We count visits to our website anonymously and without cookies: the IP address is turned into a non-reversible code that changes every day and is discarded, and we keep only totals (number of visits, pages viewed, and referring site).',
+        'We count visits to our website anonymously: the IP address is turned into a non-reversible code that changes every day and is discarded, and we keep only totals (number of visits, pages viewed, device type, and referring site). To know how many visits are new or repeat visits, your browser stores a small cookie containing only the date of your first visit, with no data that identifies you.',
+        'If you ask us to email you the signup link so you can finish later, we keep your email address only to send you that link and a single reminder the next day; we delete it after two (2) months.',
         'To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address and the card identifier provided by Stripe (not your card number). These codes are kept even after the rest of your information is deleted, solely to prevent repeated free trials.',
         '<strong>We do not store your payment information.</strong> Payments are processed by Stripe, Inc., a third party, under its own privacy policy.',
       ] },

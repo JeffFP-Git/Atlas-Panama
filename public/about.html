@@ -238,7 +238,9 @@
       }
     }
     .plans { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
-    .plan { flex: 1 1 200px; border: 2px solid #e0e0e0; border-radius: 10px; padding: 18px; text-align: center; }
+    .plan { flex: 1 1 200px; border: 2px solid #e0e0e0; border-radius: 10px; padding: 18px; text-align: center; text-decoration: none; color: inherit; display: block; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
+    .plan:hover { border-color: #667eea; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(102,126,234,0.2); }
+    .plan-go { margin-top: 10px; font-weight: 700; color: #667eea; font-size: 14px; }
     .plan-name { font-weight: 600; color: #333; margin-bottom: 6px; }
     .plan-price { font-size: 26px; font-weight: 700; color: #667eea; }
     .plan-price span { font-size: 14px; font-weight: 500; color: #666; }
@@ -289,16 +291,18 @@
       <h2 class="section-title" data-i18n="about.pricingTitle">Plans &amp; Pricing</h2>
       <p class="description" data-i18n-html="about.pricingIntro"></p>
       <div class="plans">
-        <div class="plan">
+        <a class="plan" href="/subscribe">
           <div class="plan-name" data-i18n="about.monthlyName">Monthly</div>
           <div class="plan-price">$1 <span data-i18n="about.perMonth">USD / month</span></div>
           <div class="plan-note" data-i18n="about.monthlyNote">Recurring subscription, billed monthly</div>
-        </div>
-        <div class="plan">
+          <div class="plan-go" data-i18n="about.planGo">Start free →</div>
+        </a>
+        <a class="plan" href="/subscribe">
           <div class="plan-name" data-i18n="about.annualName">Annual</div>
           <div class="plan-price">$10 <span data-i18n="about.perYear">USD / year</span></div>
           <div class="plan-note" data-i18n="about.annualNote">Recurring subscription, billed once a year</div>
-        </div>
+          <div class="plan-go" data-i18n="about.planGo">Start free →</div>
+        </a>
       </div>
       <p class="plan-fine" data-i18n-html="about.pricingFine"></p>
       <p class="plan-fine" data-i18n="about.company"></p>
@@ -315,6 +319,7 @@
         'about.subtitle': 'Monitoreo confiable para propietarios de bienes raíces, empresarios y dueños de sociedades en Panamá.',
         'about.description': '<p>Si usted tiene una propiedad, una sociedad o una fundación en Panamá, sabe que no siempre es fácil estar pendiente de cualquier movimiento o cambio que aparezca en el Registro Público.</p><p>Con <strong>Atlas Panama</strong>, usted no tiene que estar revisando constantemente. Nosotros monitoreamos diariamente sus propiedades y entidades legales, y le enviamos una alerta apenas detectamos algún cambio.</p><p>Así usted puede mantenerse informado y actuar rápidamente si aparece un movimiento que no reconoce o que requiere su atención.</p><p><strong>Más tranquilidad, más control y menos sorpresas.</strong></p><p>Atlas Panama le ayuda a proteger y mantener vigilado lo que ha construido en Panamá.</p><p>Y esto apenas comienza. Estamos desarrollando nuevas herramientas de información pública para brindar cada vez más apoyo a propietarios, inversionistas y empresarios en Panamá.</p>',
         'about.ctaButton': 'Suscribirse Ahora',
+        'about.planGo': 'Comenzar gratis →',
         'about.trialMain': '🎁 Pruébelo gratis por 30 días',
         'about.trialSub': 'Luego solo $1 al mes o $10 al año · cancele cuando quiera',
         'about.trialCta': 'Comenzar mi mes gratis',
@@ -337,6 +342,7 @@
         'about.subtitle': 'Reliable monitoring for real estate owners, business owners, and company owners in Panama.',
         'about.description': '<p>If you own a property, a company, or a foundation in Panama, you know it\'s not always easy to keep track of every movement or change that shows up in the Public Registry.</p><p>With <strong>Atlas Panama</strong>, you don\'t have to keep checking yourself. We monitor your properties and legal entities every day, and send you an alert the moment we detect a change.</p><p>That way, you stay informed and can act quickly if something shows up that you don\'t recognize or that needs your attention.</p><p><strong>More peace of mind, more control, and fewer surprises.</strong></p><p>Atlas Panama helps you protect and keep an eye on what you\'ve built in Panama.</p><p>And this is just the beginning. We\'re building new public information tools to support property owners, investors, and business owners in Panama even more.</p>',
         'about.ctaButton': 'Subscribe Now',
+        'about.planGo': 'Start free →',
         'about.trialMain': '🎁 Try it free for 30 days',
         'about.trialSub': 'Then just $1/month or $10/year · cancel anytime',
         'about.trialCta': 'Start my free month',

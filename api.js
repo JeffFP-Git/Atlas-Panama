@@ -12,6 +12,7 @@ import * as auth from './lib/auth.js';
 import * as storage from './lib/introPipelineStorage.js';
 import * as trials from './lib/trials.js';
 import * as analytics from './lib/analytics.js';
+import * as leads from './lib/leads.js';
 import { buildDailyReport, sendDailyReport, startDailyReport } from './lib/dailyReport.js';
 import * as scheduler from './lib/dailyScheduler.js';
 import { sendEmail, sendWelcomeEmail } from './lib/email.js';
@@ -168,10 +169,34 @@ app.use('/subscribe/submit', (req, res, next) => {
   if (req.method === 'POST') res.on('finish', () => analytics.recordEvent(`server_${res.statusCode}`));
   next();
 });
+// "Send me the link to finish later" (signup page): saves the email, sends the link now
+// and one reminder the next day if they haven't signed up (lib/leads.js). A hidden
+// "website" field catches bots; a small per-IP limit stops abuse.
+const linkRequestsByIp = new Map(); // ip -> [timestamps]
+app.post('/subscribe/remind', async (req, res) => {
+  const { email, language, website } = req.body || {};
+  if (website) return res.json({ ok: true }); // bot filled the hidden field
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(email || '').trim())) {
+    return res.status(400).json({ ok: false, error: 'valid_email_required' });
+  }
+  const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress;
+  const recent = (linkRequestsByIp.get(ip) || []).filter(ts => Date.now() - ts < 60 * 60 * 1000);
+  if (recent.length >= 5) return res.status(429).json({ ok: false, error: 'too_many_requests' });
+  linkRequestsByIp.set(ip, [...recent, Date.now()]);
+  try {
+    const result = await leads.requestLink(email, language);
+    analytics.recordEvent(`link_${result}`);
+    return res.json({ ok: result !== 'error', result });
+  } catch (err) {
+    console.error('[Leads] Could not send link:', err.message);
+    return res.status(500).json({ ok: false, error: 'send_failed' });
+  }
+});
+
 // …and what happened in the browser (button pressed, error message shown, script error).
 app.post('/analytics/event', (req, res) => {
   const e = String(req.body?.e || '');
-  if (/^(submit_click|error: .{1,80}|js_error: .{1,80})$/.test(e)) analytics.recordEvent(e);
+  if (/^(submit_click|later_open|error: .{1,80}|js_error: .{1,80})$/.test(e)) analytics.recordEvent(e);
   res.status(204).end();
 });
 
@@ -2473,6 +2498,7 @@ try {
     setImmediate(() => {
       initializeScheduler();
       startDailyReport();
+      leads.startLeadReminders();
       try {
         const seeded = trials.seedFromExistingSubscriptions(storage.listSubscriptionRequests());
         if (seeded > 0) console.log(`[Trial] Marked ${seeded} existing subscriber email(s) as already subscribed (no free trial on their next signup).`);

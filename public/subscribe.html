@@ -444,6 +444,13 @@
         opacity: 0.5;
       }
     }
+    .later-box { margin: 0 0 20px 0; padding: 12px 14px; background: #f3f4fb; border: 1px solid #d6d9f0; border-radius: 8px; }
+    .later-toggle { all: unset; cursor: pointer; color: #4c55b8; font-size: 14px; font-weight: 600; line-height: 1.4; display: block; }
+    .later-form { margin-top: 10px; }
+    .later-form input[type=email] { width: 100%; margin-bottom: 8px; }
+    .later-form button { width: 100%; padding: 10px; background: #667eea; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; }
+    .later-msg { font-size: 13px; margin: 8px 0 0 0; color: #1e5631; }
+    .later-msg.err { color: #a50e0e; }
     .no-card-note {
       margin-top: 14px;
       padding: 12px 14px;
@@ -501,6 +508,16 @@
     <div id="formPage">
       <h1 data-i18n="form.title">Búsqueda Diaria</h1>
       <p class="subtitle" data-i18n="form.subtitle">Complete el formulario para recibir información diaria sobre su propiedad o entidad</p>
+
+      <div class="later-box" id="laterBox">
+        <button type="button" class="later-toggle" id="laterToggle" data-i18n="later.toggle">📩 Don't have your property details handy? We'll email you the link to finish later.</button>
+        <div class="later-form hidden" id="laterForm">
+          <input type="email" id="laterEmail" data-i18n-placeholder="later.placeholder" placeholder="your@email.com" />
+          <input type="text" id="laterWebsite" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
+          <button type="button" id="laterSend" data-i18n="later.send">Email me the link</button>
+          <p class="later-msg" id="laterMsg"></p>
+        </div>
+      </div>
 
       <form id="subscribeForm">
         <div class="form-group">
@@ -653,6 +670,13 @@
         'hero.bullet2': 'Entérese de cambios en su propiedad o entidad antes de que sea demasiado tarde.',
         'hero.bullet3': 'Revisamos el Registro Público de Panamá todos los días, para que usted no tenga que hacerlo.',
         'hero.trialBadge': '🎁 30 DÍAS GRATIS',
+        'later.toggle': '📩 ¿No tiene los datos de su propiedad a mano? Le enviamos el enlace por correo para completarlo después.',
+        'later.placeholder': 'su@email.com',
+        'later.send': 'Enviarme el enlace',
+        'later.sent': '✅ Listo. Revise su correo: le enviamos el enlace. Mañana le mandaremos un solo recordatorio si aún no se ha suscrito.',
+        'later.duplicate': '✅ Ya le enviamos el enlace a este correo. Revise su bandeja de entrada (y la carpeta de spam).',
+        'later.invalid': 'Por favor escriba un correo electrónico válido.',
+        'later.error': 'No pudimos enviar el correo en este momento. Intente de nuevo en unos minutos.',
         'hero.sampleTitle': 'Así se ve una alerta de cambio (ejemplo):',
         'hero.sampleEmailCap': 'El correo',
         'hero.samplePdfCap': 'El PDF adjunto',
@@ -726,6 +750,13 @@
         'hero.bullet2': 'Find out about changes to your property or entity before it\'s too late.',
         'hero.bullet3': 'We check Panama\'s Public Registry every single day, so you don\'t have to.',
         'hero.trialBadge': '🎁 30 DAYS FREE',
+        'later.toggle': '📩 Don\'t have your property details handy? We\'ll email you the link to finish later.',
+        'later.placeholder': 'your@email.com',
+        'later.send': 'Email me the link',
+        'later.sent': '✅ Done. Check your email: we sent you the link. Tomorrow we\'ll send one reminder if you haven\'t signed up yet.',
+        'later.duplicate': '✅ We already sent the link to this email. Check your inbox (and spam folder).',
+        'later.invalid': 'Please enter a valid email address.',
+        'later.error': 'We couldn\'t send the email right now. Please try again in a few minutes.',
         'hero.sampleTitle': 'This is what a change alert looks like (example):',
         'hero.sampleEmailCap': 'The email',
         'hero.samplePdfCap': 'The attached PDF',
@@ -1305,6 +1336,26 @@
       if (ev.target.type === 'radio' && ev.target !== subscribeForm.querySelector('input[name="' + ev.target.name + '"]')) return;
       trackFormEvent('error: browser blocked (' + (ev.target.name || ev.target.id || 'field') + ' ' + (ev.target.validity && ev.target.validity.typeMismatch ? 'invalid' : 'missing') + ')');
     }, true);
+
+    // "Send me the link to finish later"
+    document.getElementById('laterToggle').addEventListener('click', () => {
+      document.getElementById('laterForm').classList.toggle('hidden');
+      trackFormEvent('later_open');
+    });
+    document.getElementById('laterSend').addEventListener('click', async () => {
+      const msg = document.getElementById('laterMsg');
+      const email = document.getElementById('laterEmail').value.trim();
+      msg.className = 'later-msg';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = t('later.invalid'); msg.className = 'later-msg err'; return; }
+      const btn = document.getElementById('laterSend'); btn.disabled = true;
+      try {
+        const r = await fetch(API_BASE + '/subscribe/remind', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, language: currentLang, website: document.getElementById('laterWebsite').value }) });
+        const data = await r.json().catch(() => ({}));
+        if (r.ok && data.ok) { msg.textContent = t(data.result === 'duplicate' ? 'later.duplicate' : 'later.sent'); }
+        else { msg.textContent = t(r.status === 400 ? 'later.invalid' : 'later.error'); msg.className = 'later-msg err'; btn.disabled = false; }
+      } catch (err) { msg.textContent = t('later.error'); msg.className = 'later-msg err'; btn.disabled = false; }
+    });
 
     subscribeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
