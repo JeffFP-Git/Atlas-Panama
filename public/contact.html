@@ -146,6 +146,27 @@
     document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
     setLanguage(currentLang);
   </script>
+  <script>
+    // Remember the campaign tag a visitor arrived with (?src=fb-boquete-adB) for 30 days,
+    // so a later signup is credited to the post that brought them. Our own email links
+    // (link-email, reminder-email) don't overwrite the original tag.
+    (function () {
+      try {
+        const src = new URLSearchParams(location.search).get('src');
+        if (!src) return;
+        const clean = src.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60);
+        const current = JSON.parse(localStorage.getItem('ap_src') || 'null');
+        const own = /^(link-email|reminder-email)$/.test(clean);
+        if (clean && !(own && current)) localStorage.setItem('ap_src', JSON.stringify({ src: clean, at: Date.now() }));
+      } catch (e) {}
+    })();
+    window.apCampaignSource = function () {
+      try {
+        const v = JSON.parse(localStorage.getItem('ap_src') || 'null');
+        return v && Date.now() - v.at < 30 * 86400000 ? v.src : null;
+      } catch (e) { return null; }
+    };
+  </script>
   <script src="/site-footer.js"></script>
 </body>
 </html>

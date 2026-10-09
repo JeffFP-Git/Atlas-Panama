@@ -13,6 +13,7 @@ import * as storage from './lib/introPipelineStorage.js';
 import * as trials from './lib/trials.js';
 import * as analytics from './lib/analytics.js';
 import * as leads from './lib/leads.js';
+import { campaignResults, campaignResultsHtml } from './lib/campaigns.js';
 import { buildDailyReport, sendDailyReport, startDailyReport } from './lib/dailyReport.js';
 import * as scheduler from './lib/dailyScheduler.js';
 import { sendEmail, sendWelcomeEmail } from './lib/email.js';
@@ -545,6 +546,14 @@ app.get('/admin/compare', requireAdminApiKey, async (req, res) => {
   }
 });
 
+// Campaign results by tracking tag, Facebook group and ad version (?since=YYYY-MM-DD,
+// ?format=json for raw numbers).
+app.get('/admin/campaigns', requireAdminApiKey, (req, res) => {
+  const opts = /^\d{4}-\d{2}-\d{2}$/.test(req.query.since || '') ? { sinceDate: req.query.since } : {};
+  if (req.query.format === 'json') return res.json({ ok: true, ...campaignResults(opts) });
+  res.send(`<html><head><meta charset="utf-8"><title>Atlas Panama campaigns</title></head><body style="font-family:sans-serif;max-width:820px;margin:24px auto;padding:0 16px;"><h2>Campaign results${opts.sinceDate ? ' since ' + opts.sinceDate : ' (all time)'}</h2>${campaignResultsHtml(opts)}</body></html>`);
+});
+
 app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
   let storageFirstUsedAt = null;
   try { storageFirstUsedAt = fs.readFileSync(STORAGE_MARKER, 'utf8').trim(); } catch {}
@@ -880,7 +889,10 @@ app.get('/files/:name', requireAdminApiKey, (req, res) => {
 app.post('/subscribe/submit', async (req, res) => {
   const startTime = Date.now();
   try {
-    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, relationship, whatsappOptIn, whatsappPhone, language } = req.body;
+    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, relationship, whatsappOptIn, whatsappPhone, language, source } = req.body;
+    // Campaign tag the visitor arrived with (e.g. "fb-boquete-adB"), remembered by the
+    // site and carried through signup, trial and payment for the campaign report.
+    const cleanSource = String(source || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60) || null;
     // `name` is the primary field for mercantil/fundacion (most subscribers know the
     // entity's name, not its RUC); `nameOrFolio` is accepted too for older callers.
     const entityName = name || nameOrFolio;
@@ -954,6 +966,7 @@ app.post('/subscribe/submit', async (req, res) => {
       language
     });
     
+    if (cleanSource) storage.updateSubscriptionRequest(request.id, { source: cleanSource });
     process.stdout.write(`   ✅ Request created: ${request.id}\n`);
     
     // Email will be sent after processing completes (in processSubscriptionPipeline)
