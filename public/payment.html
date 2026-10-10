@@ -146,6 +146,8 @@
     }
 
     [hidden] { display: none !important; }
+    .trial-btn { background: #1e8e3e !important; border-color: #1e8e3e !important; color: #fff !important; }
+    .trial-btn .plan-price, .trial-btn .plan-note { color: #fff !important; }
   </style>
 </head>
 <body>
@@ -174,6 +176,10 @@
       <h1 data-i18n="payment.chooseTitle">Confirme su correo y elija su plan</h1>
       <p class="subtitle" id="chooseSubtitle" data-i18n="payment.chooseBody">Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.</p>
       <div class="info-box" id="trialBanner" hidden></div>
+      <a id="trialStartBtn" class="plan-btn trial-btn" href="#" hidden>
+        <span class="plan-price" data-i18n="payment.startTrialBtn">Comenzar mis 30 días gratis</span>
+        <span class="plan-note" data-i18n="payment.startTrialNote">Sin tarjeta de crédito · sin compromiso</span>
+      </a>
       <a id="monthlyLink" class="plan-btn" href="#">
         <span class="plan-price">$1 / <span data-i18n="payment.month">mes</span></span>
         <span class="plan-note" data-i18n="payment.monthlyNote">Facturado mensualmente</span>
@@ -183,6 +189,7 @@
         <span class="plan-note" data-i18n="payment.annualNote">Facturado anualmente · Ahorre ~17%</span>
       </a>
       <p id="trialFine" class="plan-fine" style="font-size:13px;color:#777;margin-top:12px;" hidden></p>
+      <p id="trustNote" class="plan-fine" style="font-size:13px;color:#555;margin-top:10px;" hidden></p>
     </div>
 
     <div id="stateAlreadyActive" hidden>
@@ -242,6 +249,15 @@
         'payment.errorTitle': 'No pudimos continuar',
         'payment.errorBody': 'No pudimos encontrar esta solicitud de suscripción, o hubo un problema al confirmar el pago. Use el enlace de su correo más reciente.',
         'payment.forLabel': 'Para: {name}',
+        'payment.startTrialBtn': 'Comenzar mis 30 días gratis',
+        'payment.startTrialNote': 'Sin tarjeta de crédito · sin compromiso',
+        'payment.chooseTitleTrial': '¡Correo confirmado! Comience su prueba gratis',
+        'payment.trialBannerNoCard': '🎁 <strong>{days} días gratis, sin tarjeta.</strong> Monitoreamos su registro todos los días hasta el <strong>{date}</strong>. No le pedimos ningún dato de pago para empezar.',
+        'payment.trialFineNoCard': '5 días y 1 día antes de que termine la prueba le enviaremos un correo para elegir un plan ($1 al mes o $10 al año) si desea continuar. Si no elige un plan, el monitoreo simplemente se detiene.',
+        'payment.trustNote': '🔒 El pago lo procesa Stripe, que maneja los pagos de más de 5 millones de empresas en el mundo (más de $1.9 millones de millones de dólares en 2025). Atlas Panama nunca ve ni guarda los datos de su tarjeta.',
+        'payment.trialStartedTitle': '¡Su prueba gratis está activa!',
+        'payment.trialStartedBody': 'En las próximas horas revisaremos el Registro Público por primera vez y le enviaremos su reporte por correo (las revisiones diarias son a las 7:00 PM). No necesita tarjeta.',
+        'payment.successTrialNoCard': 'Prueba gratis hasta el {date}. Le escribiremos antes de que termine.',
         'payment.trialBanner': '🎁 <strong>{days} días gratis.</strong> No se le cobrará nada hoy; su tarjeta se usará a partir del <strong>{date}</strong>. Cancele antes de esa fecha y no paga nada.',
         'payment.monthlyNoteTrial': '{days} días gratis, luego facturado mensualmente',
         'payment.annualNoteTrial': '{days} días gratis, luego facturado anualmente · Ahorre ~17%',
@@ -271,6 +287,15 @@
         'payment.errorTitle': 'We couldn\'t continue',
         'payment.errorBody': 'We couldn\'t find this subscription request, or there was a problem confirming payment. Please use the link from your most recent email.',
         'payment.forLabel': 'For: {name}',
+        'payment.startTrialBtn': 'Start my 30 free days',
+        'payment.startTrialNote': 'No credit card · no commitment',
+        'payment.chooseTitleTrial': 'Email confirmed! Start your free trial',
+        'payment.trialBannerNoCard': '🎁 <strong>{days} days free, no card.</strong> We monitor your record every day until <strong>{date}</strong>. We don\'t ask for any payment details to start.',
+        'payment.trialFineNoCard': '5 days and 1 day before the trial ends we\'ll email you to choose a plan ($1/month or $10/year) if you want to continue. If you don\'t choose a plan, monitoring simply stops.',
+        'payment.trustNote': '🔒 Payments are processed by Stripe, which handles payments for more than 5 million businesses worldwide (more than $1.9 trillion in 2025). Atlas Panama never sees or stores your card details.',
+        'payment.trialStartedTitle': 'Your free trial is active!',
+        'payment.trialStartedBody': 'Within the next few hours we\'ll check the Registro Público for the first time and email you your report (daily checks run at 7:00 PM). No card needed.',
+        'payment.successTrialNoCard': 'Free trial until {date}. We\'ll email you before it ends.',
         'payment.trialBanner': '🎁 <strong>{days} days free.</strong> You won\'t be charged today; your card will be charged starting <strong>{date}</strong>. Cancel before then and you pay nothing.',
         'payment.monthlyNoteTrial': '{days} days free, then billed monthly',
         'payment.annualNoteTrial': '{days} days free, then billed annually · Save ~17%',
@@ -350,20 +375,29 @@
       const fine = document.getElementById('trialFine');
       const monthlyNote = document.querySelector('#monthlyLink .plan-note');
       const annualNote = document.querySelector('#annualLink .plan-note');
+      // First-time emails: one big "start my free 30 days" button, no card, no plans.
+      // Everyone else: the two plans, with the Stripe trust note.
+      const trialBtn = document.getElementById('trialStartBtn');
+      const trust = document.getElementById('trustNote');
+      const plans = [document.getElementById('monthlyLink'), document.getElementById('annualLink')];
       if (trialInfo.eligible) {
-        // Same calendar date Stripe shows: today + trial days, in Panama time
-        const firstCharge = new Date(Date.now() + trialInfo.days * 86400000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
-        banner.innerHTML = t('payment.trialBanner', { days: trialInfo.days, date: formatDate(firstCharge) });
-        fine.textContent = t('payment.trialFine');
-        monthlyNote.textContent = t('payment.monthlyNoteTrial', { days: trialInfo.days });
-        annualNote.textContent = t('payment.annualNoteTrial', { days: trialInfo.days });
+        const ends = new Date(Date.now() + trialInfo.days * 86400000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+        banner.innerHTML = t('payment.trialBannerNoCard', { days: trialInfo.days, date: formatDate(ends) });
+        fine.textContent = t('payment.trialFineNoCard');
+        document.querySelector('#stateChoosePlan h1').textContent = t('payment.chooseTitleTrial');
       }
+      trialBtn.hidden = !trialInfo.eligible;
+      plans.forEach(el => { el.hidden = trialInfo.eligible; el.style.display = trialInfo.eligible ? 'none' : ''; });
+      trust.hidden = trialInfo.eligible;
+      trust.textContent = t('payment.trustNote');
       banner.hidden = !trialInfo.eligible;
       fine.hidden = false;
       if (!trialInfo.eligible) fine.textContent = t('payment.noTrialNote');
       const successInfo = document.getElementById('successInfo');
       if (successInfo && lastRequest) {
-        if (lastRequest.trialStatus === 'trialing' && lastRequest.trialEndsAt) {
+        if (lastRequest.trialStatus === 'trialing_nocard' && lastRequest.trialEndsAt) {
+          successInfo.innerHTML += '<br>' + t('payment.successTrialNoCard', { date: formatDate(lastRequest.trialEndsAt) });
+        } else if (lastRequest.trialStatus === 'trialing' && lastRequest.trialEndsAt) {
           successInfo.innerHTML += '<br>' + t('payment.successTrial', { date: formatDate(lastRequest.trialEndsAt) });
         } else if (lastRequest.trialStatus === 'ended_card_reused') {
           successInfo.innerHTML += '<br>' + t('payment.successCardReused');
@@ -383,6 +417,7 @@
     function buildPlanLinks() {
       document.getElementById('monthlyLink').href = `${API_BASE}/subscribe/request/${requestId}/checkout?token=${encodeURIComponent(token)}&plan=monthly`;
       document.getElementById('annualLink').href = `${API_BASE}/subscribe/request/${requestId}/checkout?token=${encodeURIComponent(token)}&plan=annual`;
+      document.getElementById('trialStartBtn').href = `${API_BASE}/subscribe/request/${requestId}/start-trial?token=${encodeURIComponent(token)}`;
       document.getElementById('tryAgainBtn').href = `${window.location.pathname}?requestId=${encodeURIComponent(requestId)}&token=${encodeURIComponent(token)}`;
     }
 
@@ -408,7 +443,11 @@
         updateDynamicText();
         updateTrialText();
 
-        if (result === 'success') {
+        if (result === 'trial') {
+          document.querySelector('#stateSuccess h1').textContent = t('payment.trialStartedTitle');
+          document.getElementById('successSubtitle').textContent = t('payment.trialStartedBody');
+          showState('stateSuccess');
+        } else if (result === 'success') {
           showState('stateSuccess');
         } else if (result === 'cancelled') {
           showState('stateCancelled');

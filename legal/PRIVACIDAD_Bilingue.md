@@ -22,7 +22,7 @@ We count visits to our website anonymously: the IP address is turned into a non-
 
 If you ask us to email you the signup link so you can finish later, we keep your email address only to send you that link and a single reminder the next day; we delete it after two (2) months.
 
-To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address and the card identifier provided by Stripe (not your card number). These codes are kept even after the rest of your information is deleted, solely to prevent repeated free trials.
+To enforce the one-free-trial-per-person rule, we keep a non-reversible code of your email address. This code is kept even after the rest of your information is deleted, solely to prevent repeated free trials.
 
 **We do not store your payment information.** Payments are processed by Stripe, Inc., a third party, under its own privacy policy.
 
@@ -36,7 +36,7 @@ Contamos las visitas a nuestro sitio web de forma anónima: la dirección IP se 
 
 Si usted nos pide que le enviemos el enlace de suscripción por correo para completarla después, guardamos su correo electrónico solo para enviarle ese enlace y un único recordatorio al día siguiente; lo eliminamos a los dos (2) meses.
 
-Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico y el identificador de tarjeta que nos proporciona Stripe (no el número de su tarjeta). Estos códigos se conservan aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.
+Para aplicar la regla de una prueba gratis por persona, conservamos un código no reversible de su correo electrónico. Este código se conserva aun después de eliminar el resto de su información, únicamente para impedir pruebas gratis repetidas.
 
 **No almacenamos su información de pago.** El procesamiento de pagos lo realiza Stripe, Inc., un tercero, conforme a su propia política de privacidad.
 

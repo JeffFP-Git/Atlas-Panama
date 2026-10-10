@@ -16,7 +16,7 @@ import * as leads from './lib/leads.js';
 import { campaignResults, campaignResultsHtml } from './lib/campaigns.js';
 import { buildDailyReport, sendDailyReport, startDailyReport } from './lib/dailyReport.js';
 import * as scheduler from './lib/dailyScheduler.js';
-import { sendEmail, sendWelcomeEmail } from './lib/email.js';
+import { sendEmail, sendWelcomeEmail, sendTrialConvertedEmail } from './lib/email.js';
 import { getStripeClient, createCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
@@ -1363,6 +1363,70 @@ app.post('/subscribe/end-all', requireAdminApiKey, (req, res) => {
 // Public endpoint: Verify subscription with email and code
 // Shared by both the manual-code POST endpoint and the one-click GET link below.
 /**
+ * After a completed Stripe Checkout (from the return page or the webhook, whichever
+ * comes first — safe to run twice):
+ *  - someone on the no-card free trial who just paid → keep monitoring, mark converted,
+ *    send a short "you're all set" email (first charge when the trial ends);
+ *  - someone whose trial ended without paying (monitoring stopped) → reactivate;
+ *  - a brand-new paid signup → the normal activation (trial rules + welcome email).
+ * @returns {Promise<'missing'|'already'|'converted'|'reactivated'|'activated'>}
+ */
+async function activateFromCheckoutSession(requestId, session) {
+  const request = storage.getSubscriptionRequest(requestId);
+  if (!request) return 'missing';
+  if (request.stripeSubscriptionId && request.stripeSubscriptionId === session.subscription) return 'already';
+  const onNoCardTrial = request.trialStatus === 'trialing_nocard' && request.confirmed === true && request.status === 'confirmed';
+  const wasExpired = request.trialStatus === 'expired' || request.status === 'cancelled';
+  storage.updateSubscriptionRequest(requestId, {
+    stripeCustomerId: session.customer,
+    stripeSubscriptionId: session.subscription,
+    plan: session.metadata?.plan || request.plan
+  });
+  if (onNoCardTrial) {
+    storage.updateSubscriptionRequest(requestId, { trialStatus: 'converted' });
+    const updated = storage.getSubscriptionRequest(requestId);
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+    sendTrialConvertedEmail({
+      recipientEmail: updated.email,
+      displayName: scheduler.displayNameFor(updated),
+      language: updated.language,
+      planLabel: PRICING[updated.plan]?.label || null,
+      firstChargeDate: updated.trialEndsAt && updated.trialEndsAt > today ? updated.trialEndsAt : today,
+      manageUrl: scheduler.manageUrlFor(updated)
+    }).catch(err => console.error(`[Trial] Converted email failed for ${requestId}:`, err.message));
+    return 'converted';
+  }
+  if (wasExpired) {
+    storage.updateSubscriptionRequest(requestId, { trialStatus: 'converted_after_expiry', cancelledAt: null });
+    confirmAndScheduleSubscription(requestId);
+    return 'reactivated';
+  }
+  await applyTrialRules(requestId, session.subscription);
+  confirmAndScheduleSubscription(requestId);
+  return 'activated';
+}
+
+// "Start my 30 free days" (plan page, for emails that haven't had a subscription yet):
+// activates monitoring with no card and no Stripe. 5 and 1 days before the end we email
+// pay links; if they don't pay, monitoring stops when the trial ends (lib/dailyScheduler.js).
+app.get('/subscribe/request/:id/start-trial', (req, res) => {
+  const { id } = req.params;
+  const { token } = req.query;
+  const request = storage.getSubscriptionRequest(id);
+  if (!request || !token || request.accessToken !== token) return res.status(404).send('Subscription request not found.');
+  const back = `/payment.html?requestId=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`;
+  if (request.confirmed === true) return res.redirect(303, `${back}&result=trial`);
+  if (request.status !== 'completed' || !trials.isEmailEligible(request.email)) return res.redirect(303, back);
+  const start = new Date();
+  const trialEndsAt = new Date(start.getTime() + trials.TRIAL_DAYS * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+  trials.recordEmail(request.email);
+  storage.updateSubscriptionRequest(id, { trialStatus: 'trialing_nocard', trialEndsAt, trialStartedAt: start.toISOString() });
+  confirmAndScheduleSubscription(id);
+  console.log(`[Trial] ${id}: no-card free trial started, ends ${trialEndsAt}.`);
+  return res.redirect(303, `${back}&result=trial`);
+});
+
+/**
  * Runs once at activation, before confirmAndScheduleSubscription: records the email as
  * having had its one subscription (so it never gets another free trial) and, if this
  * subscription started on a free trial, enforces one-trial-per-card — a card that
@@ -1486,8 +1550,20 @@ app.get('/subscribe/request/:id/checkout', async (req, res) => {
       return res.status(404).send('Subscription request not found.');
     }
     const chosenPlan = plan === 'annual' ? 'annual' : 'monthly';
+    // On the no-card trial: charge when the trial ends (Stripe needs trial_end at least
+    // 48h away; closer than that, the charge happens now). Otherwise the original
+    // card-trial rule for first-time emails.
+    let trialEnd = null;
+    let trialDays = 0;
+    if (request.trialStatus === 'trialing_nocard' && request.trialEndsAt) {
+      const end = Math.floor(Date.parse(`${request.trialEndsAt}T23:59:00-05:00`) / 1000);
+      if (end - Date.now() / 1000 > 49 * 3600) trialEnd = end;
+    } else if (trials.isEmailEligible(request.email)) {
+      trialDays = trials.TRIAL_DAYS;
+    }
     const session = await createCheckoutSession(request, chosenPlan, {
-      trialDays: trials.isEmailEligible(request.email) ? trials.TRIAL_DAYS : 0,
+      trialDays,
+      trialEnd,
       successUrl: `${API_BASE_URL}/subscribe/request/${id}/checkout-success?token=${token}&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${API_BASE_URL}/payment.html?requestId=${id}&token=${token}&result=cancelled`
     });
@@ -1507,7 +1583,7 @@ app.get('/subscribe/request/:id/checkout-success', async (req, res) => {
     if (!request || !token || request.accessToken !== token) {
       return res.status(404).send('Subscription request not found.');
     }
-    if (request.confirmed === true) {
+    if (request.confirmed === true && request.stripeSubscriptionId) {
       return res.redirect(303, `/payment.html?requestId=${id}&token=${token}&result=success`);
     }
     const stripe = getStripeClient();
@@ -1518,13 +1594,7 @@ app.get('/subscribe/request/:id/checkout-success', async (req, res) => {
       // if the webhook or a refresh catches up, confirmed will already be true by then.
       return res.redirect(303, `/payment.html?requestId=${id}&token=${token}`);
     }
-    storage.updateSubscriptionRequest(id, {
-      stripeCustomerId: session.customer,
-      stripeSubscriptionId: session.subscription,
-      plan: session.metadata.plan
-    });
-    await applyTrialRules(id, session.subscription);
-    confirmAndScheduleSubscription(id);
+    await activateFromCheckoutSession(id, session);
     return res.redirect(303, `/payment.html?requestId=${id}&token=${token}&result=success`);
   } catch (err) {
     console.error(`[API] Stripe checkout-success handling failed for ${id}:`, err);
@@ -1583,15 +1653,9 @@ app.post('/webhooks/stripe', async (req, res) => {
     const requestId = session.metadata?.requestId;
     if (requestId && (session.payment_status === 'paid' || session.payment_status === 'no_payment_required')) {
       const request = storage.getSubscriptionRequest(requestId);
-      if (request && request.confirmed !== true) {
-        storage.updateSubscriptionRequest(requestId, {
-          stripeCustomerId: session.customer,
-          stripeSubscriptionId: session.subscription,
-          plan: session.metadata.plan
-        });
-        await applyTrialRules(requestId, session.subscription);
-        confirmAndScheduleSubscription(requestId);
-        console.log(`[Stripe webhook] Activated subscription ${requestId} via checkout.session.completed`);
+      if (request && !(request.confirmed === true && request.stripeSubscriptionId)) {
+        const outcome = await activateFromCheckoutSession(requestId, session);
+        console.log(`[Stripe webhook] checkout.session.completed for ${requestId}: ${outcome}`);
       }
     }
   }
