@@ -2020,9 +2020,12 @@ async function sendConfirmedMatchVerificationEmail(request, propertyData) {
   // "you're verified, now click again to subscribe" page in between.
   const activateLink = `${API_BASE_URL}/payment.html?requestId=${request.id}&token=${request.accessToken}`;
 
-  const buttonLabel = tEmail(lang, 'verify.buttonLabel');
-  const buttonSub = tEmail(lang, 'verify.buttonSub', { monthly: PRICING.monthly.label, annual: PRICING.annual.label });
-  const linkTextPrefix = tEmail(lang, 'verify.linkTextPrefix', { monthly: PRICING.monthly.label, annual: PRICING.annual.label });
+  // First-time emails get the no-card free trial, so the button says so (no plan or payment talk).
+  const trialKey = trials.isEmailEligible(request.email) ? 'Trial' : '';
+  const prices = lang === 'es' ? { monthly: '$1/mes', annual: '$10/año' } : { monthly: PRICING.monthly.label, annual: PRICING.annual.label };
+  const buttonLabel = tEmail(lang, `verify.buttonLabel${trialKey}`);
+  const buttonSub = tEmail(lang, `verify.buttonSub${trialKey}`, prices);
+  const linkTextPrefix = tEmail(lang, `verify.linkTextPrefix${trialKey}`, prices);
 
   const activateButtonHtml = `
     <div style="text-align:center; margin: 24px 0;">
