@@ -2184,8 +2184,10 @@ async function processSubscriptionPipeline(requestId) {
       await sendEmail({
         to: request.email,
         subject: tEmail(lang, 'refine.subject', { searchLabel }),
-        text: tEmail(lang, 'refine.text', { searchLabel, refineHint }),
-        html: tEmail(lang, 'refine.html', { searchLabel, refineHint })
+        // Property searches ask for 2 of the 3 property fields; entity searches ask for
+        // the full registered name or RUC. Link straight back to the signup form.
+        text: tEmail(lang, request.tipo === 'inmueble' ? 'refine.textInmueble' : 'refine.textEntity', { searchLabel, url: `${process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://atlaspanama.com'}/subscribe` }),
+        html: tEmail(lang, request.tipo === 'inmueble' ? 'refine.htmlInmueble' : 'refine.htmlEntity', { searchLabel, url: `${process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://atlaspanama.com'}/subscribe` })
       });
       console.log(`   ✅ [Pipeline ${requestId}] Too many matches — asked subscriber to refine.`);
       return;
