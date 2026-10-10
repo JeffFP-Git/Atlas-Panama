@@ -172,7 +172,7 @@
     </div>
 
     <div id="stateChoosePlan" hidden>
-      <div class="icon info">💳</div>
+      <div class="icon info" id="chooseIcon">💳</div>
       <h1 data-i18n="payment.chooseTitle">Confirme su correo y elija su plan</h1>
       <p class="subtitle" id="chooseSubtitle" data-i18n="payment.chooseBody">Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.</p>
       <div class="info-box" id="trialBanner" hidden></div>
@@ -235,6 +235,7 @@
         'payment.loadingBody': 'Un momento por favor.',
         'payment.chooseTitle': 'Confirme su correo y elija su plan',
         'payment.chooseBody': 'Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.',
+        'payment.chooseBodyTrial': 'Su correo funciona. Un clic más y empezamos a revisar su registro todos los días.',
         'payment.month': 'mes',
         'payment.year': 'año',
         'payment.monthlyNote': 'Facturado mensualmente',
@@ -273,6 +274,7 @@
         'payment.loadingBody': 'One moment please.',
         'payment.chooseTitle': 'Confirm your email & choose your plan',
         'payment.chooseBody': 'Choosing a plan confirms your email is working and takes you to secure Stripe payment.',
+        'payment.chooseBodyTrial': 'Your email works. One more click and we start checking your record every day.',
         'payment.month': 'month',
         'payment.year': 'year',
         'payment.monthlyNote': 'Billed monthly',
@@ -385,7 +387,10 @@
         banner.innerHTML = t('payment.trialBannerNoCard', { days: trialInfo.days, date: formatDate(ends) });
         fine.textContent = t('payment.trialFineNoCard');
         document.querySelector('#stateChoosePlan h1').textContent = t('payment.chooseTitleTrial');
+        document.getElementById('chooseIcon').textContent = '🎁';
       }
+      trialEligibleNow = !!trialInfo.eligible;
+      updateDynamicText();
       trialBtn.hidden = !trialInfo.eligible;
       plans.forEach(el => { el.hidden = trialInfo.eligible; el.style.display = trialInfo.eligible ? 'none' : ''; });
       trust.hidden = trialInfo.eligible;
@@ -405,11 +410,12 @@
       }
     }
 
+    var trialEligibleNow = false;
     function updateDynamicText() {
       if (!lastRequest) return;
       const label = displayLabel(lastRequest);
       const subEl = document.getElementById('chooseSubtitle');
-      if (subEl && label) subEl.textContent = t('payment.chooseBody') + '  ' + t('payment.forLabel', { name: label });
+      if (subEl && label) subEl.textContent = t(trialEligibleNow ? 'payment.chooseBodyTrial' : 'payment.chooseBody') + '  ' + t('payment.forLabel', { name: label });
       const successInfo = document.getElementById('successInfo');
       if (successInfo && label) successInfo.innerHTML = '<strong>' + t('payment.forLabel', { name: '' }).replace(':', ':') + '</strong> ' + label;
     }
