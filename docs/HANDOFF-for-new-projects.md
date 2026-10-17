@@ -4,6 +4,13 @@ Written Oct 16 2026 from a review of the atlaspanama.com codebase, so a separate
 
 Owner: Jeff (non-programmer; explain things in plain language, one step at a time).
 
+## What matters most for the loan platform (read this first)
+
+1. **Authentication must be built from scratch.** Atlas Panama has no user accounts: subscribers use emailed magic links and admins share one API key. That is fine for a $1 product, not for borrower and loan data. Build individual staff logins, MFA, roles, expiring sessions and an audit log of who changed what (section 3).
+2. **Use a real database from day one.** Atlas Panama stores everything in JSON files on one disk with no off-site backup. Loan files need Postgres (or similar) with migrations and backups, plus encrypted object storage for documents (section 5).
+3. **The Registro Público module is the most reusable part.** Login, captcha handling, search by finca / owner / company, and full-record reading can be packaged as one module. For a lender: check title, owners, liens and Prelación before funding, and monitor collateral and borrower companies during the loan. Atlas Panama itself could provide the monitoring (sections 4 and 9).
+4. **The lessons learned will save real time and money:** data wiped on every deploy until it was moved to a persistent volume; a cron scheduler that silently skipped runs; an inherited captcha key that faked success for weeks; Railway blocking SMTP email (section 8).
+
 ---
 
 ## 1. Tech stack
@@ -81,7 +88,7 @@ Atlas Panama has **no user accounts, no passwords, no sessions and no MFA**. Tha
 
 - **Subscribers:** every subscription has a random 32-byte `accessToken`. Each emailed link carries `?requestId=…&token=…`, which acts as a "magic link" (verify, choose plan, manage subscription). Tokens never expire, and they're compared with plain `!==`, not a timing-safe comparison.
 - **Billing self-service:** handled entirely by Stripe's hosted Customer Portal, reached through a token link.
-- **Admin:** routes are protected by one shared `API_KEY`, accepted from a header, a Bearer token, or a `?apiKey=` query string. **If `API_KEY` is unset, admin routes are open** (a development convenience that is dangerous in production).
+- **Admin:** routes are protected by one shared `API_KEY`, accepted from a header, a Bearer token, or a `?apiKey=` query string. It originally let everyone in when `API_KEY` was unset; since Oct 16 2026 it fails closed (503). One job-cancel route was also missing the key check and is now protected.
 - **Webhooks:** Stripe uses signature verification (`STRIPE_WEBHOOK_SECRET`); Postmark uses HTTP Basic Auth.
 
 **For a loan platform, build real authentication:** individual staff logins, hashed passwords (or Google Workspace SSO), MFA, roles (admin, loan officer, read-only), expiring sessions, and an audit log of who changed what. Fail closed when a secret is missing.
@@ -178,7 +185,7 @@ Atlas Panama has **no user accounts, no passwords, no sessions and no MFA**. Tha
 4. **Railway blocks outbound SMTP.** Use the email provider's HTTPS API.
 5. **"Sent" logged when the send had actually failed.** Always check the real result before logging success.
 6. **Secrets leaking into logs** (tokens in request URLs). Redact query strings and bodies in request logging.
-7. **Unauthenticated admin routes** inherited from the old code, and admin auth that fails open. Audit every route; fail closed.
+7. **Unauthenticated admin routes** inherited from the old code, and admin auth that failed open when the key was missing (both fixed). Audit every route; fail closed.
 8. **False change alerts** from loading placeholders. Confirm before alerting; a false alarm on a fraud product destroys trust.
 9. **Stripe "Link"** kept appearing in Checkout and enrolling people until it was disabled with a payment-method configuration; `payment_method_types: ['card']` alone did not remove it.
 10. **Stale server processes** during local testing made "fixed" code look broken. Restart before every live test.

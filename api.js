@@ -790,7 +790,7 @@ app.get('/jobs/:id/stream', requireAdminApiKey, (req, res) => {
 });
 
 // Cancel a queued job
-app.post('/jobs/:id/cancel', (req, res) => {
+app.post('/jobs/:id/cancel', requireAdminApiKey, (req, res) => {
   const job = jobs.get(req.params.id);
   if (!job) return res.status(404).json({ ok: false, error: 'not_found' });
   if (job.status !== 'queued') return res.status(409).json({ ok: false, error: 'cannot_cancel_now' });
@@ -2338,8 +2338,8 @@ async function processSubscriptionPipeline(requestId) {
 function requireAdminApiKey(req, res, next) {
   const API_KEY = process.env.API_KEY || '';
   if (!API_KEY) {
-    // If no API key is configured, allow access (for development)
-    return next();
+    // Fail closed: a missing API_KEY must never open the admin routes.
+    return res.status(503).json({ ok: false, error: 'admin_api_key_not_configured' });
   }
   
   const providedKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '') || req.query.apiKey;
