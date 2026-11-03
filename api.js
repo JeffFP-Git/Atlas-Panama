@@ -889,7 +889,7 @@ app.get('/files/:name', requireAdminApiKey, (req, res) => {
 app.post('/subscribe/submit', async (req, res) => {
   const startTime = Date.now();
   try {
-    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, relationship, whatsappOptIn, whatsappPhone, language, source } = req.body;
+    const { email, tipo, nameOrFolio, name, ruc, folio, codigo, ownerName, relationship, whatsappOptIn, whatsappPhone, language, source, nickname } = req.body;
     // Campaign tag the visitor arrived with (e.g. "fb-boquete-adB"), remembered by the
     // site and carried through signup, trial and payment for the campaign report.
     const cleanSource = String(source || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60) || null;
@@ -967,6 +967,9 @@ app.post('/subscribe/submit', async (req, res) => {
     });
     
     if (cleanSource) storage.updateSubscriptionRequest(request.id, { source: cleanSource });
+    // Subscriber's own name for it (optional), shown in emails next to the official Folio/name
+    const cleanNickname = String(nickname || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (cleanNickname) storage.updateSubscriptionRequest(request.id, { nickname: cleanNickname });
     process.stdout.write(`   ✅ Request created: ${request.id}\n`);
     
     // Email will be sent after processing completes (in processSubscriptionPipeline)

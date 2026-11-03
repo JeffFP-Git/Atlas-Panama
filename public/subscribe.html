@@ -581,6 +581,13 @@
           </div>
         </div>
 
+        <!-- Optional nickname, shown in every email next to the official Folio/name -->
+        <div class="form-group">
+          <label for="nickname" data-i18n="form.nicknameLabel">Nombre para identificarla (opcional)</label>
+          <input type="text" id="nickname" name="nickname" maxlength="80" data-i18n-placeholder="form.nicknamePlaceholder" placeholder="Ej: Casa de playa en Coronado" />
+          <p class="field-hint" data-i18n="form.nicknameHint" style="color:#666; font-size:15px; margin-top:8px;">Así la verá en nuestros correos, junto al número oficial.</p>
+        </div>
+
         <!-- WhatsApp opt-in (shown once a tipo is selected, wording adapts to it) -->
         <div id="whatsappFields" class="form-group hidden">
           <div class="radio-option" style="align-items: flex-start; cursor: default;">
@@ -713,6 +720,9 @@
         'form.whatsappOptInMercantil': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su empresa, además de la notificación por email?',
         'form.whatsappOptInFundacion': '¿Desea recibir un mensaje de WhatsApp cuando detectemos un cambio en su fundación, además de la notificación por email?',
         'form.whatsappPhoneLabel': 'Número de WhatsApp',
+        'form.nicknameLabel': 'Nombre para identificarla (opcional)',
+        'form.nicknamePlaceholder': 'Ej: Casa de playa en Coronado',
+        'form.nicknameHint': 'Así la verá en nuestros correos, junto al número oficial.',
         'form.whatsappPhonePlaceholder': 'Ej: +507 6000-0000',
         'form.warningTitle': '⚠️ No cierre ni abandone esta página',
         'form.warningBody': 'Por favor mantenga esta página abierta mientras se procesa su solicitud. El proceso puede tardar unos minutos.',
@@ -799,6 +809,9 @@
         'form.whatsappOptInMercantil': 'Would you like to receive a WhatsApp message when we detect a change to your company, in addition to the email notification?',
         'form.whatsappOptInFundacion': 'Would you like to receive a WhatsApp message when we detect a change to your foundation, in addition to the email notification?',
         'form.whatsappPhoneLabel': 'WhatsApp Number',
+        'form.nicknameLabel': 'Nickname (optional)',
+        'form.nicknamePlaceholder': 'E.g. Beach house in Coronado',
+        'form.nicknameHint': 'This is how you\'ll see it in our emails, next to the official number.',
         'form.whatsappPhonePlaceholder': 'E.g: +507 6000-0000',
         'form.warningTitle': '⚠️ Do not close or leave this page',
         'form.warningBody': 'Please keep this page open while your request is being processed. This can take a few minutes.',
@@ -1499,6 +1512,8 @@
       }
       payload.whatsappOptIn = wantsWhatsapp;
       if (wantsWhatsapp) payload.whatsappPhone = whatsappPhone;
+      const nickname = (formData.get('nickname') || '').trim();
+      if (nickname) payload.nickname = nickname;
 
       // Track when API call completes
       let apiResult = null;
