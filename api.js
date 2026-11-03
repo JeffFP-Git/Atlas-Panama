@@ -305,7 +305,7 @@ async function startJob(id) {
       const browser = await puppeteerLib.launch({
         headless: headlessFlag,
         executablePath,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         ...(userDataDir ? { userDataDir } : {})
       });
 
@@ -348,7 +348,7 @@ async function startJob(id) {
       const browser = await puppeteerLib.launch({
         headless: headlessFlag,
         executablePath,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         ...(userDataDir ? { userDataDir } : {})
       });
 
@@ -2158,7 +2158,7 @@ async function processSubscriptionPipeline(requestId) {
     const browser = await puppeteerLib.launch({
       headless: process.env.HEADLESS === '0' || process.env.HEADLESS === 'false' ? false : true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
 
     let searchResult;
@@ -2431,6 +2431,15 @@ function initializeScheduler() {
     // instead of running pipelines directly in the scheduler module.
     try {
       scheduler.setEnqueueRunHandler(async (subscription, meta = {}) => {
+        // Never queue a second copy of a check that's already waiting or running: the
+        // 15-minute catch-up used to pile up copies while checks were failing (Nov 2026).
+        for (const existing of jobs.values()) {
+          if (existing.type === 'subscription' && (existing.status === 'queued' || existing.status === 'running')
+              && existing.payload?.subscriptionId === subscription.id) {
+            console.log(`[API][Scheduler->Queue] ${subscription.id} already ${existing.status} as job ${existing.id}; not queuing another.`);
+            return;
+          }
+        }
         const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const job = {
           id,
