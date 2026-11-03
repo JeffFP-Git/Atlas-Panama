@@ -1406,6 +1406,93 @@ async function activateFromCheckoutSession(requestId, session) {
   return 'activated';
 }
 
+// ---------------------------------------------------------------------------
+// Bulk signup (admin only, Nov 2026): Jeff's own ~50 properties/entities. Each item
+// goes through the normal search pipeline without any per-item email. One match →
+// activated on the 30-day no-card trial (the one-trial-per-email rule is waived for
+// bulk). Several matches → waits for POST /admin/bulk-subscribe/select. Results:
+// GET /admin/bulk-subscribe?batch=<id>.
+// ---------------------------------------------------------------------------
+function activateBulkTrial(requestId) {
+  const start = new Date();
+  const trialEndsAt = new Date(start.getTime() + trials.TRIAL_DAYS * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+  const request = storage.getSubscriptionRequest(requestId);
+  if (request) trials.recordEmail(request.email);
+  storage.updateSubscriptionRequest(requestId, { trialStatus: 'trialing_nocard', trialEndsAt, trialStartedAt: start.toISOString() });
+  confirmAndScheduleSubscription(requestId, { welcomeEmail: false });
+  console.log(`[Bulk] ${requestId}: activated on the no-card trial, ends ${trialEndsAt}.`);
+}
+
+app.post('/admin/bulk-subscribe', requireAdminApiKey, (req, res) => {
+  const { email, language, items } = req.body || {};
+  if (!email || !String(email).includes('@')) return res.status(400).json({ ok: false, error: 'valid_email_required' });
+  if (!Array.isArray(items) || items.length === 0 || items.length > 200) return res.status(400).json({ ok: false, error: 'items_required' });
+  const lang = language === 'en' ? 'en' : 'es';
+  const problems = [];
+  items.forEach((it, i) => {
+    if (!['inmueble', 'mercantil', 'fundacion'].includes(it?.tipo)) problems.push(`item ${i}: tipo`);
+    else if (it.tipo === 'inmueble' && !it.folio) problems.push(`item ${i}: folio`);
+    else if (it.tipo !== 'inmueble' && !it.name && !it.ruc) problems.push(`item ${i}: name or ruc`);
+  });
+  if (problems.length) return res.status(400).json({ ok: false, error: 'invalid_items', problems });
+
+  const batch = `bulk-${Date.now()}`;
+  const created = [];
+  for (const it of items) {
+    const request = storage.createSubscriptionRequest({
+      tipo: it.tipo, email,
+      name: it.tipo !== 'inmueble' ? (it.name || null) : null,
+      ruc: it.tipo !== 'inmueble' ? (it.ruc || null) : null,
+      folio: it.tipo === 'inmueble' ? String(it.folio) : null,
+      codigo: it.tipo === 'inmueble' ? (it.codigo ? String(it.codigo) : null) : null,
+      ownerName: null, relationship: null, whatsappOptIn: false, whatsappPhone: null, language: lang
+    });
+    storage.updateSubscriptionRequest(request.id, { bulk: true, bulkBatch: batch, nickname: it.nickname ? String(it.nickname).slice(0, 80) : null, source: 'bulk-admin' });
+    const jobId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    // Back of the queue: a real visitor's signup (front of the queue) still goes first.
+    jobs.set(jobId, { id: jobId, type: 'subscriptionPipeline', status: 'queued', payload: { requestId: request.id }, enqueuedAt: new Date().toISOString(), logs: [] });
+    queue.push(jobId);
+    created.push({ id: request.id, nickname: it.nickname || null });
+  }
+  maybeStartNext();
+  console.log(`[Bulk] Batch ${batch}: ${created.length} item(s) queued for ${email}.`);
+  return res.json({ ok: true, batch, count: created.length, items: created });
+});
+
+app.get('/admin/bulk-subscribe', requireAdminApiKey, (req, res) => {
+  const batch = String(req.query.batch || '');
+  const list = storage.listSubscriptionRequests({}).filter(s => s.bulk === true && (!batch || s.bulkBatch === batch));
+  const counts = {};
+  for (const s of list) counts[s.status] = (counts[s.status] || 0) + 1;
+  return res.json({
+    ok: true, batch: batch || null, total: list.length, counts,
+    items: list.map(s => ({
+      id: s.id, batch: s.bulkBatch, nickname: s.nickname || null, tipo: s.tipo, status: s.status,
+      searched: s.tipo === 'inmueble' ? `Folio ${s.folio}${s.codigo ? ' / Código ' + s.codigo : ''}` : [s.name, s.ruc].filter(Boolean).join(' / '),
+      displayName: scheduler.displayNameFor(s), trialEndsAt: s.trialEndsAt || null, matchCount: s.matchCount || null, error: s.error || null,
+      matches: s.status === 'needs_disambiguation' ? (s.matches || []).map((m, i) => ({ index: i, label: matchDisplayLabel(s.tipo, m) })) : undefined
+    }))
+  });
+});
+
+app.post('/admin/bulk-subscribe/select', requireAdminApiKey, (req, res) => {
+  const { id, index } = req.body || {};
+  const request = storage.getSubscriptionRequest(String(id || ''));
+  if (!request || request.bulk !== true) return res.status(404).json({ ok: false, error: 'not_found' });
+  if (request.status !== 'needs_disambiguation' || !Array.isArray(request.matches)) return res.status(400).json({ ok: false, error: 'not_awaiting_selection' });
+  const idx = Number(index);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= request.matches.length) return res.status(400).json({ ok: false, error: 'invalid_index' });
+  const match = request.matches[idx];
+  const identity = matchIdentityFields(request.tipo, match);
+  const storedMatchData = { ...match, ...renderMatchAsPropertyData(match) };
+  storage.updateSubscriptionRequest(request.id, {
+    status: 'completed', ...identity, datosDelFolio: storedMatchData,
+    datosDelInmueble: request.tipo === 'inmueble' ? storedMatchData : null, matches: null
+  });
+  activateBulkTrial(request.id);
+  return res.json({ ok: true, id: request.id, selected: matchDisplayLabel(request.tipo, match) });
+});
+
 // "Start my 30 free days" (plan page, for emails that haven't had a subscription yet):
 // activates monitoring with no card and no Stripe. 5 and 1 days before the end we email
 // pay links; if they don't pay, monitoring stops when the trial ends (lib/dailyScheduler.js).
@@ -1473,7 +1560,7 @@ async function applyTrialRules(requestId, stripeSubscriptionId) {
   storage.updateSubscriptionRequest(requestId, { trialStatus, trialEndsAt });
 }
 
-function confirmAndScheduleSubscription(requestId) {
+function confirmAndScheduleSubscription(requestId, { welcomeEmail = true } = {}) {
   const confirmedRequest = storage.confirmSubscription(requestId, true);
   if (!confirmedRequest) return null;
   try {
@@ -1483,6 +1570,8 @@ function confirmAndScheduleSubscription(requestId) {
     console.error(`[API] Error scheduling job for ${requestId}:`, err);
     // Don't fail the request - subscription is confirmed even if scheduling fails
   }
+  // Bulk signups (admin) skip the per-item welcome email; the owner gets one summary instead.
+  if (!welcomeEmail) return confirmedRequest;
   // Fire-and-forget: one-time welcome email, separate from daily monitoring emails
   // (which start the next scheduled check). Failure here shouldn't fail activation.
   // Payment details (plan label from the local PRICING table, renewal date fetched
@@ -2225,6 +2314,29 @@ async function processSubscriptionPipeline(requestId) {
 
     const lang = request.language === 'en' ? 'en' : 'es';
 
+    // Bulk signups (POST /admin/bulk-subscribe) never email the subscriber per item:
+    // one match → activated on the free trial; anything else waits for admin review.
+    if (request.bulk === true) {
+      if (searchResult.classification === 'A') {
+        const match = searchResult.matches[0];
+        const identity = matchIdentityFields(request.tipo, match);
+        const storedMatchData = { ...match, ...renderMatchAsPropertyData(match) };
+        storage.updateSubscriptionRequest(requestId, {
+          status: 'completed', ...identity, datosDelFolio: storedMatchData,
+          datosDelInmueble: request.tipo === 'inmueble' ? storedMatchData : null
+        });
+        activateBulkTrial(requestId);
+      } else if (searchResult.classification === 'B') {
+        storage.updateSubscriptionRequest(requestId, { status: 'needs_disambiguation', matches: searchResult.matches.slice(0, 15), matchCount: searchResult.count });
+      } else if (searchResult.classification === 'C') {
+        storage.updateSubscriptionRequest(requestId, { status: 'needs_refinement', matches: null, matchCount: searchResult.count });
+      } else {
+        storage.updateSubscriptionRequest(requestId, { status: 'no_match' });
+      }
+      console.log(`   ✅ [Pipeline ${requestId}] Bulk item: classification ${searchResult.classification} (no email sent).`);
+      return;
+    }
+
     if (searchResult.classification === 'none') {
       // Matches the promise on the Q&A page: after 2 failed search attempts, point the
       // subscriber at operations@atlaspanama.com for free manual help instead of just
@@ -2319,6 +2431,7 @@ async function processSubscriptionPipeline(requestId) {
       status: 'error',
       error: err.message || String(err)
     });
+    if (request.bulk === true) return;
     try {
       await sendAdminAlertEmail({
         subject: `Signup pipeline failed — ${request.email}`,
