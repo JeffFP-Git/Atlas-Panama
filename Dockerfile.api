@@ -16,7 +16,7 @@ ARG TARGETARCH
 # running headless Chrome anyway, so just don't request them at all.
 RUN set -eux; \
   apt-get update; \
-  apt-get install -y --no-install-recommends wget gnupg ca-certificates fonts-liberation curl; \
+  apt-get install -y --no-install-recommends wget gnupg ca-certificates fonts-liberation curl tini; \
   if [ "${TARGETARCH:-amd64}" = "amd64" ]; then \
     wget -qO- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor >/usr/share/keyrings/google.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >/etc/apt/sources.list.d/google-chrome.list; \
@@ -57,6 +57,10 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Default entrypoint runs the API server
-ENTRYPOINT ["node", "api.js"]
+# Default entrypoint runs the API server under tini (Nov 2026). Without an init process,
+# node was PID 1 and never collected the leftover processes each Chrome run leaves behind;
+# they piled up for weeks until the container hit its process limit and every daily check
+# failed with "fork: Resource temporarily unavailable". tini collects them and passes
+# Railway's SIGTERM on to node so the graceful shutdown still works.
+ENTRYPOINT ["/usr/bin/tini", "--", "node", "api.js"]
 

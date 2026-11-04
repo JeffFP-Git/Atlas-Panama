@@ -555,6 +555,27 @@ app.get('/admin/campaigns', requireAdminApiKey, (req, res) => {
   res.send(`<html><head><meta charset="utf-8"><title>Atlas Panama campaigns</title></head><body style="font-family:sans-serif;max-width:820px;margin:24px auto;padding:0 16px;"><h2>Campaign results${opts.sinceDate ? ' since ' + opts.sinceDate : ' (all time)'}</h2>${campaignResultsHtml(opts)}</body></html>`);
 });
 
+// Process counts inside the container (Linux only). Leftover Chrome processes that nobody
+// collects show up as zombies; enough of them and new checks can't start (Nov 2026).
+function processStats() {
+  try {
+    let total = 0, zombies = 0, chrome = 0;
+    for (const d of fs.readdirSync('/proc')) {
+      if (!/^\d+$/.test(d)) continue;
+      try {
+        const stat = fs.readFileSync(`/proc/${d}/stat`, 'utf8');
+        total++;
+        const state = stat.slice(stat.lastIndexOf(')') + 2, stat.lastIndexOf(')') + 3);
+        if (state === 'Z') zombies++;
+        if (/\((chrome|google-chrome|chrome_crashpad)/.test(stat)) chrome++;
+      } catch {}
+    }
+    return { serverPid: process.pid, total, zombies, chrome };
+  } catch {
+    return null;
+  }
+}
+
 app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
   let storageFirstUsedAt = null;
   try { storageFirstUsedAt = fs.readFileSync(STORAGE_MARKER, 'utf8').trim(); } catch {}
@@ -565,6 +586,7 @@ app.get('/admin/storage-check', requireAdminApiKey, (_req, res) => {
     monitoringDir: MONITORING_DIR,
     storageFirstUsedAt,
     serverStartedAt: SERVER_STARTED_AT,
+    processes: processStats(),
     subscriptionRequests: storage.listSubscriptionRequests().length,
     // Last daily check per active subscription (date of its newest snapshot)
     lastChecks: storage.listSubscriptionRequests({ confirmed: true, status: 'confirmed' }).map(s => ({
