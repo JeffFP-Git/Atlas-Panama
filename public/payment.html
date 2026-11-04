@@ -177,7 +177,7 @@
       <p class="subtitle" id="chooseSubtitle" data-i18n="payment.chooseBody">Al elegir un plan, confirmamos que su correo funciona y le llevamos a un pago seguro con Stripe.</p>
       <div class="info-box" id="trialBanner" hidden></div>
       <a id="trialStartBtn" class="plan-btn trial-btn" href="#" hidden>
-        <span class="plan-price" data-i18n="payment.startTrialBtn">Comenzar mis 30 días gratis</span>
+        <span class="plan-price" data-i18n="payment.startTrialBtn">Comenzar mis 6 meses gratis</span>
         <span class="plan-note" data-i18n="payment.startTrialNote">Sin tarjeta de crédito · sin compromiso</span>
       </a>
       <a id="monthlyLink" class="plan-btn" href="#">
@@ -250,7 +250,7 @@
         'payment.errorTitle': 'No pudimos continuar',
         'payment.errorBody': 'No pudimos encontrar esta solicitud de suscripción, o hubo un problema al confirmar el pago. Use el enlace de su correo más reciente.',
         'payment.forLabel': 'Para: {name}',
-        'payment.startTrialBtn': 'Comenzar mis 30 días gratis',
+        'payment.startTrialBtn': 'Comenzar mis 6 meses gratis',
         'payment.startTrialNote': 'Sin tarjeta de crédito · sin compromiso',
         'payment.chooseTitleTrial': '¡Correo confirmado! Comience su prueba gratis',
         'payment.trialBannerNoCard': '🎁 <strong>{days} días gratis, sin tarjeta.</strong> Monitoreamos su registro todos los días hasta el <strong>{date}</strong>. No le pedimos ningún dato de pago para empezar.',
@@ -264,7 +264,7 @@
         'payment.annualNoteTrial': '{days} días gratis, luego facturado anualmente · Ahorre ~17%',
         'payment.trialFine': 'Una prueba gratis por persona y por tarjeta. Si su tarjeta ya se usó para una prueba gratis, el cobro comienza de inmediato.',
         'payment.successTrial': 'Su prueba gratis está activa: no se le cobrará nada hasta el {date}.',
-        'payment.noTrialNote': 'La prueba gratis de 30 días aplica a la primera suscripción de cada correo electrónico. Como este correo ya tiene una suscripción, esta propiedad o entidad se factura desde hoy.',
+        'payment.noTrialNote': 'Los 6 meses gratis aplican a la primera suscripción de cada correo electrónico. Como este correo ya tiene una suscripción, esta propiedad o entidad se factura desde hoy.',
         'payment.successCardReused': 'Esta tarjeta ya se había usado para una prueba gratis, por lo que el cobro de su plan comenzó hoy.'
       },
       en: {
@@ -289,7 +289,7 @@
         'payment.errorTitle': 'We couldn\'t continue',
         'payment.errorBody': 'We couldn\'t find this subscription request, or there was a problem confirming payment. Please use the link from your most recent email.',
         'payment.forLabel': 'For: {name}',
-        'payment.startTrialBtn': 'Start my 30 free days',
+        'payment.startTrialBtn': 'Start my 6 free months',
         'payment.startTrialNote': 'No credit card · no commitment',
         'payment.chooseTitleTrial': 'Email confirmed! Start your free trial',
         'payment.trialBannerNoCard': '🎁 <strong>{days} days free, no card.</strong> We monitor your record every day until <strong>{date}</strong>. We don\'t ask for any payment details to start.',
@@ -303,7 +303,7 @@
         'payment.annualNoteTrial': '{days} days free, then billed annually · Save ~17%',
         'payment.trialFine': 'One free trial per person and per card. If your card was already used for a free trial, billing starts right away.',
         'payment.successTrial': 'Your free trial is active: no charge until {date}.',
-        'payment.noTrialNote': 'The 30-day free trial applies to the first subscription for each email address. Since this email already has a subscription, this property or entity is billed starting today.',
+        'payment.noTrialNote': 'The 6 free months apply to the first subscription for each email address. Since this email already has a subscription, this property or entity is billed starting today.',
         'payment.successCardReused': 'This card had already been used for a free trial, so billing for your plan started today.'
       }
     };
@@ -377,7 +377,7 @@
       const fine = document.getElementById('trialFine');
       const monthlyNote = document.querySelector('#monthlyLink .plan-note');
       const annualNote = document.querySelector('#annualLink .plan-note');
-      // First-time emails: one big "start my free 30 days" button, no card, no plans.
+      // First-time emails: one big "start my 6 free months" button, no card, no plans.
       // Everyone else: the two plans, with the Stripe trust note.
       const trialBtn = document.getElementById('trialStartBtn');
       const trust = document.getElementById('trustNote');
