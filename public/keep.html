@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Atlas Panama</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 90px 16px 40px; color: #333; }
+    .nav-bar { position: fixed; top: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #667eea; text-decoration: none; }
+    .lang-btn { border: 1px solid #667eea; background: #fff; color: #667eea; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .lang-btn.active { background: #667eea; color: #fff; }
+    .card { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 28px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #333; }
+    p.lead { color: #555; margin-bottom: 18px; line-height: 1.5; }
+    .row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 6px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .row input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+    .row.all { background: #f3f4ff; border-radius: 8px; border-bottom: none; font-weight: 700; margin-bottom: 6px; }
+    .name { font-size: 16px; line-height: 1.35; overflow-wrap: anywhere; }
+    .sub { font-size: 13px; color: #888; margin-top: 2px; }
+    .plans { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 12px; }
+    .plans label { flex: 1 1 200px; border: 2px solid #ddd; border-radius: 8px; padding: 12px; cursor: pointer; }
+    .plans label.selected { border-color: #667eea; background: #f3f4ff; }
+    .plans input { margin-right: 8px; }
+    .total { font-size: 18px; font-weight: 700; margin: 10px 0 16px; }
+    button.pay { width: 100%; padding: 16px; font-size: 18px; font-weight: 700; color: #fff; background: #27ae60; border: none; border-radius: 8px; cursor: pointer; }
+    button.pay:disabled { background: #aaa; cursor: not-allowed; }
+    .note { font-size: 13px; color: #777; margin-top: 12px; line-height: 1.5; }
+    .msg { padding: 16px; border-radius: 8px; margin-bottom: 16px; line-height: 1.5; }
+    .ok { background: #e8f8ef; color: #1e7e44; }
+    .err { background: #fdecea; color: #a50e0e; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="/" class="nav-brand">Atlas Panama</a>
+    <span>
+      <button type="button" id="langEs" class="lang-btn active">ES</button>
+      <button type="button" id="langEn" class="lang-btn">EN</button>
+    </span>
+  </nav>
+
+  <div class="card">
+    <div id="success" class="msg ok hidden"></div>
+    <div id="error" class="msg err hidden"></div>
+    <div id="loading"><p class="lead" data-i18n="loading">Cargando…</p></div>
+
+    <div id="chooser" class="hidden">
+      <h1 data-i18n="title">Elija cuáles desea mantener</h1>
+      <p class="lead" data-i18n="lead">Marque las propiedades y entidades que desea seguir monitoreando. Las que no marque se detienen al terminar su prueba gratis.</p>
+
+      <label class="row all"><input type="checkbox" id="selectAll"> <span data-i18n="selectAll">Seleccionar todas</span></label>
+      <div id="list"></div>
+
+      <div class="plans">
+        <label id="planMonthlyLabel" class="selected"><input type="radio" name="plan" value="monthly" checked><span id="planMonthlyText"></span></label>
+        <label id="planAnnualLabel"><input type="radio" name="plan" value="annual"><span id="planAnnualText"></span></label>
+      </div>
+      <div class="total" id="total"></div>
+      <button type="button" class="pay" id="payBtn" disabled></button>
+      <p class="note" data-i18n="note">Si paga antes de que termine su prueba gratis, el primer cobro será al terminar la prueba. Puede cancelar en cualquier momento con el enlace "Administrar suscripción" de sus correos. Su pago lo procesa Stripe; Atlas Panama nunca ve ni guarda los datos de su tarjeta.</p>
+    </div>
+  </div>
+
+  <script>
+    const TRANSLATIONS = {
+      es: {
+        loading: 'Cargando…',
+        title: 'Elija cuáles desea mantener',
+        lead: 'Marque las propiedades y entidades que desea seguir monitoreando. Las que no marque se detienen al terminar su prueba gratis.',
+        selectAll: 'Seleccionar todas',
+        trialEnds: 'Prueba gratis hasta el {date}',
+        ended: 'Prueba terminada: monitoreo en pausa',
+        monthly: '${price} al mes cada una',
+        annual: '${price} al año cada una',
+        totalMonthly: '{n} seleccionadas: ${total} al mes',
+        totalAnnual: '{n} seleccionadas: ${total} al año',
+        payBtn: 'Continuar al pago seguro',
+        payNone: 'Marque al menos una',
+        note: 'Si paga antes de que termine su prueba gratis, el primer cobro será al terminar la prueba. Puede cancelar en cualquier momento con el enlace "Administrar suscripción" de sus correos. Su pago lo procesa Stripe; Atlas Panama nunca ve ni guarda los datos de su tarjeta.',
+        success: '✅ ¡Listo! {n} propiedades/entidades seguirán monitoreadas. Le enviamos un correo de confirmación.',
+        nothing: 'No hay pruebas gratis pendientes para este correo.',
+        paid: 'Ya pagadas: {list}',
+        notFound: 'Este enlace no es válido. Use el botón de su correo más reciente o escríbanos a operations@atlaspanama.com.',
+        failed: 'No pudimos abrir la página de pago. Intente de nuevo en un momento o escríbanos a operations@atlaspanama.com.'
+      },
+      en: {
+        loading: 'Loading…',
+        title: 'Choose which ones to keep',
+        lead: 'Tick the properties and entities you want us to keep monitoring. Anything you don\'t tick stops when its free trial ends.',
+        selectAll: 'Select all',
+        trialEnds: 'Free trial until {date}',
+        ended: 'Trial ended: monitoring paused',
+        monthly: '${price} per month each',
+        annual: '${price} per year each',
+        totalMonthly: '{n} selected: ${total} per month',
+        totalAnnual: '{n} selected: ${total} per year',
+        payBtn: 'Continue to secure payment',
+        payNone: 'Tick at least one',
+        note: 'If you pay before your free trial ends, the first charge happens when the trial ends. You can cancel at any time with the "Manage subscription" link in our emails. Your payment is processed by Stripe; Atlas Panama never sees or stores your card details.',
+        success: '✅ Done! {n} properties/entities will keep being monitored. We\'ve sent you a confirmation email.',
+        nothing: 'There are no pending free trials for this email.',
+        paid: 'Already paid: {list}',
+        notFound: 'This link isn\'t valid. Use the button in your most recent email or write to operations@atlaspanama.com.',
+        failed: 'We couldn\'t open the payment page. Please try again in a moment or write to operations@atlaspanama.com.'
+      }
+    };
+    const params = new URLSearchParams(location.search);
+    const e = params.get('e') || '', tkn = params.get('t') || '';
+    let lang = 'es', data = null;
+    try { lang = localStorage.getItem('lang') || lang; } catch (_) {}
+    if (lang !== 'en') lang = 'es';
+    const t = (k, v = {}) => (TRANSLATIONS[lang][k] || k).replace(/\{(\w+)\}/g, (_, x) => v[x] !== undefined ? v[x] : '');
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const fmtDate = d => { if (!d) return ''; const [y, m, day] = d.split('-').map(Number); return new Date(Date.UTC(y, m - 1, day)).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-PA', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }); };
+
+    function setLang(l) {
+      lang = l;
+      try { localStorage.setItem('lang', l); } catch (_) {}
+      document.documentElement.lang = l;
+      document.getElementById('langEs').classList.toggle('active', l === 'es');
+      document.getElementById('langEn').classList.toggle('active', l === 'en');
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+      render();
+    }
+    document.getElementById('langEs').onclick = () => setLang('es');
+    document.getElementById('langEn').onclick = () => setLang('en');
+
+    function selectedIds() { return [...document.querySelectorAll('#list input:checked')].map(i => i.value); }
+    function plan() { return document.querySelector('input[name=plan]:checked').value; }
+
+    function updateTotal() {
+      if (!data) return;
+      const n = selectedIds().length;
+      const p = plan();
+      const price = data.prices[p];
+      document.getElementById('total').textContent = t(p === 'annual' ? 'totalAnnual' : 'totalMonthly', { n, total: (n * price).toFixed(2).replace(/\.00$/, '') });
+      const btn = document.getElementById('payBtn');
+      btn.disabled = n === 0;
+      btn.textContent = n === 0 ? t('payNone') : t('payBtn');
+      const boxes = document.querySelectorAll('#list input');
+      const all = document.getElementById('selectAll');
+      all.checked = boxes.length > 0 && n === boxes.length;
+      all.indeterminate = n > 0 && n < boxes.length;
+      document.getElementById('planMonthlyLabel').classList.toggle('selected', p === 'monthly');
+      document.getElementById('planAnnualLabel').classList.toggle('selected', p === 'annual');
+    }
+
+    function render() {
+      if (!data) return;
+      const checked = new Set(selectedIds());
+      document.getElementById('list').innerHTML = data.items.map(it =>
+        `<label class="row"><input type="checkbox" value="${esc(it.id)}" ${checked.has(it.id) ? 'checked' : ''}><span><div class="name">${esc(it.displayName)}</div><div class="sub">${esc(it.ended ? t('ended') : t('trialEnds', { date: fmtDate(it.trialEndsAt) }))}</div></span></label>`
+      ).join('');
+      document.querySelectorAll('#list input').forEach(i => i.onchange = updateTotal);
+      document.getElementById('planMonthlyText').textContent = t('monthly', { price: data.prices.monthly });
+      document.getElementById('planAnnualText').textContent = t('annual', { price: data.prices.annual });
+      updateTotal();
+    }
+
+    document.getElementById('selectAll').onchange = ev => {
+      document.querySelectorAll('#list input').forEach(i => { i.checked = ev.target.checked; });
+      updateTotal();
+    };
+    document.querySelectorAll('input[name=plan]').forEach(r => r.onchange = updateTotal);
+
+    function showError(key) {
+      const el = document.getElementById('error');
+      el.textContent = t(key);
+      el.classList.remove('hidden');
+    }
+
+    document.getElementById('payBtn').onclick = async () => {
+      const btn = document.getElementById('payBtn');
+      btn.disabled = true;
+      try {
+        const r = await fetch('/keep/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e, t: tkn, ids: selectedIds(), plan: plan() }) });
+        const j = await r.json();
+        if (j.ok && j.url) { location.href = j.url; return; }
+        showError('failed');
+      } catch (_) { showError('failed'); }
+      btn.disabled = false;
+    };
+
+    (async () => {
+      try {
+        const r = await fetch(`/keep/list?e=${encodeURIComponent(e)}&t=${encodeURIComponent(tkn)}`);
+        const j = await r.json();
+        document.getElementById('loading').classList.add('hidden');
+        if (!j.ok) { setLang(lang); showError('notFound'); return; }
+        let saved = null;
+        try { saved = localStorage.getItem('lang'); } catch (_) {}
+        if (!saved) lang = j.language;
+        data = j;
+        setLang(lang);
+        if (params.get('result') === 'success') {
+          const s = document.getElementById('success');
+          s.textContent = t('success', { n: params.get('n') || '' });
+          s.classList.remove('hidden');
+        }
+        if (j.items.length === 0) {
+          const s = document.getElementById('success').classList.contains('hidden') ? document.getElementById('error') : null;
+          if (s) { s.textContent = t('nothing') + (j.alreadyPaid.length ? ' ' + t('paid', { list: j.alreadyPaid.join(', ') }) : ''); s.classList.remove('hidden'); }
+          return;
+        }
+        document.getElementById('chooser').classList.remove('hidden');
+      } catch (_) {
+        document.getElementById('loading').classList.add('hidden');
+        showError('failed');
+      }
+    })();
+  </script>
+  <script src="/site-footer.js"></script>
+</body>
+</html>

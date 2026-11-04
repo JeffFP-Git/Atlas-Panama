@@ -16,8 +16,9 @@ import * as leads from './lib/leads.js';
 import { campaignResults, campaignResultsHtml } from './lib/campaigns.js';
 import { buildDailyReport, sendDailyReport, startDailyReport } from './lib/dailyReport.js';
 import * as scheduler from './lib/dailyScheduler.js';
-import { sendEmail, sendWelcomeEmail, sendTrialConvertedEmail } from './lib/email.js';
-import { getStripeClient, createCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
+import { sendEmail, sendWelcomeEmail, sendTrialConvertedEmail, sendKeepConfirmedEmail } from './lib/email.js';
+import { getStripeClient, createCheckoutSession, createMultiCheckoutSession, createManageSession, PRICING } from './lib/stripe.js';
+import * as keep from './lib/keepSelections.js';
 import { t as tEmail } from './lib/emailTranslations.js';
 import { sendAdminAlertEmail } from './lib/adminAlerts.js';
 import * as qaSearchLog from './lib/qaSearchLog.js';
@@ -1374,7 +1375,7 @@ app.post('/subscribe/end-all', requireAdminApiKey, (req, res) => {
  *  - a brand-new paid signup → the normal activation (trial rules + welcome email).
  * @returns {Promise<'missing'|'already'|'converted'|'reactivated'|'activated'>}
  */
-async function activateFromCheckoutSession(requestId, session) {
+async function activateFromCheckoutSession(requestId, session, { quiet = false } = {}) {
   const request = storage.getSubscriptionRequest(requestId);
   if (!request) return 'missing';
   if (request.stripeSubscriptionId && request.stripeSubscriptionId === session.subscription) return 'already';
@@ -1387,6 +1388,7 @@ async function activateFromCheckoutSession(requestId, session) {
   });
   if (onNoCardTrial) {
     storage.updateSubscriptionRequest(requestId, { trialStatus: 'converted' });
+    if (quiet) return 'converted';
     const updated = storage.getSubscriptionRequest(requestId);
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
     sendTrialConvertedEmail({
@@ -1401,13 +1403,121 @@ async function activateFromCheckoutSession(requestId, session) {
   }
   if (wasExpired) {
     storage.updateSubscriptionRequest(requestId, { trialStatus: 'converted_after_expiry', cancelledAt: null });
-    confirmAndScheduleSubscription(requestId);
+    confirmAndScheduleSubscription(requestId, { welcomeEmail: !quiet });
     return 'reactivated';
   }
   await applyTrialRules(requestId, session.subscription);
   confirmAndScheduleSubscription(requestId);
   return 'activated';
 }
+
+// ---------------------------------------------------------------------------
+// "Choose which ones to keep" (Nov 2026): /keep?e=<email>&t=<code> (link in the combined
+// trial-ending email) lists that email's free trials (and trials that recently ended);
+// the subscriber ticks some, all or none and pays once for the ticked ones.
+// ---------------------------------------------------------------------------
+function keepCandidatesFor(email) {
+  const key = String(email || '').trim().toLowerCase();
+  return storage.listSubscriptionRequests({})
+    .filter(s => String(s.email || '').toLowerCase() === key && !s.stripeSubscriptionId)
+    .filter(s => (s.trialStatus === 'trialing_nocard' && s.confirmed === true && s.status === 'confirmed')
+      || (s.trialStatus === 'expired' && s.status === 'cancelled'));
+}
+
+app.get('/keep', (req, res) => res.sendFile(path.join(ROOT_DIR, 'public', 'keep.html')));
+
+app.get('/keep/list', (req, res) => {
+  const { e, t } = req.query;
+  if (!e || !keep.isValidKeepToken(e, t)) return res.status(404).json({ ok: false, error: 'not_found' });
+  const items = keepCandidatesFor(e);
+  const all = storage.listSubscriptionRequests({}).filter(s => String(s.email || '').toLowerCase() === String(e).toLowerCase());
+  const language = all[0]?.language === 'en' ? 'en' : 'es';
+  return res.json({
+    ok: true, language,
+    items: items.map(s => ({ id: s.id, displayName: scheduler.displayNameFor(s), trialEndsAt: s.trialEndsAt || null, ended: s.status === 'cancelled' })),
+    alreadyPaid: all.filter(s => s.stripeSubscriptionId && s.status === 'confirmed').map(s => scheduler.displayNameFor(s)),
+    prices: { monthly: PRICING.monthly.amountCents / 100, annual: PRICING.annual.amountCents / 100 }
+  });
+});
+
+app.post('/keep/checkout', async (req, res) => {
+  const { e, t, ids, plan } = req.body || {};
+  if (!e || !keep.isValidKeepToken(e, t)) return res.status(404).json({ ok: false, error: 'not_found' });
+  if (!['monthly', 'annual'].includes(plan)) return res.status(400).json({ ok: false, error: 'plan_required' });
+  const candidates = new Map(keepCandidatesFor(e).map(s => [s.id, s]));
+  const chosen = [...new Set(Array.isArray(ids) ? ids.map(String) : [])].filter(id => candidates.has(id));
+  if (chosen.length === 0) return res.status(400).json({ ok: false, error: 'nothing_selected' });
+  const subs = chosen.map(id => candidates.get(id));
+  // Still on the trial: first charge when the earliest ticked trial ends (Stripe needs
+  // trial_end at least 48h away; closer than that, the charge happens today).
+  let trialEnd = null;
+  if (subs.every(s => s.status === 'confirmed' && s.trialEndsAt)) {
+    const earliest = subs.map(s => s.trialEndsAt).sort()[0];
+    const end = Math.floor(Date.parse(`${earliest}T23:59:00-05:00`) / 1000);
+    if (end - Date.now() / 1000 > 49 * 3600) trialEnd = end;
+  }
+  const selectionId = keep.createSelection({ email: e, ids: chosen, plan });
+  const baseUrl = process.env.API_BASE_URL || process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+  const back = `${baseUrl}/keep?e=${encodeURIComponent(e)}&t=${encodeURIComponent(t)}`;
+  try {
+    const session = await createMultiCheckoutSession({
+      email: e, language: subs[0].language, plan, quantity: chosen.length, selectionId, trialEnd,
+      successUrl: `${baseUrl}/keep/success?selection=${selectionId}&e=${encodeURIComponent(e)}&t=${encodeURIComponent(t)}&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: back
+    });
+    console.log(`[Keep] ${e}: checkout for ${chosen.length} item(s), ${plan}, selection ${selectionId}.`);
+    return res.json({ ok: true, url: session.url });
+  } catch (err) {
+    console.error('[Keep] Checkout creation failed:', err.message);
+    await sendAdminAlertEmail({ subject: `Keep-page checkout failed: ${e}`, context: 'POST /keep/checkout', error: err, extra: { items: chosen.length, plan } }).catch(() => {});
+    return res.status(500).json({ ok: false, error: 'checkout_failed' });
+  }
+});
+
+/** Activates every subscription in a paid selection; one confirmation email for all of them. */
+async function activateKeepSelection(selectionId, session) {
+  const sel = keep.getSelection(selectionId);
+  if (!sel) return 'missing';
+  if (sel.activatedAt) return 'already';
+  keep.markActivated(selectionId);
+  const names = [];
+  for (const id of sel.ids) {
+    try {
+      await activateFromCheckoutSession(id, session, { quiet: true });
+      const s = storage.getSubscriptionRequest(id);
+      if (s) names.push(scheduler.displayNameFor(s));
+    } catch (err) {
+      console.error(`[Keep] Activation failed for ${id}:`, err.message);
+    }
+  }
+  const first = storage.getSubscriptionRequest(sel.ids[0]);
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' });
+  const trialEnds = sel.ids.map(id => storage.getSubscriptionRequest(id)?.trialEndsAt).filter(d => d && d > today).sort();
+  sendKeepConfirmedEmail({
+    recipientEmail: sel.email, language: first?.language, displayNames: names,
+    planLabel: PRICING[sel.plan]?.label || null, firstChargeDate: trialEnds[0] || today,
+    manageUrl: first ? scheduler.manageUrlFor(first) : null
+  }).catch(err => console.error('[Keep] Confirmation email failed:', err.message));
+  return `activated ${names.length}`;
+}
+
+app.get('/keep/success', async (req, res) => {
+  const { selection, e, t, session_id } = req.query;
+  const back = `/keep?e=${encodeURIComponent(e || '')}&t=${encodeURIComponent(t || '')}`;
+  if (!e || !keep.isValidKeepToken(e, t)) return res.status(404).send('Link not found. / Enlace no encontrado.');
+  try {
+    const sel = keep.getSelection(String(selection || ''));
+    const stripe = getStripeClient();
+    const session = await stripe.checkout.sessions.retrieve(String(session_id || ''));
+    const done = session.status === 'complete' && (session.payment_status === 'paid' || session.payment_status === 'no_payment_required');
+    if (!sel || !done || session.metadata?.selectionId !== selection) return res.redirect(303, back);
+    await activateKeepSelection(selection, session);
+    return res.redirect(303, `${back}&result=success&n=${sel.ids.length}`);
+  } catch (err) {
+    console.error('[Keep] Success handling failed:', err.message);
+    return res.redirect(303, back);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Bulk signup (admin only, Nov 2026): Jeff's own ~50 properties/entities. Each item
@@ -1740,7 +1850,13 @@ app.post('/webhooks/stripe', async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed' && event.data.object?.metadata?.selectionId) {
+    const session = event.data.object;
+    if (session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
+      const outcome = await activateKeepSelection(session.metadata.selectionId, session);
+      console.log(`[Stripe webhook] checkout.session.completed for selection ${session.metadata.selectionId}: ${outcome}`);
+    }
+  } else if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const requestId = session.metadata?.requestId;
     if (requestId && (session.payment_status === 'paid' || session.payment_status === 'no_payment_required')) {
