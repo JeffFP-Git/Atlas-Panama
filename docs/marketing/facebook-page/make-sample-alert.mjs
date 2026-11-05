@@ -26,9 +26,9 @@ await p.setContent(`<!doctype html><html><body style="margin:0;font-family:'Helv
     </div>
   </div>
   <div style="position:absolute;top:955px;left:50%;transform:translateX(-50%) rotate(-5deg);border:7px solid #dc2626;color:#dc2626;background:rgba(255,255,255,.92);font-size:44px;font-weight:900;padding:8px 26px;border-radius:12px;letter-spacing:2px;white-space:nowrap">EJEMPLO / EXAMPLE</div>
-  <div style="position:absolute;bottom:60px;left:0;right:0;text-align:center;color:#fff">
+  <div style="position:absolute;bottom:45px;left:0;right:0;text-align:center;color:#fff">
     <div style="font-size:40px;font-weight:700">atlaspanama.com</div>
-    <div style="display:inline-block;margin-top:16px;background:#facc15;color:#1f2937;font-size:32px;font-weight:800;padding:14px 34px;border-radius:999px">30 días gratis · sin tarjeta</div>
+    <div style="display:inline-block;margin-top:16px;background:#facc15;color:#1f2937;font-size:32px;font-weight:800;padding:14px 34px;border-radius:999px">6 meses gratis · sin tarjeta<br><span style="font-size:24px;font-weight:700">6 months free · no card</span></div>
   </div>
 </div></body></html>`, {waitUntil:'load'});
 await p.screenshot({path:out}); await br.close();
